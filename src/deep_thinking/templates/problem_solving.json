@@ -1,0 +1,56 @@
+{
+  "template_id": "problem_solving",
+  "name": "问题求解模板",
+  "description": "引导用户系统地分析和解决问题的思考框架",
+  "category": "problem_solving",
+  "structure": {
+    "steps": [
+      {
+        "step_number": 1,
+        "prompt": "明确问题定义：这个问题的核心是什么？",
+        "type": "regular"
+      },
+      {
+        "step_number": 2,
+        "prompt": "分析问题成因：导致这个问题的原因有哪些？",
+        "type": "regular"
+      },
+      {
+        "step_number": 3,
+        "prompt": "收集相关信息：需要哪些数据或信息来解决这个问题？",
+        "type": "regular"
+      },
+      {
+        "step_number": 4,
+        "prompt": "生成解决方案：基于分析，列出可能的解决方案。",
+        "type": "regular"
+      },
+      {
+        "step_number": 5,
+        "prompt": "评估方案优劣：分析每个方案的优缺点、可行性和风险。",
+        "type": "regular"
+      },
+      {
+        "step_number": 6,
+        "prompt": "选择最佳方案：综合考虑后，选择最优解决方案。",
+        "type": "regular"
+      },
+      {
+        "step_number": 7,
+        "prompt": "制定实施计划：将解决方案分解为具体的执行步骤。",
+        "type": "regular"
+      },
+      {
+        "step_number": 8,
+        "prompt": "验证结果：如何验证解决方案的有效性？",
+        "type": "regular"
+      }
+    ]
+  },
+  "metadata": {
+    "author": "DeepThinking-MCP",
+    "version": "1.0.0",
+    "tags": ["问题解决", "系统性思考", "分析"],
+    "estimated_steps": 8
+  }
+}

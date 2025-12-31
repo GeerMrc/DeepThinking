@@ -78,5 +78,6 @@ from deep_thinking.tools import (  # noqa: E402, F401
     export,
     sequential_thinking,
     session_manager,
+    template,
     visualization,
 )

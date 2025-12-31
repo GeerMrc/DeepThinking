@@ -1,0 +1,56 @@
+{
+  "template_id": "decision_making",
+  "name": "决策模板",
+  "description": "帮助用户做出理性决策的思考框架",
+  "category": "decision",
+  "structure": {
+    "steps": [
+      {
+        "step_number": 1,
+        "prompt": "明确决策目标：我们需要做出什么决定？目标是什么？",
+        "type": "regular"
+      },
+      {
+        "step_number": 2,
+        "prompt": "列出可选方案：有哪些可行的选项？",
+        "type": "regular"
+      },
+      {
+        "step_number": 3,
+        "prompt": "设定评估标准：用什么标准来评估这些方案？（如成本、时间、风险等）",
+        "type": "regular"
+      },
+      {
+        "step_number": 4,
+        "prompt": "分析每个方案：根据评估标准，分析每个选项的优缺点。",
+        "type": "regular"
+      },
+      {
+        "step_number": 5,
+        "prompt": "考虑不确定因素：有哪些未知或不确定的因素可能影响决策？",
+        "type": "regular"
+      },
+      {
+        "step_number": 6,
+        "prompt": "权衡利弊：综合评估后，哪个方案的利大于弊？",
+        "type": "regular"
+      },
+      {
+        "step_number": 7,
+        "prompt": "做出决策：基于分析，选择最优方案。",
+        "type": "regular"
+      },
+      {
+        "step_number": 8,
+        "prompt": "制定后续计划：决策后如何执行？需要做什么准备？",
+        "type": "regular"
+      }
+    ]
+  },
+  "metadata": {
+    "author": "DeepThinking-MCP",
+    "version": "1.0.0",
+    "tags": ["决策", "选择", "权衡"],
+    "estimated_steps": 8
+  }
+}

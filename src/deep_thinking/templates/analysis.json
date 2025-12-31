@@ -1,0 +1,56 @@
+{
+  "template_id": "analysis",
+  "name": "分析模板",
+  "description": "帮助用户深入分析复杂问题的思考框架",
+  "category": "analysis",
+  "structure": {
+    "steps": [
+      {
+        "step_number": 1,
+        "prompt": "明确分析对象：我们需要分析什么？",
+        "type": "regular"
+      },
+      {
+        "step_number": 2,
+        "prompt": "收集背景信息：相关的背景、历史、上下文是什么？",
+        "type": "regular"
+      },
+      {
+        "step_number": 3,
+        "prompt": "识别关键要素：这个问题包含哪些关键组成部分？",
+        "type": "regular"
+      },
+      {
+        "step_number": 4,
+        "prompt": "分析相互关系：各要素之间如何相互影响？",
+        "type": "regular"
+      },
+      {
+        "step_number": 5,
+        "prompt": "识别模式与趋势：有哪些规律或趋势？",
+        "type": "regular"
+      },
+      {
+        "step_number": 6,
+        "prompt": "找出根本原因：深层次的原因是什么？",
+        "type": "regular"
+      },
+      {
+        "step_number": 7,
+        "prompt": "预测可能影响：这个分析对未来有什么启示？",
+        "type": "regular"
+      },
+      {
+        "step_number": 8,
+        "prompt": "得出结论：基于以上分析，得出什么结论？",
+        "type": "regular"
+      }
+    ]
+  },
+  "metadata": {
+    "author": "DeepThinking-MCP",
+    "version": "1.0.0",
+    "tags": ["分析", "深入思考", "洞察"],
+    "estimated_steps": 8
+  }
+}
