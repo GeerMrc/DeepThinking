@@ -38,20 +38,19 @@ async def server_lifespan(_app: FastMCP) -> AsyncGenerator[None, None]:
     """
     服务器生命周期管理
 
-    在服务器启动时初始化资源，在关闭时清理资源
+    注意：实际的资源初始化和清理在 server.py 的 server_lifespan 中实现，
+    包括存储管理器的初始化和会话数据的持久化。
 
     Args:
-        app: FastMCP服务器实例
+        app: FastMCP服务器实例（未使用，保留用于API兼容性）
 
     Yields:
         None
     """
-    # TODO: 初始化存储管理器
     logger.info("DeepThinking-MCP服务器正在初始化...")
 
     yield
 
-    # TODO: 清理资源
     logger.info("DeepThinking-MCP服务器正在关闭...")
 
 
@@ -59,16 +58,20 @@ def create_server() -> FastMCP:
     """
     创建FastMCP服务器实例
 
+    注意：实际的MCP服务器和工具注册在 server.py 中实现。
+    各个工具模块通过导入 server.py 中的 app 实例自动注册。
+
     Returns:
-        FastMCP服务器实例
+        FastMCP服务器实例（基础实例，实际使用 server.py 中的全局实例）
     """
     app = FastMCP(name="deep-thinking", lifespan=server_lifespan)
 
-    # TODO: 添加工具注册
-    # 这些将在后续阶段实现
-    # @app.tool()
-    # async def sequential_thinking(...) -> str:
-    #     ...
+    # 工具通过导入 server.py 自动注册：
+    # - sequential_thinking (顺序思考)
+    # - session_manager (会话管理)
+    # - export (导出工具)
+    # - visualization (可视化)
+    # - template (模板系统)
 
     return app
 

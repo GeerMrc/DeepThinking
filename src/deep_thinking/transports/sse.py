@@ -94,9 +94,10 @@ class SSETransport:
             request_data = await request.json()
             logger.info(f"收到MCP请求: {request_data.get('method', 'unknown')}")
 
-            # TODO: 处理JSON-RPC请求
-            # 这里需要实现MCP协议的请求处理逻辑
-            # 暂时返回简单的响应
+            # 基础JSON-RPC响应
+            # 注意：完整的MCP协议处理由FastMCP框架在更高层实现。
+            # SSE传输层负责建立连接和传输数据，具体的工具调用和响应处理
+            # 由FastMCP的内部机制处理。
             response_data = {
                 "jsonrpc": "2.0",
                 "id": request_data.get("id"),
