@@ -75,16 +75,25 @@ class ThinkingSession(BaseModel):
         """
         验证会话ID格式
 
-        Raises:
-            ValueError: 如果不是有效的UUID格式
-        """
-        try:
-            # 验证UUID格式
-            from uuid import UUID
+        对于自动生成的UUID进行验证，自定义ID允许通过。
 
-            UUID(v)
-        except ValueError as e:
-            raise ValueError(f"无效的会话ID格式: {v}") from e
+        Raises:
+            ValueError: 如果ID为空或格式明显无效
+        """
+        if not v or not v.strip():
+            raise ValueError("会话ID不能为空")
+
+        v = v.strip()
+
+        # 如果看起来像UUID格式，进行验证
+        if "-" in v and len(v) == 36:  # UUID格式特征
+            try:
+                from uuid import UUID
+
+                UUID(v)
+            except ValueError as e:
+                raise ValueError(f"无效的UUID格式: {v}") from e
+
         return v
 
     def add_thought(self, thought: Thought) -> None:

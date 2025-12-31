@@ -22,7 +22,7 @@ import sys
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-from mcp.server import FastMCP
+from mcp.server import FastMCP  # type: ignore[import-not-found]
 
 from deep_thinking.transports.sse import run_sse
 

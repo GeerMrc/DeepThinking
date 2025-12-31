@@ -104,7 +104,11 @@ class StorageManager:
             self._write_index(index)
 
     def create_session(
-        self, name: str, description: str = "", metadata: dict | None = None
+        self,
+        name: str,
+        description: str = "",
+        metadata: dict | None = None,
+        session_id: str | None = None,
     ) -> ThinkingSession:
         """
         创建新会话
@@ -113,15 +117,24 @@ class StorageManager:
             name: 会话名称
             description: 会话描述
             metadata: 元数据
+            session_id: 会话ID（可选，不提供则自动生成UUID）
 
         Returns:
             创建的会话对象
         """
-        session = ThinkingSession(
-            name=name,
-            description=description,
-            metadata=metadata or {},
-        )
+        if session_id is not None:
+            session = ThinkingSession(
+                name=name,
+                description=description,
+                metadata=metadata or {},
+                session_id=session_id,
+            )
+        else:
+            session = ThinkingSession(
+                name=name,
+                description=description,
+                metadata=metadata or {},
+            )
 
         # 保存会话
         self._save_session(session)

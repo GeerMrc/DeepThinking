@@ -12,7 +12,7 @@ STDIO传输模块
 
 import logging
 
-from mcp.server import FastMCP
+from mcp.server import FastMCP  # type: ignore[import-not-found]
 
 logger = logging.getLogger(__name__)
 

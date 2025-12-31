@@ -49,7 +49,7 @@ class Thought(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.utcnow, description="思考时间戳")
 
     @model_validator(mode="after")
-    def validate_type_consistency(self) -> "Thought":  # type: ignore[misc]
+    def validate_type_consistency(self) -> "Thought":
         """
         验证思考类型与其他字段的一致性
 

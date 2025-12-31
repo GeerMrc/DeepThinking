@@ -69,8 +69,8 @@ class TestJsonFileStore:
         assert backup_path.exists()
 
         # 验证备份是旧版本
-        from deep_thinking.storage.json_file_store import JsonFileStore
         import json
+
         with open(backup_path, encoding="utf-8") as f:
             backup_data = json.load(f)
         assert backup_data == {"version": 1}
