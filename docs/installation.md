@@ -28,7 +28,7 @@
 
 ## 安装方法
 
-### 方法1: 使用 pip 安装（推荐）
+### 方法1: 使用 pip 安装
 
 ```bash
 pip install deep-thinking-mcp
@@ -48,7 +48,54 @@ pip uninstall deep-thinking-mcp
 
 ---
 
-### 方法2: 从源码安装
+### 方法2: 使用 uv 安装（推荐）⚡
+
+[uv](https://github.com/astral-sh/uv) 是一个极速的 Python 包管理器，比 pip 快 10-100 倍。
+
+#### 安装 uv
+
+```bash
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# 或使用 pip 安装
+pip install uv
+```
+
+#### 使用 uv 安装 DeepThinking-MCP
+
+```bash
+# 全局安装
+uv pip install deep-thinking-mcp
+
+# 或在项目中安装
+uv pip install deep-thinking-mcp
+```
+
+#### 升级到最新版本
+
+```bash
+uv pip install --upgrade deep-thinking-mcp
+```
+
+#### 卸载
+
+```bash
+uv pip uninstall deep-thinking-mcp
+```
+
+**为什么选择 uv？**
+- 🚀 **极快速度**: 比 pip 快 10-100 倍
+- 🔒 **更安全**: 内置依赖锁定和冲突解决
+- 📦 **一体化**: 包管理、虚拟环境、脚本运行于一体
+- 💡 **现代设计**: Rust 编写，兼容 pip 的所有功能
+
+---
+
+### 方法3: 从源码安装
 
 #### 1. 克隆仓库
 
@@ -77,7 +124,7 @@ pip install -e .
 
 ---
 
-### 方法3: 使用 Poetry 安装（开发模式）
+### 方法4: 使用 Poetry 安装（开发模式）
 
 ```bash
 # 安装 Poetry

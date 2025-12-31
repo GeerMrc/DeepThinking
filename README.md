@@ -29,7 +29,19 @@ DeepThinking-MCP是一个功能完整的MCP（Model Context Protocol）服务器
 
 ## 安装
 
-### 使用 pip 安装（推荐）
+### 使用 uv 安装（推荐）⚡
+
+[uv](https://github.com/astral-sh/uv) 是一个极速的 Python 包管理器。
+
+```bash
+# 安装 uv (macOS/Linux)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 安装 DeepThinking-MCP
+uv pip install deep-thinking-mcp
+```
+
+### 使用 pip 安装
 
 ```bash
 pip install deep-thinking-mcp

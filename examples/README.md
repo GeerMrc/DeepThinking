@@ -13,6 +13,26 @@
 
 ## 快速开始
 
+### 安装 DeepThinking-MCP
+
+首先选择一种方式安装 DeepThinking-MCP：
+
+#### 使用 uv（推荐）⚡
+```bash
+# 安装 uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 安装 DeepThinking-MCP
+uv pip install deep-thinking-mcp
+```
+
+#### 使用 pip
+```bash
+pip install deep-thinking-mcp
+```
+
+---
+
 ### 1. STDIO 模式（推荐）
 
 这是最简单的配置方式，适用于大多数用户。
@@ -151,7 +171,9 @@ export DEEP_THINKING_LOG_LEVEL="DEBUG"
 **解决方案**：
 
 1. 确认 Python 已安装：`python --version`
-2. 确认包已安装：`pip list | grep deep-thinking`
+2. 确认包已安装：
+   - 使用 pip: `pip list | grep deep-thinking`
+   - 使用 uv: `uv pip list | grep deep-thinking`
 3. 尝试完整路径：将 `"python"` 改为 `"/usr/bin/python3"` 或完整 Python 路径
 
 ### 问题：SSE 模式连接失败
@@ -163,6 +185,43 @@ export DEEP_THINKING_LOG_LEVEL="DEBUG"
 3. 检查防火墙设置
 
 ## 高级配置
+
+### 使用 uv（推荐）⚡
+
+如果您使用 uv 安装了 DeepThinking-MCP：
+
+```json
+{
+  "mcpServers": {
+    "deep-thinking": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/path/to/deep-thinking-mcp",
+        "run",
+        "python",
+        "-m",
+        "deep_thinking",
+        "--transport",
+        "stdio"
+      ]
+    }
+  }
+}
+```
+
+或使用全局安装：
+
+```json
+{
+  "mcpServers": {
+    "deep-thinking": {
+      "command": "python",
+      "args": ["-m", "deep_thinking", "--transport", "stdio"]
+    }
+  }
+}
+```
 
 ### 使用虚拟环境
 
