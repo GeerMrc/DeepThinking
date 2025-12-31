@@ -5,23 +5,44 @@ build-backend = "hatchling.build"
 [project]
 name = "deep-thinking-mcp"
 version = "0.1.0"
-description = "Python实现的高级深度思考MCP服务器，支持STDIO和SSE双传输模式"
+description = "Advanced sequential thinking MCP server with session management, templates, and visualization"
 readme = "README.md"
+readme-content-type = "text/markdown"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [
     { name = "Maric", email = "maric@example.com" }
 ]
-keywords = ["mcp", "thinking", "ai", "deep-thinking", "mcp-server"]
+maintainers = [
+    { name = "Maric", email = "maric@example.com" }
+]
+keywords = [
+    "mcp",
+    "model-context-protocol",
+    "thinking",
+    "ai",
+    "deep-thinking",
+    "mcp-server",
+    "sequential-thinking",
+    "claude",
+    "anthropic",
+    "session-management",
+    "visualization",
+]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
 ]
 
 dependencies = [

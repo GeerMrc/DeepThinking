@@ -1,0 +1,16 @@
+include LICENSE
+include README.md
+include pyproject.toml
+
+# Documentation
+recursive-include docs *.md
+recursive-include examples *.json *.md
+
+# Templates
+recursive-include src/deep_thinking/templates *.json
+
+# Project documentation
+include ARCHITECTURE.md
+include TASKS.md
+include CHANGELOG.md
+include STAGE6_QUALITY_REPORT.md

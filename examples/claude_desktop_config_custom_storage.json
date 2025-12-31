@@ -1,0 +1,17 @@
+{
+  "$schema": "../schemas/mcp-server-config.schema.json",
+  "description": "Claude Desktop 配置示例 - 自定义存储目录",
+  "mcpServers": {
+    "deep-thinking": {
+      "command": "python",
+      "args": [
+        "-m",
+        "deep_thinking",
+        "--mode",
+        "stdio",
+        "--storage-dir",
+        "~/Documents/deep-thinking-data"
+      ]
+    }
+  }
+}

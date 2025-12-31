@@ -1,0 +1,11 @@
+{
+  "$schema": "../schemas/mcp-server-config.schema.json",
+  "description": "Claude Desktop 配置示例 - SSE 模式",
+  "mcpServers": {
+    "deep-thinking": {
+      "url": "http://127.0.0.1:8088/sse",
+      "transport": "sse"
+    }
+  },
+  "_comment_sse_startup": "使用此配置前，需要先启动 SSE 服务器：python -m deep_thinking --mode sse"
+}

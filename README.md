@@ -2,6 +2,17 @@
 
 > 高级深度思考MCP服务器 - 使用Python构建的功能完整、架构清晰的MCP服务器
 
+[![PyPI version](https://badge.fury.io/py/deep-thinking-mcp.svg)](https://badge.fury.io/py/deep-thinking-mcp)
+[![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
+## 📖 文档
+
+- **[API 文档](docs/api.md)** - 完整的MCP工具API参考
+- **[用户指南](docs/user_guide.md)** - 详细的使用说明和示例
+- **[安装与配置](docs/installation.md)** - 安装步骤和配置指南
+- **[架构设计](ARCHITECTURE.md)** - 系统架构和技术设计
+
 ## 项目概述
 
 DeepThinking-MCP是一个功能完整的MCP（Model Context Protocol）服务器，提供顺序思考工具，支持常规思考、修订思考和分支思考三种模式。
@@ -17,6 +28,12 @@ DeepThinking-MCP是一个功能完整的MCP（Model Context Protocol）服务器
 - **模板系统**：预设思考框架
 
 ## 安装
+
+### 使用 pip 安装（推荐）
+
+```bash
+pip install deep-thinking-mcp
+```
 
 ### 从源码安装
 
@@ -149,7 +166,15 @@ deep-thinking-mcp/
 │   ├── storage/              # 持久化层
 │   └── utils/                # 工具函数
 ├── tests/                    # 测试目录
-└── docs/                     # 文档目录
+├── docs/                     # 文档目录
+│   ├── api.md                # API文档
+│   ├── user_guide.md         # 用户指南
+│   └── installation.md       # 安装指南
+├── examples/                 # 配置示例
+│   └── *.json                # Claude Desktop配置示例
+├── ARCHITECTURE.md           # 架构文档
+├── README.md                 # 项目说明
+└── LICENSE                   # MIT许可证
 ```
 
 ## 许可证

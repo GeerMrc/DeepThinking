@@ -1,0 +1,18 @@
+{
+  "$schema": "../schemas/mcp-server-config.schema.json",
+  "description": "Claude Desktop 配置示例 - STDIO 模式（推荐）",
+  "mcpServers": {
+    "deep-thinking": {
+      "command": "python",
+      "args": [
+        "-m",
+        "deep_thinking",
+        "--mode",
+        "stdio"
+      ],
+      "env": {
+        "DEEP_THINKING_LOG_LEVEL": "INFO"
+      }
+    }
+  }
+}
