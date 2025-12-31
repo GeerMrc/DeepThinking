@@ -74,4 +74,9 @@ app = FastMCP(
 
 
 # 导出工具模块
-from deep_thinking.tools import sequential_thinking, session_manager  # noqa: E402, F401
+from deep_thinking.tools import (  # noqa: E402, F401
+    export,
+    sequential_thinking,
+    session_manager,
+    visualization,
+)
