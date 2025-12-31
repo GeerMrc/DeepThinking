@@ -75,17 +75,18 @@ class ThinkingSession(BaseModel):
         """
         验证会话ID格式
 
-        对于自动生成的UUID进行验证，自定义ID允许通过。
+        如果提供的ID看起来像UUID格式，进行严格验证。
+        其他格式的ID也允许通过（支持测试环境和自定义ID）。
 
         Raises:
-            ValueError: 如果ID为空或格式明显无效
+            ValueError: 如果ID为空或UUID格式明显无效
         """
         if not v or not v.strip():
             raise ValueError("会话ID不能为空")
 
         v = v.strip()
 
-        # 如果看起来像UUID格式，进行验证
+        # 如果看起来像UUID格式（长度36且包含"-"），进行严格验证
         if "-" in v and len(v) == 36:  # UUID格式特征
             try:
                 from uuid import UUID

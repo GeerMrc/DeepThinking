@@ -84,8 +84,9 @@ class TestThinkingSession:
 
     def test_session_id_validation(self):
         """测试会话ID验证（UUID格式）"""
+        # 测试无效的UUID格式（36字符但内容无效）
         with pytest.raises(ValidationError):
-            ThinkingSession(name="会话", session_id="invalid-uuid")
+            ThinkingSession(name="会话", session_id="12345678-1234-1234-1234-invalid-uuid")
 
     def test_add_thought(self):
         """测试添加思考步骤"""

@@ -5,18 +5,14 @@
 """
 
 import json
-from datetime import datetime
-from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
-from pydantic import ValidationError
 
-from deep_thinking.models.thought import Thought
 from deep_thinking.models.thinking_session import ThinkingSession
+from deep_thinking.models.thought import Thought
 from deep_thinking.tools import export
 from deep_thinking.utils.formatters import SessionFormatter, export_session_to_file
-
 
 # =============================================================================
 # SessionFormatter.to_json 测试
@@ -308,7 +304,7 @@ class TestExportSessionToFile:
         session = ThinkingSession(**sample_session_data)
         output_path = temp_dir / "subdir" / "nested" / "test.json"
 
-        result_path = export_session_to_file(session, "json", output_path)
+        export_session_to_file(session, "json", output_path)
 
         assert output_path.exists()
         assert output_path.parent.exists()
@@ -341,9 +337,9 @@ class TestExportSessionTool:
         mock_manager = MagicMock()
         mock_manager.get_session.return_value = session
 
-        with patch("deep_thinking.tools.export.get_storage_manager", return_value=mock_manager):
-            with patch("deep_thinking.tools.export.Path.home", return_value=temp_dir):
-                result = await export.export_session("test-session-123")
+        with patch("deep_thinking.tools.export.get_storage_manager", return_value=mock_manager), \
+             patch("deep_thinking.tools.export.Path.home", return_value=temp_dir):
+            result = await export.export_session("test-session-123")
 
         # 验证返回结果
         assert "会话已导出" in result
@@ -360,9 +356,9 @@ class TestExportSessionTool:
         mock_manager = MagicMock()
         mock_manager.get_session.return_value = session
 
-        with patch("deep_thinking.tools.export.get_storage_manager", return_value=mock_manager):
-            with patch("deep_thinking.tools.export.Path.home", return_value=temp_dir):
-                result = await export.export_session("test-session-123", "json")
+        with patch("deep_thinking.tools.export.get_storage_manager", return_value=mock_manager), \
+             patch("deep_thinking.tools.export.Path.home", return_value=temp_dir):
+            result = await export.export_session("test-session-123", "json")
 
         assert "会话已导出" in result
         assert "json" in result
@@ -391,9 +387,9 @@ class TestExportSessionTool:
         mock_manager = MagicMock()
         mock_manager.get_session.return_value = None
 
-        with patch("deep_thinking.tools.export.get_storage_manager", return_value=mock_manager):
-            with pytest.raises(ValueError, match="会话不存在"):
-                await export.export_session("nonexistent-session")
+        with patch("deep_thinking.tools.export.get_storage_manager", return_value=mock_manager), \
+             pytest.raises(ValueError, match="会话不存在"):
+            await export.export_session("nonexistent-session")
 
     @pytest.mark.asyncio
     async def test_export_session_invalid_format(
@@ -405,9 +401,9 @@ class TestExportSessionTool:
         mock_manager = MagicMock()
         mock_manager.get_session.return_value = session
 
-        with patch("deep_thinking.tools.export.get_storage_manager", return_value=mock_manager):
-            with pytest.raises(ValueError, match="不支持的格式"):
-                await export.export_session("test-session-123", "invalid_format")
+        with patch("deep_thinking.tools.export.get_storage_manager", return_value=mock_manager), \
+             pytest.raises(ValueError, match="不支持的格式"):
+            await export.export_session("test-session-123", "invalid_format")
 
 
 # =============================================================================

@@ -8,11 +8,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from deep_thinking.models.thought import Thought
 from deep_thinking.models.thinking_session import ThinkingSession
+from deep_thinking.models.thought import Thought
 from deep_thinking.tools import visualization
 from deep_thinking.utils.formatters import Visualizer
-
 
 # =============================================================================
 # Visualizer.to_mermaid 测试
@@ -367,9 +366,9 @@ class TestVisualizeSessionTool:
         mock_manager = MagicMock()
         mock_manager.get_session.return_value = None
 
-        with patch("deep_thinking.tools.visualization.get_storage_manager", return_value=mock_manager):
-            with pytest.raises(ValueError, match="会话不存在"):
-                await visualization.visualize_session("nonexistent-session")
+        with patch("deep_thinking.tools.visualization.get_storage_manager", return_value=mock_manager), \
+             pytest.raises(ValueError, match="会话不存在"):
+            await visualization.visualize_session("nonexistent-session")
 
     @pytest.mark.asyncio
     async def test_visualize_session_invalid_format(
@@ -381,9 +380,9 @@ class TestVisualizeSessionTool:
         mock_manager = MagicMock()
         mock_manager.get_session.return_value = session
 
-        with patch("deep_thinking.tools.visualization.get_storage_manager", return_value=mock_manager):
-            with pytest.raises(ValueError, match="不支持的格式"):
-                await visualization.visualize_session("test-session-123", "invalid")
+        with patch("deep_thinking.tools.visualization.get_storage_manager", return_value=mock_manager), \
+             pytest.raises(ValueError, match="不支持的格式"):
+            await visualization.visualize_session("test-session-123", "invalid")
 
 
 # =============================================================================
