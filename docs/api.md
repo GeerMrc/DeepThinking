@@ -1,7 +1,12 @@
 # DeepThinking-MCP API 文档
 
 > 版本: 0.1.0
-> 更新日期: 2025-12-31
+> 更新日期: 2026-01-01
+>
+> **重要更新** (2026-01-01):
+> - 同步/异步设计统一：所有MCP工具函数均为同步函数，调用时无需使用 `await`
+> - 代码已改为全同步设计（详见 `docs/ASYNC_SYNC_ANALYSIS.md`）
+> - 示例代码已同步更新，移除了错误的 `await` 关键字
 
 ---
 
@@ -65,7 +70,7 @@ DeepThinking-MCP 是一个基于 Model Context Protocol (MCP) 的深度思考服
 
 ```python
 # 常规思考
-await sequential_thinking(
+sequential_thinking(
     thought="首先分析问题的核心要素",
     nextThoughtNeeded=True,
     thoughtNumber=1,
@@ -74,7 +79,7 @@ await sequential_thinking(
 )
 
 # 修订思考
-await sequential_thinking(
+sequential_thinking(
     thought="修正之前的分析，添加新的考虑因素",
     nextThoughtNeeded=True,
     thoughtNumber=4,
@@ -85,7 +90,7 @@ await sequential_thinking(
 )
 
 # 分支思考
-await sequential_thinking(
+sequential_thinking(
     thought="探索另一种可能的解决方案",
     nextThoughtNeeded=True,
     thoughtNumber=1,
@@ -129,7 +134,7 @@ await sequential_thinking(
 #### 使用示例
 
 ```python
-await create_session(
+create_session(
     name="技术方案分析",
     description="分析不同技术方案的优劣",
     metadata='{"project": "AI平台", "priority": "high"}'
@@ -160,7 +165,7 @@ await create_session(
 #### 使用示例
 
 ```python
-await get_session("abc-123-def")
+get_session("abc-123-def")
 ```
 
 #### 错误处理
@@ -193,10 +198,10 @@ await get_session("abc-123-def")
 
 ```python
 # 列出所有会话
-await list_sessions()
+list_sessions()
 
 # 只列出活跃会话
-await list_sessions(status="active", limit=10)
+list_sessions(status="active", limit=10)
 ```
 
 #### 状态值
@@ -224,7 +229,7 @@ await list_sessions(status="active", limit=10)
 #### 使用示例
 
 ```python
-await delete_session("abc-123-def")
+delete_session("abc-123-def")
 ```
 
 ---
@@ -247,7 +252,7 @@ await delete_session("abc-123-def")
 #### 使用示例
 
 ```python
-await update_session_status("abc-123-def", "completed")
+update_session_status("abc-123-def", "completed")
 ```
 
 #### 错误处理
@@ -288,13 +293,13 @@ await update_session_status("abc-123-def", "completed")
 
 ```python
 # 应用问题求解模板
-await apply_template(
+apply_template(
     template_id="problem_solving",
     context="如何优化团队协作效率"
 )
 
 # 应用决策模板
-await apply_template(
+apply_template(
     template_id="decision_making",
     context="选择哪个技术方案：方案A vs 方案B"
 )
@@ -328,10 +333,10 @@ await apply_template(
 
 ```python
 # 列出所有模板
-await list_templates()
+list_templates()
 
 # 只列决策类模板
-await list_templates(category="decision")
+list_templates(category="decision")
 ```
 
 ---
@@ -378,16 +383,16 @@ await list_templates(category="decision")
 
 ```python
 # 使用默认格式和路径
-await export_session("abc-123")
+export_session("abc-123")
 
 # 导出为JSON格式
-await export_session("abc-123", "json")
+export_session("abc-123", "json")
 
 # 指定输出路径
-await export_session("abc-123", "html", "~/my-session.html")
+export_session("abc-123", "html", "~/my-session.html")
 
 # 使用相对路径
-await export_session("abc-123", "markdown", "./exports/session.md")
+export_session("abc-123", "markdown", "./exports/session.md")
 ```
 
 #### 错误处理
@@ -428,13 +433,13 @@ await export_session("abc-123", "markdown", "./exports/session.md")
 
 ```python
 # 使用默认 Mermaid 格式
-await visualize_session("abc-123")
+visualize_session("abc-123")
 
 # 使用 ASCII 格式
-await visualize_session("abc-123", "ascii")
+visualize_session("abc-123", "ascii")
 
 # 使用树状结构
-await visualize_session("abc-123", "tree")
+visualize_session("abc-123", "tree")
 ```
 
 #### 错误处理
@@ -462,10 +467,10 @@ await visualize_session("abc-123", "tree")
 
 ```python
 # 直接获取 Mermaid 代码
-mermaid_code = await visualize_session_simple("abc-123", "mermaid")
+mermaid_code = visualize_session_simple("abc-123", "mermaid")
 
 # 获取树状结构
-tree_structure = await visualize_session_simple("abc-123", "tree")
+tree_structure = visualize_session_simple("abc-123", "tree")
 ```
 
 ---
