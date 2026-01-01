@@ -52,6 +52,7 @@ pip install deep-thinking-mcp
 
 ### 从源码安装
 
+**开发模式（推荐开发使用）**：
 ```bash
 # 克隆仓库
 git clone https://github.com/yourusername/deep-thinking-mcp.git
@@ -62,9 +63,24 @@ python -m venv venv
 source venv/bin/activate  # Linux/macOS
 # 或 venv\Scripts\activate  # Windows
 
-# 安装依赖
+# 以开发模式安装
 pip install -e .
 ```
+
+**生产模式（推荐部署使用）**：
+```bash
+# 克隆仓库
+git clone https://github.com/yourusername/deep-thinking-mcp.git
+cd deep-thinking-mcp
+
+# 构建 Wheel 文件
+uv build  # 或 python -m build
+
+# 安装 Wheel 文件（不显示源代码路径）
+uv pip install dist/deep_thinking_mcp-0.1.0-py3-none-any.whl
+```
+
+> 📘 **详细安装指南**: 请参阅 [安装与配置文档](docs/installation.md) 获取完整的安装说明，包括开发模式和生产模式Wheel安装的详细对比。
 
 ## 使用
 

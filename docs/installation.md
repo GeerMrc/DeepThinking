@@ -1,7 +1,7 @@
 # DeepThinking-MCP 安装与配置指南
 
-> 版本: 0.1.0
-> 更新日期: 2025-12-31
+> 版本: 0.2.0
+> 更新日期: 2026-01-02
 
 ---
 
@@ -30,9 +30,11 @@
 
 > ⚠️ **重要提示**: deep-thinking-mcp **目前未发布到 PyPI**。
 >
-> 以下方法1和方法2仅在未来包发布到PyPI后可用。
+> **可用安装方式**：
+> - **方法3（开发模式）**: 从源码以可编辑模式安装，适合开发测试
+> - **方法4（Wheel文件）**: 从源码构建Wheel文件后安装，适合生产环境
 >
-> **当前请使用方法3（开发模式安装）**。
+> 以下方法1和方法2仅在未来包发布到PyPI后可用。
 
 ---
 
@@ -107,9 +109,9 @@ uv pip uninstall deep-thinking-mcp
 
 ---
 
-### 方法3: 开发模式安装 ⭐ （推荐，当前可用）
+### 方法3: 开发模式安装 ⭐ （开发环境推荐）
 
-这是**当前唯一可用的安装方式**，直接从源代码安装。
+这是**当前可用的安装方式之一**，直接从源代码以可编辑模式安装。
 
 #### 方式3A: 使用 uv（推荐）
 
@@ -156,6 +158,7 @@ pip install -e .
 - ✅ 指向源代码目录，而非复制文件
 - ✅ 适合开发和测试
 - ✅ 可以使用 `git pull` 更新代码
+- ⚠️ **显示源代码目录路径**，不适合生产环境
 
 #### 验证安装
 
@@ -165,6 +168,140 @@ python -c "import deep_thinking; print('✅ 安装成功')"
 
 # 查看版本信息
 python -m deep_thinking --help
+```
+
+---
+
+### 方法4: 使用 Wheel 文件安装 ⭐ （生产环境推荐）
+
+Wheel 安装方式**复制代码到 site-packages**，不显示源代码路径，适合生产环境部署。
+
+#### 4.1 构建 Wheel 文件
+
+从源码构建 wheel 包：
+
+```bash
+# 进入项目目录
+cd /path/to/Deep-Thinking-MCP
+
+# 使用 uv 构建（推荐）
+uv build
+
+# 或使用 pip 构建
+python -m build
+```
+
+**构建输出**：
+```
+Built /path/to/Deep-Thinking-MCP/dist/deep_thinking_mcp-0.1.0-py3-none-any.whl
+Built /path/to/Deep-Thinking-MCP/dist/deep_thinking_mcp-0.1.0.tar.gz
+```
+
+#### 4.2 安装 Wheel 文件
+
+**使用 uv 安装**（推荐）：
+```bash
+# 从本地 wheel 文件安装
+uv pip install dist/deep_thinking_mcp-0.1.0-py3-none-any.whl
+
+# 指定完整路径安装
+uv pip install /path/to/Deep-Thinking-MCP/dist/deep_thinking_mcp-0.1.0-py3-none-any.whl
+```
+
+**使用 pip 安装**：
+```bash
+# 从本地 wheel 文件安装
+pip install dist/deep_thinking_mcp-0.1.0-py3-none-any.whl
+
+# 指定完整路径安装
+pip install /path/to/Deep-Thinking-MCP/dist/deep_thinking_mcp-0.1.0-py3-none-any.whl
+```
+
+#### 4.3 验证 Wheel 安装
+
+```bash
+# 查看已安装的包（不显示源代码路径）
+uv pip list | grep deep-thinking-mcp
+# 或
+pip list | grep deep-thinking-mcp
+```
+
+**Wheel 安装输出示例**：
+```
+deep-thinking-mcp    0.1.0
+# （无源代码路径显示）
+```
+
+**详细安装信息**：
+```bash
+uv pip show deep-thinking-mcp
+# 或
+pip show deep-thinking-mcp
+```
+
+**输出示例**：
+```
+Name: deep-thinking-mcp
+Version: 0.1.0
+Summary: Advanced sequential thinking MCP server...
+Location: /Users/maric/miniconda3/lib/python3.12/site-packages
+Requires: mcp, pydantic
+```
+
+#### 4.4 安装模式对比
+
+| 特性 | Editable 模式 | Wheel 模式 |
+|------|-------------|-----------|
+| **安装命令** | `pip install -e .` | `pip install xxx.whl` |
+| **代码存储** | 源代码目录 | `site-packages/` |
+| **显示源路径** | ✅ 显示源目录 | ❌ 不显示源目录 |
+| **代码修改** | ✅ 立即生效 | ❌ 需重新构建安装 |
+| **适用场景** | 开发、测试 | 生产环境、部署 |
+| **依赖管理** | 引用源码依赖 | 包含所有依赖 |
+
+**Editable 模式示例**（开发模式）：
+```bash
+$ uv pip list | grep deep-thinking-mcp
+deep-thinking-mcp    0.1.0    /Volumes/DISK/Claude-code-glm/Deep-Thinking-MCP
+#                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 显示源代码目录
+```
+
+**Wheel 模式示例**（生产环境）：
+```bash
+$ uv pip list | grep deep-thinking-mcp
+deep-thinking-mcp    0.1.0
+#                     （不显示源代码路径，清洁安装）
+```
+
+#### 4.5 Wheel 安装优势
+
+**生产环境部署**：
+- ✅ **不显示源代码路径**，更专业
+- ✅ **代码固定版本**，避免意外修改
+- ✅ **独立部署**，不需要源代码目录
+- ✅ **适合CI/CD**，标准化部署流程
+
+**团队协作**：
+- ✅ **统一版本**，确保环境一致
+- ✅ **离线安装**，支持内网环境
+- ✅ **版本锁定**，便于依赖管理
+
+**示例：团队共享安装**
+```bash
+# 构建后分享 wheel 文件
+scp dist/deep_thinking_mcp-0.1.0-py3-none-any.whl user@server:/tmp/
+
+# 服务器上安装
+uv pip install /tmp/deep_thinking_mcp-0.1.0-py3-none-any.whl
+```
+
+#### 4.6 卸载 Wheel 安装
+
+```bash
+# 卸载 wheel 安装的包
+uv pip uninstall deep-thinking-mcp
+# 或
+pip uninstall deep-thinking-mcp
 ```
 
 ---
