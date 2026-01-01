@@ -109,7 +109,7 @@ DeepThinking-MCP 将思考会话数据存储在本地文件系统中。
 | `revisesThought` | integer\|null | ❌ | null | 修订的思考步骤编号 |
 | `branchFromThought` | integer\|null | ❌ | null | 分支来源思考步骤编号 |
 | `branchId` | string\|null | ❌ | null | 分支ID（格式如 "branch-0-1"） |
-| `needsMoreThoughts` | boolean | ❌ | false | 是否需要增加总思考步骤数（每次增加10步，上限1000步） |
+| `needsMoreThoughts` | boolean | ❌ | false | 是否需要增加总思考步骤数（每次增加DEEP_THINKING_THOUGHTS_INCREMENT步，默认10步，上限DEEP_THINKING_MAX_THOUGHTS，默认50步） |
 
 #### 返回值
 

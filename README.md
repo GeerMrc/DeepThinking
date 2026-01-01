@@ -88,13 +88,25 @@ python -m deep_thinking --transport sse --api-key your-api-key
 
 ```bash
 # .env
+# 传输配置
 DEEP_THINKING_TRANSPORT=stdio
 DEEP_THINKING_HOST=localhost
 DEEP_THINKING_PORT=8000
-DEEP_THINKING_DATA_DIR=./.deep-thinking-mcp
-DEEP_THINKING_LOG_LEVEL=INFO
+
+# 认证配置（SSE模式）
 DEEP_THINKING_AUTH_TOKEN=your-secret-token
 DEEP_THINKING_API_KEY=your-api-key
+
+# 存储配置
+DEEP_THINKING_DATA_DIR=./.deep-thinking-mcp
+
+# 思考配置
+DEEP_THINKING_MAX_THOUGHTS=50           # 最大思考步骤数（推荐 50，支持 1-10000）
+DEEP_THINKING_MIN_THOUGHTS=3            # 最小思考步骤数（推荐 3，支持 1-10000）
+DEEP_THINKING_THOUGHTS_INCREMENT=10     # 思考步骤增量（默认 10，支持 1-100）
+
+# 日志配置
+DEEP_THINKING_LOG_LEVEL=INFO
 ```
 
 **数据存储**: 默认存储在项目本地目录 `.deep-thinking-mcp/`，包含会话数据和索引文件。详见[数据迁移指南](docs/MIGRATION.md)。
