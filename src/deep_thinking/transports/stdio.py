@@ -10,7 +10,6 @@ STDIO传输模块
 - 最佳性能，无网络开销
 """
 
-import asyncio
 import logging
 
 from mcp.server import FastMCP  # type: ignore[import-not-found]

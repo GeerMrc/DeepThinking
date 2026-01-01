@@ -191,8 +191,9 @@ class TestServerLifespan:
     @pytest.mark.asyncio
     async def test_server_lifespan_context_manager(self):
         """测试server_lifespan可以作为上下文管理器"""
-        from deep_thinking.__main__ import server_lifespan
         from mcp.server import FastMCP
+
+        from deep_thinking.__main__ import server_lifespan
 
         server = FastMCP(name="test")
 

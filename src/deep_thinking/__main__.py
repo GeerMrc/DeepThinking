@@ -24,15 +24,14 @@ from contextlib import asynccontextmanager
 
 from mcp.server import FastMCP  # type: ignore[import-not-found]
 
+# 导入 server.py 中的 app 实例（已注册所有工具）
+# 这必须在使用前导入，以确保工具装饰器执行
+from deep_thinking.server import app  # noqa: E402
 from deep_thinking.transports.sse import run_sse
 
 # 导入传输层模块
 from deep_thinking.transports.stdio import run_stdio
 from deep_thinking.utils.logger import setup_logging
-
-# 导入 server.py 中的 app 实例（已注册所有工具）
-# 这必须在使用前导入，以确保工具装饰器执行
-from deep_thinking.server import app  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
