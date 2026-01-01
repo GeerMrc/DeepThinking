@@ -22,13 +22,13 @@ class ThinkingConfig(BaseModel):
     """
 
     max_thoughts: int = Field(
-        default=1000,
+        default=50,
         ge=1,
         le=10000,
         description="最大思考步骤数（防止无限循环）",
     )
     min_thoughts: int = Field(
-        default=1,
+        default=3,
         ge=1,
         description="最小思考步骤数（确保合理范围）",
     )
@@ -65,7 +65,7 @@ class ThinkingConfig(BaseModel):
 
     @field_validator("thoughts_increment")
     @classmethod
-    def validate_thoughts_increment(cls, v: int, info) -> int:
+    def validate_thoughts_increment(cls, v: int) -> int:
         """
         验证思考步骤增量
 
@@ -73,7 +73,6 @@ class ThinkingConfig(BaseModel):
 
         Args:
             v: 思考步骤增量
-            info: 字段验证信息
 
         Returns:
             验证后的思考步骤增量
@@ -122,16 +121,21 @@ class ThinkingConfig(BaseModel):
         从环境变量创建配置
 
         支持的环境变量：
-        - DEEP_THINKING_MAX_THOUGHTS: 最大思考步骤数
-        - DEEP_THINKING_MIN_THOUGHTS: 最小思考步骤数
-        - DEEP_THINKING_THOUGHTS_INCREMENT: 思考步骤增量
+        - DEEP_THINKING_MAX_THOUGHTS: 最大思考步骤数（默认：50）
+        - DEEP_THINKING_MIN_THOUGHTS: 最小思考步骤数（默认：3）
+        - DEEP_THINKING_THOUGHTS_INCREMENT: 思考步骤增量（默认：10）
+
+        配置范围说明：
+        - 最大思考步骤：支持配置 1-10000 步（推荐 50 步）
+        - 最小思考步骤：支持配置 1-10000 步（推荐 3 步）
+        - 思考步骤增量：支持配置 1-100 步（默认 10 步）
 
         Returns:
             思考配置实例
         """
         return cls(
-            max_thoughts=int(os.getenv("DEEP_THINKING_MAX_THOUGHTS", "1000")),
-            min_thoughts=int(os.getenv("DEEP_THINKING_MIN_THOUGHTS", "1")),
+            max_thoughts=int(os.getenv("DEEP_THINKING_MAX_THOUGHTS", "50")),
+            min_thoughts=int(os.getenv("DEEP_THINKING_MIN_THOUGHTS", "3")),
             thoughts_increment=int(
                 os.getenv("DEEP_THINKING_THOUGHTS_INCREMENT", "10")
             ),

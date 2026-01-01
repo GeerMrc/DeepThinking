@@ -394,9 +394,9 @@ python -m deep_thinking --mode sse --host 127.0.0.1 --port 8088
 | **存储配置** | | |
 | `DEEP_THINKING_DATA_DIR` | 数据存储目录 | ./.deep-thinking-mcp/ |
 | **思考配置** | | |
-| `DEEP_THINKING_MAX_THOUGHTS` | 最大思考步骤数 | 1000 |
-| `DEEP_THINKING_MIN_THOUGHTS` | 最小思考步骤数 | 1 |
-| `DEEP_THINKING_THOUGHTS_INCREMENT` | 思考步骤增量（needsMoreThoughts） | 10 |
+| `DEEP_THINKING_MAX_THOUGHTS` | 最大思考步骤数（推荐 50，支持 1-10000） | 50 |
+| `DEEP_THINKING_MIN_THOUGHTS` | 最小思考步骤数（推荐 3，支持 1-10000） | 3 |
+| `DEEP_THINKING_THOUGHTS_INCREMENT` | 思考步骤增量（needsMoreThoughts，支持 1-100） | 10 |
 | **日志配置** | | |
 | `DEEP_THINKING_LOG_LEVEL` | 日志级别 (DEBUG/INFO/WARNING/ERROR) | INFO |
 

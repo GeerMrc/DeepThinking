@@ -16,8 +16,8 @@ class TestThinkingConfig:
     def test_default_values(self):
         """测试默认值"""
         config = ThinkingConfig()
-        assert config.max_thoughts == 1000
-        assert config.min_thoughts == 1
+        assert config.max_thoughts == 50
+        assert config.min_thoughts == 3
         assert config.thoughts_increment == 10
 
     def test_custom_values(self):
@@ -138,8 +138,8 @@ class TestThinkingConfig:
 
         config = ThinkingConfig.from_env()
 
-        assert config.max_thoughts == 1000
-        assert config.min_thoughts == 1
+        assert config.max_thoughts == 50
+        assert config.min_thoughts == 3
         assert config.thoughts_increment == 10
 
 
@@ -155,7 +155,7 @@ class TestGlobalConfig:
         """测试获取全局配置（从环境变量初始化）"""
         config = get_global_config()
         assert isinstance(config, ThinkingConfig)
-        assert config.max_thoughts == 1000  # 默认值
+        assert config.max_thoughts == 50  # 默认值
 
     def test_set_global_config(self):
         """测试设置全局配置"""

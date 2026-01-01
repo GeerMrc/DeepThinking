@@ -149,22 +149,22 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--max-thoughts",
         type=int,
-        default=int(os.getenv("DEEP_THINKING_MAX_THOUGHTS", "1000")),
-        help="最大思考步骤数（默认: 1000）",
+        default=int(os.getenv("DEEP_THINKING_MAX_THOUGHTS", "50")),
+        help="最大思考步骤数（默认: 50，支持 1-10000）",
     )
 
     parser.add_argument(
         "--min-thoughts",
         type=int,
-        default=int(os.getenv("DEEP_THINKING_MIN_THOUGHTS", "1")),
-        help="最小思考步骤数（默认: 1）",
+        default=int(os.getenv("DEEP_THINKING_MIN_THOUGHTS", "3")),
+        help="最小思考步骤数（默认: 3，支持 1-10000）",
     )
 
     parser.add_argument(
         "--thoughts-increment",
         type=int,
         default=int(os.getenv("DEEP_THINKING_THOUGHTS_INCREMENT", "10")),
-        help="思考步骤增量（默认: 10）",
+        help="思考步骤增量（默认: 10，支持 1-100）",
     )
 
     return parser.parse_args()
