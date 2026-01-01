@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 @app.tool()
-async def create_session(
+def create_session(
     name: str,
     description: str = "",
     metadata: str | None = None,
@@ -64,7 +64,7 @@ async def create_session(
 
 
 @app.tool()
-async def get_session(session_id: str) -> str:
+def get_session(session_id: str) -> str:
     """
     获取会话详情
 
@@ -117,7 +117,7 @@ async def get_session(session_id: str) -> str:
 
 
 @app.tool()
-async def list_sessions(
+def list_sessions(
     status: str | None = None,
     limit: int = 20,
 ) -> str:
@@ -181,7 +181,7 @@ async def list_sessions(
 
 
 @app.tool()
-async def delete_session(session_id: str) -> str:
+def delete_session(session_id: str) -> str:
     """
     删除会话
 
@@ -212,7 +212,7 @@ async def delete_session(session_id: str) -> str:
 
 
 @app.tool()
-async def update_session_status(
+def update_session_status(
     session_id: str,
     status: str,
 ) -> str:

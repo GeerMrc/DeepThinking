@@ -26,7 +26,7 @@ class TestSequentialThinkingIntegration:
 
     async def test_regular_thinking(self, storage_manager):
         """测试常规思考"""
-        result = await sequential_thinking.sequential_thinking(
+        result = sequential_thinking.sequential_thinking(
             thought="这是第一个思考步骤",
             nextThoughtNeeded=True,
             thoughtNumber=1,
@@ -48,7 +48,7 @@ class TestSequentialThinkingIntegration:
     async def test_revision_thinking(self, storage_manager):
         """测试修订思考"""
         # 先创建一个常规思考
-        await sequential_thinking.sequential_thinking(
+        sequential_thinking.sequential_thinking(
             thought="原始思考",
             nextThoughtNeeded=True,
             thoughtNumber=1,
@@ -57,7 +57,7 @@ class TestSequentialThinkingIntegration:
         )
 
         # 然后创建修订思考
-        result = await sequential_thinking.sequential_thinking(
+        result = sequential_thinking.sequential_thinking(
             thought="这是修订后的思考",
             nextThoughtNeeded=False,
             thoughtNumber=2,
@@ -82,7 +82,7 @@ class TestSequentialThinkingIntegration:
     async def test_branch_thinking(self, storage_manager):
         """测试分支思考"""
         # 先创建一个常规思考
-        await sequential_thinking.sequential_thinking(
+        sequential_thinking.sequential_thinking(
             thought="主线思考",
             nextThoughtNeeded=True,
             thoughtNumber=1,
@@ -91,7 +91,7 @@ class TestSequentialThinkingIntegration:
         )
 
         # 然后创建分支思考
-        result = await sequential_thinking.sequential_thinking(
+        result = sequential_thinking.sequential_thinking(
             thought="这是一个分支思考",
             nextThoughtNeeded=True,
             thoughtNumber=2,
@@ -115,7 +115,7 @@ class TestSequentialThinkingIntegration:
 
     async def test_completion(self, storage_manager):
         """测试思考完成"""
-        result = await sequential_thinking.sequential_thinking(
+        result = sequential_thinking.sequential_thinking(
             thought="最后一个思考",
             nextThoughtNeeded=False,
             thoughtNumber=1,
@@ -136,7 +136,7 @@ class TestSequentialThinkingIntegration:
         session_id = "test-multiple"
 
         # 添加三个思考步骤
-        await sequential_thinking.sequential_thinking(
+        sequential_thinking.sequential_thinking(
             thought="步骤1：分析问题",
             nextThoughtNeeded=True,
             thoughtNumber=1,
@@ -144,7 +144,7 @@ class TestSequentialThinkingIntegration:
             session_id=session_id,
         )
 
-        await sequential_thinking.sequential_thinking(
+        sequential_thinking.sequential_thinking(
             thought="步骤2：制定方案",
             nextThoughtNeeded=True,
             thoughtNumber=2,
@@ -152,7 +152,7 @@ class TestSequentialThinkingIntegration:
             session_id=session_id,
         )
 
-        await sequential_thinking.sequential_thinking(
+        sequential_thinking.sequential_thinking(
             thought="步骤3：执行方案",
             nextThoughtNeeded=False,
             thoughtNumber=3,
@@ -170,7 +170,7 @@ class TestSequentialThinkingIntegration:
 
     async def test_default_session_creation(self, storage_manager):
         """测试默认会话自动创建"""
-        result = await sequential_thinking.sequential_thinking(
+        result = sequential_thinking.sequential_thinking(
             thought="使用默认会话",
             nextThoughtNeeded=False,
             thoughtNumber=1,

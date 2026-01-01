@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 @app.tool()
-async def sequential_thinking(
+def sequential_thinking(
     thought: str,
     nextThoughtNeeded: bool,
     thoughtNumber: int,
