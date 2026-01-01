@@ -18,17 +18,75 @@ DeepThinking-MCP 是一个基于 Model Context Protocol (MCP) 的深度思考服
 
 | 工具名称 | 功能描述 | 分类 |
 |---------|---------|------|
-| `sequential_thinking` | 执行顺序思考步骤 | 核心思考 |
+| `sequential_thinking` | 执行顺序思考步骤（支持动态调整） | 核心思考 |
+| `resume_session` | 恢复已暂停的思考会话 | 会话管理 |
 | `create_session` | 创建新会话 | 会话管理 |
 | `get_session` | 获取会话详情 | 会话管理 |
 | `list_sessions` | 列出所有会话 | 会话管理 |
 | `delete_session` | 删除会话 | 会话管理 |
 | `update_session_status` | 更新会话状态 | 会话管理 |
+| `create_task` | 创建新任务 | 任务管理 |
+| `list_tasks` | 列出任务 | 任务管理 |
+| `update_task_status` | 更新任务状态 | 任务管理 |
+| `get_next_task` | 获取下一个待执行任务 | 任务管理 |
+| `get_task_stats` | 获取任务统计信息 | 任务管理 |
+| `link_task_session` | 关联任务与思考会话 | 任务管理 |
 | `apply_template` | 应用思考模板 | 模板系统 |
 | `list_templates` | 列出可用模板 | 模板系统 |
 | `export_session` | 导出会话 | 导出工具 |
 | `visualize_session` | 可视化会话 | 可视化工具 |
 | `visualize_session_simple` | 简化可视化 | 可视化工具 |
+
+---
+
+## 数据存储
+
+### 存储位置
+
+DeepThinking-MCP 将思考会话数据存储在本地文件系统中。
+
+**默认存储路径（项目本地）**:
+```
+./.deep-thinking-mcp/
+├── sessions/           # 会话数据目录
+│   ├── .index.json    # 会话索引文件
+│   └── *.json         # 各个会话的数据文件
+├── .backups/          # 自动备份目录
+└── .gitignore         # 防止数据提交到版本控制
+```
+
+### 存储路径配置
+
+存储路径支持以下配置方式（按优先级排序）：
+
+1. **环境变量**: `DEEP_THINKING_DATA_DIR`
+   ```bash
+   export DEEP_THINKING_DATA_DIR=/custom/path
+   ```
+
+2. **CLI参数**: `--data-dir`
+   ```bash
+   python -m deep_thinking --data-dir /custom/path
+   ```
+
+3. **默认值**: 项目本地目录 `.deep-thinking-mcp/`
+
+### 数据迁移
+
+**自动迁移**: 从旧版本（`~/.deep-thinking-mcp/`）升级时，系统会：
+- 检测旧数据目录
+- 自动创建备份
+- 迁移数据到新位置
+- 创建迁移标记文件
+
+手动迁移或查看迁移状态，请参考 `MIGRATION.md`。
+
+### 数据格式
+
+所有数据以 JSON 格式存储，包含：
+- 会话元数据（ID、名称、描述、状态）
+- 思考步骤序列（内容、类型、时间戳）
+- 索引信息（快速查找）
 
 ---
 
@@ -51,7 +109,7 @@ DeepThinking-MCP 是一个基于 Model Context Protocol (MCP) 的深度思考服
 | `revisesThought` | integer\|null | ❌ | null | 修订的思考步骤编号 |
 | `branchFromThought` | integer\|null | ❌ | null | 分支来源思考步骤编号 |
 | `branchId` | string\|null | ❌ | null | 分支ID（格式如 "branch-0-1"） |
-| `needsMoreThoughts` | boolean | ❌ | false | 是否需要增加总思考步骤数（预留参数） |
+| `needsMoreThoughts` | boolean | ❌ | false | 是否需要增加总思考步骤数（每次增加10步，上限1000步） |
 
 #### 返回值
 
@@ -261,9 +319,266 @@ update_session_status("abc-123-def", "completed")
 
 ---
 
-## 3. 模板系统
+### 2.6 resume_session
 
-### 3.1 apply_template
+恢复已暂停的思考会话（断点续传功能）。
+
+#### 参数
+
+| 参数名 | 类型 | 必需 | 默认值 | 描述 |
+|-------|------|-----|-------|------|
+| `session_id` | string | ✅ | - | 要恢复的会话ID |
+
+#### 返回值
+
+返回会话恢复信息，包含：
+- 会话ID、名称、状态
+- 总思考数
+- 上一个思考步骤内容
+- 思考步骤调整历史（如有）
+- 继续思考的指导
+
+#### 使用示例
+
+```python
+# 恢复会话，获取上次思考进度
+resume_session("my-session-id")
+```
+
+#### 断点续传功能
+
+- 获取会话的最后一个思考步骤
+- 显示当前思考进度和状态
+- 提供继续思考的参数指导
+- 支持查看历史调整记录
+
+#### 错误处理
+
+- `ValueError`: 会话不存在
+
+---
+
+## 3. 任务管理工具
+
+任务管理工具提供任务清单管理功能，支持优先级驱动的任务执行。
+
+### 3.1 create_task
+
+创建新任务。
+
+#### 参数
+
+| 参数名 | 类型 | 必需 | 默认值 | 描述 |
+|-------|------|-----|-------|------|
+| `title` | string | ✅ | - | 任务标题 |
+| `description` | string | ❌ | "" | 任务描述 |
+| `priority` | string | ❌ | "P2" | 任务优先级（P0/P1/P2） |
+| `task_id` | string\|null | ❌ | null | 任务ID（不提供则自动生成） |
+
+#### 返回值
+
+返回创建的任务信息：
+- 任务ID
+- 标题
+- 优先级
+- 状态
+
+#### 使用示例
+
+```python
+# 创建高优先级任务
+create_task(
+    title="修复登录bug",
+    description="用户无法正常登录",
+    priority="P0"
+)
+
+# 创建中等优先级任务
+create_task(
+    title="优化数据库查询",
+    priority="P1"
+)
+```
+
+#### 优先级说明
+
+- `P0`: 最高优先级，立即处理
+- `P1`: 高优先级，尽快处理
+- `P2`: 普通优先级，按计划处理
+
+---
+
+### 3.2 list_tasks
+
+列出任务，支持按状态和优先级过滤。
+
+#### 参数
+
+| 参数名 | 类型 | 必需 | 默认值 | 描述 |
+|-------|------|-----|-------|------|
+| `status` | string\|null | ❌ | null | 过滤状态（pending/in_progress/completed/failed/blocked） |
+| `priority` | string\|null | ❌ | null | 过滤优先级（P0/P1/P2） |
+| `limit` | integer | ❌ | 100 | 最大返回数量 |
+
+#### 返回值
+
+返回任务列表，每个任务包含：
+- 状态图标
+- 优先级
+- 标题
+- 任务ID
+- 状态
+- 更新时间
+
+#### 使用示例
+
+```python
+# 列出所有任务
+list_tasks()
+
+# 只列出待执行的高优先级任务
+list_tasks(status="pending", priority="P0")
+
+# 列出进行中的任务
+list_tasks(status="in_progress")
+```
+
+#### 状态值
+
+- `pending`: 待执行
+- `in_progress`: 进行中
+- `completed`: 已完成
+- `failed`: 失败
+- `blocked`: 已阻塞
+
+---
+
+### 3.3 update_task_status
+
+更新任务状态。
+
+#### 参数
+
+| 参数名 | 类型 | 必需 | 默认值 | 描述 |
+|-------|------|-----|-------|------|
+| `task_id` | string | ✅ | - | 任务ID |
+| `new_status` | string | ✅ | - | 新状态（pending/in_progress/completed/failed/blocked） |
+
+#### 返回值
+
+返回更新结果，包含：
+- 任务ID
+- 旧状态 → 新状态
+
+#### 使用示例
+
+```python
+# 开始执行任务
+update_task_status("task-123", "in_progress")
+
+# 标记任务完成
+update_task_status("task-123", "completed")
+
+# 标记任务失败
+update_task_status("task-123", "failed")
+```
+
+---
+
+### 3.4 get_next_task
+
+获取下一个待执行任务（按优先级排序）。
+
+#### 参数
+
+无参数
+
+#### 返回值
+
+返回下一个待执行任务信息：
+- 任务ID
+- 标题
+- 描述
+- 优先级
+- 创建时间
+
+如果没有待执行任务，返回提示信息。
+
+#### 使用示例
+
+```python
+# 获取下一个待执行任务
+next_task = get_next_task()
+```
+
+#### 优先级排序
+
+- P0 任务优先
+- P1 任务次之
+- P2 任务最后
+- 同优先级按创建时间排序
+
+---
+
+### 3.5 get_task_stats
+
+获取任务统计信息。
+
+#### 参数
+
+无参数
+
+#### 返回值
+
+返回任务统计信息：
+- 总任务数
+- 状态分布（各状态任务数）
+- 优先级分布（各优先级任务数）
+
+#### 使用示例
+
+```python
+# 获取任务统计
+stats = get_task_stats()
+```
+
+---
+
+### 3.6 link_task_session
+
+关联任务与思考会话。
+
+#### 参数
+
+| 参数名 | 类型 | 必需 | 默认值 | 描述 |
+|-------|------|-----|-------|------|
+| `task_id` | string | ✅ | - | 任务ID |
+| `session_id` | string | ✅ | - | 思考会话ID |
+
+#### 返回值
+
+返回关联结果，包含：
+- 任务ID
+- 关联的会话ID
+
+#### 使用示例
+
+```python
+# 将任务与思考会话关联
+link_task_session("task-123", "session-abc")
+```
+
+#### 使用场景
+
+- 跟踪任务相关的思考过程
+- 在任务执行时记录思考步骤
+- 任务完成后回顾思考历程
+
+---
+
+## 4. 模板系统
+
+### 4.1 apply_template
 
 应用思考模板创建新会话。
 
@@ -311,7 +626,7 @@ apply_template(
 
 ---
 
-### 3.2 list_templates
+### 4.2 list_templates
 
 列出所有可用的思考模板。
 
@@ -341,9 +656,9 @@ list_templates(category="decision")
 
 ---
 
-## 4. 导出工具
+## 5. 导出工具
 
-### 4.1 export_session
+### 5.1 export_session
 
 导出思考会话为指定格式。
 
@@ -401,9 +716,9 @@ export_session("abc-123", "markdown", "./exports/session.md")
 
 ---
 
-## 5. 可视化工具
+## 6. 可视化工具
 
-### 5.1 visualize_session
+### 6.1 visualize_session
 
 可视化思考会话。
 
@@ -448,7 +763,7 @@ visualize_session("abc-123", "tree")
 
 ---
 
-### 5.2 visualize_session_simple
+### 6.2 visualize_session_simple
 
 简化的会话可视化（直接返回可视化内容，不包含额外说明）。
 

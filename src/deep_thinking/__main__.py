@@ -22,7 +22,7 @@ import sys
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-from mcp.server import FastMCP  # type: ignore[import-not-found]
+from mcp.server import FastMCP
 
 # 导入 server.py 中的 app 实例（已注册所有工具）
 # 这必须在使用前导入，以确保工具装饰器执行
@@ -128,6 +128,14 @@ def parse_args() -> argparse.Namespace:
         help="API Key用于SSE模式认证",
     )
 
+    # 存储目录参数
+    parser.add_argument(
+        "--data-dir",
+        type=str,
+        default=os.getenv("DEEP_THINKING_DATA_DIR"),
+        help="数据存储目录路径（默认: ./.deep-thinking-mcp/）",
+    )
+
     # 日志级别
     parser.add_argument(
         "--log-level",
@@ -149,6 +157,10 @@ async def main_async() -> int:
     """
     # 解析命令行参数
     args = parse_args()
+
+    # 如果指定了 --data-dir，设置环境变量
+    if args.data_dir:
+        os.environ["DEEP_THINKING_DATA_DIR"] = args.data_dir
 
     # 配置日志（传输感知）
     log_level = getattr(logging, args.log_level)

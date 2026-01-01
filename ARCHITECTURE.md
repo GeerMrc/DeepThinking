@@ -2,7 +2,7 @@
 
 > 项目: DeepThinking-MCP
 > 版本: 1.0.0
-> 更新时间: 2025-12-31
+> 更新时间: 2026-01-01
 
 ---
 
@@ -52,7 +52,8 @@
 │               │     │                │     │               │
 │ - 思考工具    │◄────┤ - 会话模型     │────►│ - JSON存储    │
 │ - 会话管理    │     │ - 思考模型     │     │ - 存储管理器  │
-│ - 导出工具    │     │ - 模板模型     │     │ - 原子写入    │
+│ - 导出工具    │     │ - 模板模型     │     │ - 任务清单存储│
+│ - 任务管理    │     │ - 任务模型     │     │ - 原子写入    │
 │ - 可视化      │     │                │     │ - 自动备份    │
 └───────────────┘     └────────────────┘     └───────────────┘
         │                      │                      │
@@ -174,6 +175,7 @@ tools/
 ├── __init__.py
 ├── sequential_thinking.py    # 核心思考工具
 ├── session_manager.py        # 会话管理工具
+├── task_manager.py           # 任务管理工具
 ├── export.py                 # 导出工具
 └── visualization.py          # 可视化工具
 ```
@@ -215,6 +217,12 @@ async def sequential_thinking(
 - 每次思考自动关联到session_id指定的会话
 - 思考步骤自动保存到持久化层
 - 支持动态调整totalThoughts（通过needsMoreThoughts）
+
+**动态思考步骤调整**:
+- `needsMoreThoughts=true`: 每次增加10步，上限1000步
+- 自动记录调整历史到会话元数据
+- 防止无限循环的保护机制
+- 支持断点续传恢复调整状态
 
 **思考类型处理**:
 
@@ -260,6 +268,85 @@ async def update_session_status(
 ) -> str:
     """更新会话状态"""
 ```
+
+#### 会话恢复工具
+
+**职责**: 恢复已暂停的思考会话（断点续传功能）
+
+**工具定义**:
+```python
+@app.tool()
+def resume_session(session_id: str) -> str:
+    """
+    恢复已暂停的思考会话（断点续传）
+
+    获取会话的最后一个思考步骤，返回可以继续思考的上下文信息。
+    """
+```
+
+**核心功能**:
+- 获取会话的最后一个思考步骤
+- 显示思考进度和状态
+- 提供继续思考的参数指导
+- 支持查看思考步骤调整历史
+
+#### 任务管理工具 (task_manager.py)
+
+**职责**: 提供任务清单管理功能，支持优先级驱动的任务执行
+
+**工具列表**:
+```python
+@app.tool(name="create_task")
+def create_task(
+    title: str,
+    description: str = "",
+    priority: str = "P2",
+    task_id: str | None = None,
+) -> str:
+    """创建新任务"""
+
+@app.tool(name="list_tasks")
+def list_tasks(
+    status: str | None = None,
+    priority: str | None = None,
+    limit: int = 100,
+) -> str:
+    """列出任务，支持按状态和优先级过滤"""
+
+@app.tool(name="update_task_status")
+def update_task_status(
+    task_id: str,
+    new_status: str,
+) -> str:
+    """更新任务状态"""
+
+@app.tool(name="get_next_task")
+def get_next_task() -> str:
+    """获取下一个待执行任务（按优先级排序）"""
+
+@app.tool(name="get_task_stats")
+def get_task_stats() -> str:
+    """获取任务统计信息"""
+
+@app.tool(name="link_task_session")
+def link_task_session(
+    task_id: str,
+    session_id: str,
+) -> str:
+    """关联任务与思考会话"""
+```
+
+**优先级机制**:
+- P0: 最高优先级，立即处理
+- P1: 高优先级，尽快处理
+- P2: 普通优先级，按计划处理
+
+**状态管理**:
+- pending: 待执行
+- in_progress: 进行中
+- completed: 已完成
+- failed: 失败
+- blocked: 已阻塞
 
 #### 导出工具 (export.py)
 
@@ -335,6 +422,7 @@ models/
 ├── __init__.py
 ├── thought.py               # 思考步骤模型
 ├── thinking_session.py      # 思考会话模型
+├── task.py                  # 任务模型
 └── template.py              # 模板模型
 ```
 
@@ -407,6 +495,71 @@ class ThinkingSession(BaseModel):
     class Config:
         frozen = True
 ```
+
+#### 任务模型 (task.py)
+
+```python
+from enum import Enum
+from datetime import datetime
+
+class TaskStatus(str, Enum):
+    """任务状态枚举"""
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    BLOCKED = "blocked"
+
+class TaskPriority(str, Enum):
+    """任务优先级枚举"""
+    P0 = "P0"  # 最高优先级
+    P1 = "P1"  # 高优先级
+    P2 = "P2"  # 普通优先级
+
+class ThinkingTask(BaseModel):
+    """任务清单模型"""
+    task_id: str = Field(..., description="任务唯一标识")
+    title: str = Field(..., description="任务标题")
+    description: str = Field(default="", description="任务描述")
+    status: TaskStatus = Field(
+        default=TaskStatus.PENDING,
+        description="任务状态"
+    )
+    priority: TaskPriority = Field(
+        default=TaskPriority.P2,
+        description="任务优先级"
+    )
+    linked_session_id: str | None = Field(
+        default=None,
+        description="关联的思考会话ID"
+    )
+    created_at: datetime = Field(
+        default_factory=datetime.utcnow,
+        description="创建时间"
+    )
+    updated_at: datetime = Field(
+        default_factory=datetime.utcnow,
+        description="更新时间"
+    )
+
+    class Config:
+        frozen = True
+
+    def update_status(self, new_status: TaskStatus) -> None:
+        """更新任务状态"""
+        object.__setattr__(self, 'status', new_status)
+        object.__setattr__(self, 'updated_at', datetime.utcnow())
+
+    def link_session(self, session_id: str) -> None:
+        """关联思考会话"""
+        object.__setattr__(self, 'linked_session_id', session_id)
+        object.__setattr__(self, 'updated_at', datetime.utcnow())
+```
+
+**任务与思考会话关联**:
+- 一个任务可以关联到一个思考会话
+- 通过`linked_session_id`字段关联
+- 支持任务执行时记录思考过程
 
 #### 模板模型 (template.py)
 
@@ -681,7 +834,7 @@ def format_mermaid(session: ThinkingSession) -> str:
          │ 5. 原子写入JSON文件
          ▼
 ┌─────────────────────────────┐
-│   ~/.deep-thinking-mcp/     │
+│   ./.deep-thinking-mcp/     │
 │   sessions/{session_id}.json│
 └────────┬────────────────────┘
          │

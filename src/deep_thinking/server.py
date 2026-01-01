@@ -5,15 +5,80 @@ FastMCP服务器实例
 """
 
 import logging
+import os
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from mcp.server import FastMCP  # type: ignore[import-not-found]
+from mcp.server import FastMCP
 
+from deep_thinking.storage.migration import (
+    create_migration_backup,
+    detect_old_data,
+    get_migration_info,
+    migrate_data,
+)
 from deep_thinking.storage.storage_manager import StorageManager
 
 logger = logging.getLogger(__name__)
+
+
+def get_default_data_dir() -> Path:
+    """
+    获取默认数据存储目录
+
+    优先级：
+    1. 环境变量 DEEP_THINKING_DATA_DIR
+    2. 项目本地目录 .deep-thinking-mcp/
+    3. 用户主目录 .deep-thinking-mcp/ (向后兼容)
+
+    Returns:
+        数据存储目录路径
+    """
+    # 1. 检查环境变量
+    custom_dir = os.getenv("DEEP_THINKING_DATA_DIR")
+    if custom_dir:
+        return Path(custom_dir)
+
+    # 2. 默认使用项目本地目录
+    local_dir = Path.cwd() / ".deep-thinking-mcp"
+
+    # 3. 向后兼容：如果本地目录不存在但旧目录存在，使用旧目录
+    old_dir = Path.home() / ".deep-thinking-mcp"
+    if not local_dir.exists() and old_dir.exists():
+        logger.info(f"检测到旧数据目录: {old_dir}")
+        logger.info("建议迁移数据到项目本地目录")
+        return old_dir
+
+    return local_dir
+
+
+def ensure_gitignore(data_dir: Path) -> None:
+    """
+    确保数据目录包含 .gitignore 文件
+
+    防止敏感数据和临时文件被提交到版本控制。
+
+    Args:
+        data_dir: 数据目录路径
+    """
+    gitignore_path = data_dir / ".gitignore"
+    if not gitignore_path.exists():
+        gitignore_path.parent.mkdir(parents=True, exist_ok=True)
+        gitignore_path.write_text(
+            "# 忽略所有会话数据\n"
+            "sessions/\n"
+            "# 忽略索引文件\n"
+            ".index.json\n"
+            "# 忽略备份数据\n"
+            ".backups/\n"
+            "backups/\n"
+            "# 忽略迁移日志\n"
+            "migration.log\n"
+            "*.log\n",
+            encoding="utf-8",
+        )
+        logger.debug(f"创建 .gitignore: {gitignore_path}")
 
 # 全局存储管理器实例
 _storage_manager: StorageManager | None = None
@@ -47,11 +112,30 @@ async def server_lifespan(_server: FastMCP) -> AsyncGenerator[None, None]:
     """
     global _storage_manager
 
-    # 数据存储目录
-    data_dir = Path.home() / ".deep-thinking-mcp"
+    # 获取数据存储目录（支持环境变量和项目本地目录）
+    data_dir = get_default_data_dir()
     data_dir.mkdir(parents=True, exist_ok=True)
 
     logger.info(f"初始化数据目录: {data_dir}")
+
+    # 确保 .gitignore 存在
+    ensure_gitignore(data_dir)
+
+    # 检查并执行数据迁移
+    migration_info = get_migration_info(data_dir)
+    if migration_info:
+        logger.info(f"数据已迁移: {migration_info.get('target', data_dir)}")
+    elif detect_old_data():
+        logger.info("检测到旧数据目录，开始自动迁移...")
+        backup_dir = create_migration_backup()
+        if backup_dir:
+            logger.info(f"迁移备份已创建: {backup_dir}")
+
+        success = migrate_data(data_dir)
+        if success:
+            logger.info("数据迁移完成")
+        else:
+            logger.warning("数据迁移失败，将继续使用旧数据目录")
 
     # 初始化存储管理器
     _storage_manager = StorageManager(data_dir)
@@ -78,6 +162,7 @@ from deep_thinking.tools import (  # noqa: E402, F401
     export,
     sequential_thinking,
     session_manager,
+    task_manager,
     template,
     visualization,
 )

@@ -8,8 +8,9 @@ from deep_thinking.tools import (
     export,
     sequential_thinking,
     session_manager,
+    task_manager,
     template,
     visualization,
 )
 
-__all__ = ["export", "sequential_thinking", "session_manager", "template", "visualization"]
+__all__ = ["export", "sequential_thinking", "session_manager", "task_manager", "template", "visualization"]

@@ -344,9 +344,9 @@ python -m deep_thinking --mode sse --host 127.0.0.1 --port 8088
       "args": [
         "-m",
         "deep_thinking",
-        "--mode",
+        "--transport",
         "stdio",
-        "--storage-dir",
+        "--data-dir",
         "/path/to/custom/storage"
       ]
     }
@@ -366,7 +366,7 @@ python -m deep_thinking --mode sse --host 127.0.0.1 --port 8088
       "args": [
         "-m",
         "deep_thinking",
-        "--mode",
+        "--transport",
         "stdio",
         "--log-level",
         "DEBUG"
@@ -384,10 +384,10 @@ python -m deep_thinking --mode sse --host 127.0.0.1 --port 8088
 
 | 环境变量 | 描述 | 默认值 |
 |---------|------|-------|
-| `DEEP_THINKING_MODE` | 传输模式 (stdio/sse) | stdio |
+| `DEEP_THINKING_TRANSPORT` | 传输模式 (stdio/sse) | stdio |
 | `DEEP_THINKING_HOST` | SSE 监听地址 | 127.0.0.1 |
-| `DEEP_THINKING_PORT` | SSE 监听端口 | 8088 |
-| `DEEP_THINKING_STORAGE_DIR` | 数据存储目录 | ~/.deep-thinking/ |
+| `DEEP_THINKING_PORT` | SSE 监听端口 | 8000 |
+| `DEEP_THINKING_DATA_DIR` | 数据存储目录 | ./.deep-thinking-mcp/ |
 | `DEEP_THINKING_LOG_LEVEL` | 日志级别 | INFO |
 
 ### 设置环境变量
@@ -396,11 +396,11 @@ python -m deep_thinking --mode sse --host 127.0.0.1 --port 8088
 
 ```bash
 # 临时设置
-export DEEP_THINKING_STORAGE_DIR="/path/to/storage"
+export DEEP_THINKING_DATA_DIR="/path/to/storage"
 export DEEP_THINKING_LOG_LEVEL="DEBUG"
 
 # 永久设置（添加到 ~/.bashrc 或 ~/.zshrc）
-echo 'export DEEP_THINKING_STORAGE_DIR="/path/to/storage"' >> ~/.bashrc
+echo 'export DEEP_THINKING_DATA_DIR="/path/to/storage"' >> ~/.bashrc
 echo 'export DEEP_THINKING_LOG_LEVEL="DEBUG"' >> ~/.bashrc
 ```
 
@@ -408,7 +408,7 @@ echo 'export DEEP_THINKING_LOG_LEVEL="DEBUG"' >> ~/.bashrc
 
 ```cmd
 # 临时设置
-set DEEP_THINKING_STORAGE_DIR=C:\path\to\storage
+set DEEP_THINKING_DATA_DIR=C:\path\to\storage
 set DEEP_THINKING_LOG_LEVEL=DEBUG
 
 # 永久设置（系统环境变量）
@@ -422,29 +422,47 @@ set DEEP_THINKING_LOG_LEVEL=DEBUG
 
 ### 存储目录结构
 
-默认存储目录：`~/.deep-thinking/`
+**默认存储目录：项目本地** `./.deep-thinking-mcp/`
 
 ```
-~/.deep-thinking/
+./.deep-thinking-mcp/
 ├── sessions/              # 会话数据
-│   ├── {session_id}.json # 各会话文件
-│   └── .backup/          # 自动备份
-├── templates/             # 自定义模板
-└── logs/                  # 日志文件
+│   ├── .index.json       # 会话索引文件
+│   └── *.json            # 各会话文件
+├── .backups/             # 自动备份目录
+└── .gitignore            # 防止数据提交到版本控制
 ```
+
+**旧版本存储目录（向后兼容）**: `~/.deep-thinking-mcp/`
+
+### 存储路径优先级
+
+1. **环境变量** `DEEP_THINKING_DATA_DIR`
+2. **CLI参数** `--data-dir`
+3. **默认值** 项目本地目录 `.deep-thinking-mcp/`
+
+### 数据迁移
+
+从旧版本（`~/.deep-thinking-mcp/`）升级时，系统会自动：
+- 检测旧数据目录
+- 创建自动备份
+- 迁移数据到新位置
+- 创建迁移标记文件
+
+详见 [MIGRATION.md](./MIGRATION.md)。
 
 ### 数据备份
 
-自动备份在每次修改前创建，保留最近 10 个版本。
+自动备份在每次修改前创建。
 
 手动备份：
 
 ```bash
 # 备份整个数据目录
-cp -r ~/.deep-thinking ~/.deep-thinking.backup.$(date +%Y%m%d)
+cp -r .deep-thinking-mcp .deep-thinking-mcp.backup.$(date +%Y%m%d)
 
 # 只备份会话数据
-cp -r ~/.deep-thinking/sessions ~/.deep-thinking/sessions.backup.$(date +%Y%m%d)
+cp -r .deep-thinking-mcp/sessions .deep-thinking-mcp/sessions.backup.$(date +%Y%m%d)
 ```
 
 ### 数据恢复
@@ -453,11 +471,11 @@ cp -r ~/.deep-thinking/sessions ~/.deep-thinking/sessions.backup.$(date +%Y%m%d)
 
 ```bash
 # 恢复整个数据目录
-rm -rf ~/.deep-thinking
-cp -r ~/.deep-thinking.backup.20251231 ~/.deep-thinking
+rm -rf .deep-thinking-mcp
+cp -r .deep-thinking-mcp.backup.20251231 .deep-thinking-mcp
 
-# 恢复特定会话
-cp ~/.deep-thinking/sessions/.backup/{session_id}.json.bak10 ~/.deep-thinking/sessions/{session_id}.json
+# 从备份目录恢复
+cp -r ~/.deep-thinking-mcp/backups/migration_backup_*/* .deep-thinking-mcp/sessions/
 ```
 
 ---

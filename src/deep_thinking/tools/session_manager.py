@@ -275,6 +275,109 @@ def update_session_status(
 请检查会话ID是否正确。"""
 
 
+@app.tool()
+def resume_session(
+    session_id: str,
+) -> str:
+    """
+    恢复已暂停的思考会话（断点续传）
+
+    获取会话的最后一个思考步骤，返回可以继续思考的上下文信息。
+
+    Args:
+        session_id: 要恢复的会话ID
+
+    Returns:
+        会话恢复信息，包含最后一个思考步骤和继续指导
+
+    Raises:
+        ValueError: 会话不存在或已完成
+    """
+    manager = get_storage_manager()
+
+    # 获取会话
+    session = manager.get_session(session_id)
+    if session is None:
+        raise ValueError(f"会话不存在: {session_id}")
+
+    # 检查会话状态
+    if session.status == "completed":
+        return f"""## 会话已完成
+
+**会话ID**: {session_id}
+**名称**: {session.name}
+
+该会话已经标记为完成，无法继续。
+
+如需继续思考，请创建新会话。"""
+
+    # 获取最后一个思考步骤
+    last_thought = session.get_latest_thought()
+
+    if not last_thought:
+        # 会话存在但没有思考步骤
+        return f"""## 会话恢复成功（新会话）
+
+**会话ID**: {session_id}
+**名称**: {session.name}
+**描述**: {session.description or '(无描述)'}
+
+该会话尚未包含任何思考步骤，可以直接开始思考。
+
+使用 `sequential_thinking` 工具开始添加思考步骤。"""
+
+    # 构建恢复信息
+    result_parts = [
+        "## 🔄 会话恢复成功",
+        "",
+        f"**会话ID**: {session_id}",
+        f"**名称**: {session.name}",
+        f"**状态**: {session.status}",
+        f"**总思考数**: {session.thought_count()}",
+        "",
+    ]
+
+    # 显示最后一个思考步骤
+    result_parts.extend([
+        "---",
+        "### 上一个思考步骤",
+        "",
+        f"**步骤 {last_thought.thought_number}**: {last_thought.content[:100]}{'...' if len(last_thought.content) > 100 else ''}",
+        f"**类型**: {last_thought.type}",
+        f"**时间**: {last_thought.timestamp.strftime('%Y-%m-%d %H:%M:%S')}",
+        "",
+    ])
+
+    # 检查是否有total_thoughts历史记录
+    if "total_thoughts_history" in session.metadata:
+        history = session.metadata["total_thoughts_history"]
+        if history:
+            last_adjustment = history[-1]
+            current_total = last_adjustment["new_total"]
+            result_parts.extend([
+                "### 思考步骤调整历史",
+                "",
+                f"**当前总数**: {current_total}",
+                f"**调整次数**: {len(history)}",
+                "",
+            ])
+
+    # 继续指导
+    result_parts.extend([
+        "---",
+        "### 继续思考",
+        "",
+        "要继续添加思考步骤，请使用 `sequential_thinking` 工具：",
+        "",
+        f"- 设置 `thoughtNumber` 为 {session.thought_count() + 1}",
+        "- 设置 `session_id` 为当前会话ID",
+        "- 如果需要增加思考步骤总数，设置 `needsMoreThoughts=true`",
+        "",
+    ])
+
+    return "\n".join(result_parts)
+
+
 # 注册工具
 __all__ = [
     "create_session",
@@ -282,4 +385,5 @@ __all__ = [
     "list_sessions",
     "delete_session",
     "update_session_status",
+    "resume_session",
 ]

@@ -25,7 +25,7 @@ def sequential_thinking(
     revisesThought: int | None = None,
     branchFromThought: int | None = None,
     branchId: str | None = None,
-    needsMoreThoughts: bool = False,  # noqa: ARG001 - 预留参数，用于API兼容性
+    needsMoreThoughts: bool = False,
 ) -> str:
     """
     执行顺序思考步骤
@@ -42,7 +42,7 @@ def sequential_thinking(
         revisesThought: 修订的思考步骤编号（仅修订思考使用）
         branchFromThought: 分支来源思考步骤编号（仅分支思考使用）
         branchId: 分支ID（仅分支思考使用，格式如"branch-0-1"）
-        needsMoreThoughts: 是否需要增加总思考步骤数（预留参数）
+        needsMoreThoughts: 是否需要增加总思考步骤数
 
     Returns:
         思考结果描述，包含当前思考信息和会话状态
@@ -50,10 +50,63 @@ def sequential_thinking(
     Raises:
         ValueError: 参数验证失败
     """
-    # needsMoreThoughts 是预留参数，未来将用于动态调整思考步骤总数
-    _ = needsMoreThoughts  # 标记为有意未使用
-
     manager = get_storage_manager()
+
+    # 获取或创建会话
+    session = manager.get_session(session_id)
+
+    if session is None:
+        session = manager.create_session(
+            name=f"会话-{session_id[:8]}",
+            description="自动创建的思考会话",
+            metadata={"session_type": "sequential_thinking"},
+            session_id=session_id,
+        )
+
+    # 处理 needsMoreThoughts 功能
+    original_total = totalThoughts
+    max_thoughts_limit = 1000  # 最大思考步骤限制
+    thoughts_increment = 10  # 每次增加的思考步骤数
+
+    if needsMoreThoughts:
+        # 检查是否超过最大限制
+        if totalThoughts >= max_thoughts_limit:
+            logger.warning(f"思考步骤数已达上限 {max_thoughts_limit}，不再增加")
+            result = [
+                f"## 思考步骤 {thoughtNumber}/{totalThoughts}",
+                "",
+                "**类型**: 常规思考 💭",
+                "",
+                f"{thought}",
+                "",
+                "---",
+                "**会话信息**:",
+                f"- 会话ID: {session_id}",
+                f"- 总思考数: {session.thought_count()}",
+                f"- 预计总数: {totalThoughts}",
+                "",
+                f"⚠️ 警告：思考步骤数已达上限 {max_thoughts_limit}，无法继续增加。",
+            ]
+            return "\n".join(result)
+
+        # 增加思考步骤总数
+        new_total = min(totalThoughts + thoughts_increment, max_thoughts_limit)
+        totalThoughts = new_total
+
+        # 记录调整历史到会话元数据
+        if "total_thoughts_history" not in session.metadata:
+            session.metadata["total_thoughts_history"] = []
+
+        session.metadata["total_thoughts_history"].append({
+            "original_total": original_total,
+            "new_total": new_total,
+            "thought_number": thoughtNumber,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        })
+
+        # 更新会话
+        manager.update_session(session)
+        logger.info(f"会话 {session_id} 调整思考步骤数: {original_total} -> {new_total}")
 
     # 确定思考类型
     thought_type: Literal["regular", "revision", "branch"] = "regular"
@@ -73,17 +126,6 @@ def sequential_thinking(
         branch_id=branchId,
         timestamp=datetime.now(timezone.utc),
     )
-
-    # 获取或创建会话
-    session = manager.get_session(session_id)
-
-    if session is None:
-        session = manager.create_session(
-            name=f"会话-{session_id[:8]}",
-            description="自动创建的思考会话",
-            metadata={"session_type": "sequential_thinking"},
-            session_id=session_id,  # 使用提供的session_id
-        )
 
     # 添加思考步骤到会话
     manager.add_thought(session_id, thought_obj)
@@ -114,6 +156,11 @@ def sequential_thinking(
         if branchId:
             branch_info += f" (分支ID: {branchId})"
         result_parts.append(branch_info)
+        result_parts.append("")
+
+    # 添加思考步骤调整信息
+    if needsMoreThoughts and totalThoughts > original_total:
+        result_parts.append(f"📈 思考步骤总数已调整: {original_total} → {totalThoughts}")
         result_parts.append("")
 
     # 添加会话状态

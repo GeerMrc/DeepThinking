@@ -91,10 +91,13 @@ python -m deep_thinking --transport sse --api-key your-api-key
 DEEP_THINKING_TRANSPORT=stdio
 DEEP_THINKING_HOST=localhost
 DEEP_THINKING_PORT=8000
+DEEP_THINKING_DATA_DIR=./.deep-thinking-mcp
 DEEP_THINKING_LOG_LEVEL=INFO
 DEEP_THINKING_AUTH_TOKEN=your-secret-token
 DEEP_THINKING_API_KEY=your-api-key
 ```
+
+**数据存储**: 默认存储在项目本地目录 `.deep-thinking-mcp/`，包含会话数据和索引文件。详见[数据迁移指南](docs/MIGRATION.md)。
 
 ## Claude Desktop配置
 
