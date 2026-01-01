@@ -1,6 +1,6 @@
 # DeepThinking-MCP IDE 配置指南
 
-> 版本: 0.2.0
+> 版本: 0.3.0
 > 更新日期: 2026-01-02
 > 适用对象: Claude Desktop、Claude Code、Cursor、Continue.dev 等 MCP 客户端用户
 
@@ -25,7 +25,7 @@ DeepThinking-MCP 支持通过 MCP (Model Context Protocol) 协议与各种 IDE �
 本文档包含以下配置章节：
 1. **Claude Desktop 配置** - 桌面应用配置
 2. **Claude Code (VSCode) 配置** - VSCode扩展配置
-3. **Claude Code CLI 详细配置指南** - 新增：项目级配置、开发模式、uv加速等
+3. **Claude Code CLI 详细配置指南** - CLI命令行配置方式（推荐）、配置文件方式
 4. **Cursor 配置** - Cursor编辑器配置
 5. **Continue.dev 配置** - Continue.dev扩展配置
 
@@ -260,7 +260,258 @@ my-project/
 
 ### Claude Code CLI 详细配置指南
 
-Claude Code CLI 提供了灵活的配置方式，支持项目级和用户级配置。
+Claude Code CLI 提供了灵活的配置方式，除了手动编辑配置文件外，还提供了更便捷的**命令行配置方式**。
+
+#### 命令行配置方式（推荐）
+
+Claude Code CLI 提供了 `claude mcp add` 命令系列，可以快速添加和管理 MCP 服务器，无需手动编辑配置文件。
+
+**优势**：
+- ⚡ 快速配置，一行命令完成
+- 📝 自动生成/更新配置文件
+- ✅ 内置配置验证
+- 🔄 支持三种传输方式和三种配置范围
+
+##### STDIO 服务器配置
+
+**基础配置**（本地 Python）：
+```bash
+claude mcp add --transport stdio deep-thinking -- python -m deep_thinking
+```
+
+**带环境变量的配置**：
+```bash
+claude mcp add --transport stdio deep-thinking \
+  --env DEEP_THINKING_MAX_THOUGHTS=50 \
+  --env DEEP_THINKING_MIN_THOUGHTS=3 \
+  --env DEEP_THINKING_LOG_LEVEL=INFO \
+  -- python -m deep_thinking --transport stdio
+```
+
+**使用 uv 加速**（推荐）：
+```bash
+claude mcp add --transport stdio deep-thinking \
+  --env DEEP_THINKING_MAX_THOUGHTS=100 \
+  -- uv run --directory /path/to/Deep-Thinking-MCP python -m deep_thinking
+```
+
+**使用虚拟环境**：
+```bash
+claude mcp add --transport stdio deep-thinking \
+  --env DEEP_THINKING_LOG_LEVEL=DEBUG \
+  -- /path/to/venv/bin/python -m deep_thinking
+```
+
+##### SSE 服务器配置（远程部署）
+
+**无认证连接**：
+```bash
+claude mcp add --transport sse deep-thinking-remote http://localhost:8088/sse
+```
+
+**Bearer Token 认证**：
+```bash
+claude mcp add --transport sse deep-thinking-remote \
+  http://localhost:8088/sse \
+  --header "Authorization: Bearer your-token-here"
+```
+
+**API Key 认证**：
+```bash
+claude mcp add --transport sse deep-thinking-remote \
+  https://api.example.com/sse \
+  --header "X-API-Key: your-api-key-here"
+```
+
+**自定义请求头**（多认证）：
+```bash
+claude mcp add --transport sse deep-thinking-remote \
+  https://api.example.com/sse \
+  --header "Authorization: Bearer token123" \
+  --header "X-Client-ID: deep-thinking-client" \
+  --header "X-Client-Version: 1.0.0"
+```
+
+##### HTTP 服务器配置
+
+**基础 HTTP 连接**：
+```bash
+claude mcp add --transport http deep-thinking-http http://localhost:8088/mcp
+```
+
+**带认证的 HTTP 连接**：
+```bash
+claude mcp add --transport http deep-thinking-http \
+  https://api.example.com/mcp \
+  --header "X-API-Key: your-api-key"
+```
+
+##### 配置范围说明
+
+Claude Code CLI 支持三种配置范围，决定了配置的存储位置和共享范围：
+
+**本地范围**（默认）：
+```bash
+# 存储位置：项目特定用户设置
+# 适用场景：个人开发、实验配置、敏感凭证
+claude mcp add --transport stdio deep-thinking-local -- python -m deep_thinking
+
+# 或显式指定
+claude mcp add --transport stdio deep-thinking-local --scope local -- python -m deep_thinking
+```
+
+**项目范围**（团队协作推荐）：
+```bash
+# 存储位置：.mcp.json（可版本控制）
+# 适用场景：团队共享、项目特定工具
+claude mcp add --transport stdio deep-thinking \
+  --scope project \
+  --env DEEP_THINKING_MAX_THOUGHTS=50 \
+  -- python -m deep_thinking
+```
+
+生成的 `.mcp.json` 文件：
+```json
+{
+  "mcpServers": {
+    "deep-thinking": {
+      "command": "python",
+      "args": ["-m", "deep_thinking"],
+      "env": {
+        "DEEP_THINKING_MAX_THOUGHTS": "50"
+      }
+    }
+  }
+}
+```
+
+**用户范围**（全局配置）：
+```bash
+# 存储位置：用户级全局配置
+# 适用场景：个人工具、跨项目使用
+claude mcp add --transport stdio deep-thinking \
+  --scope user \
+  -- python -m deep_thinking
+```
+
+##### 管理命令
+
+配置完成后，可以使用以下命令管理 MCP 服务器：
+
+```bash
+# 列出所有已配置的服务器
+claude mcp list
+
+# 获取特定服务器的详细信息
+claude mcp get deep-thinking
+
+# 删除服务器
+claude mcp remove deep-thinking
+
+# 在 Claude Code 中检查服务器状态
+/mcp
+```
+
+##### 完整配置示例
+
+**开发环境配置**（本地 + 调试）：
+```bash
+# 项目范围 - 团队共享
+claude mcp add --transport stdio deep-thinking-dev \
+  --scope project \
+  --env DEEP_THINKING_MAX_THOUGHTS=100 \
+  --env DEEP_THINKING_LOG_LEVEL=DEBUG \
+  --env DEEP_THINKING_DATA_DIR=./.deep-thinking-dev \
+  -- uv run --directory ../Deep-Thinking-MCP python -m deep_thinking
+```
+
+**生产环境配置**（远程 SSE）：
+```bash
+# 用户范围 - 个人使用
+claude mcp add --transport sse deep-thinking-prod \
+  --scope user \
+  https://api.production.com/sse \
+  --header "X-API-Key: ${DEEP_THINKING_API_KEY}"
+```
+
+**多环境配置**（开发 + 生产）：
+```bash
+# 开发环境（项目级）
+claude mcp add --transport stdio deep-thinking-dev \
+  --scope project \
+  --env DEEP_THINKING_LOG_LEVEL=DEBUG \
+  -- python -m deep_thinking
+
+# 生产环境（用户级）
+claude mcp add --transport sse deep-thinking-prod \
+  --scope user \
+  https://api.production.com/sse \
+  --header "X-API-Key: ${PROD_API_KEY}"
+
+# 查看所有配置
+claude mcp list
+```
+
+##### 环境变量扩展
+
+在命令行配置中支持环境变量扩展：
+
+```bash
+# 使用环境变量
+claude mcp add --transport sse deep-thinking \
+  https://${API_HOST:-localhost}:8088/sse \
+  --header "X-API-Key: ${API_KEY}"
+
+# 使用默认值语法
+claude mcp add --transport stdio deep-thinking \
+  --env DEEP_THINKING_MAX_THOUGHTS=${MAX_THOUGHTS:-50} \
+  -- python -m deep_thinking
+```
+
+##### 故障排除
+
+**问题 1：命令未找到**
+```bash
+# 确认 Claude Code CLI 已安装
+claude --version
+
+# 更新到最新版本
+claude update
+```
+
+**问题 2：权限被拒绝**
+```bash
+# macOS/Linux
+chmod +x /path/to/Deep-Thinking-MCP/src/deep_thinking/__main__.py
+
+# 或使用 python -m 方式
+claude mcp add --transport stdio deep-thinking -- python -m deep_thinking
+```
+
+**问题 3：配置未生效**
+```bash
+# 检查配置文件
+cat .mcp.json          # 项目级
+cat ~/.claude/config.json  # 用户级
+
+# 验证配置
+claude mcp get deep-thinking
+
+# 重启 Claude Code
+```
+
+**问题 4：多配置冲突**
+```bash
+# 查看所有配置及优先级
+claude mcp list
+
+# 删除冲突的配置
+claude mcp remove deep-thinking-local
+```
+
+##### 手动配置文件方式
+
+除了命令行方式，您也可以手动编辑配置文件。Claude Code CLI 提供了灵活的配置方式，支持项目级和用户级配置。
 
 #### 配置文件位置
 
