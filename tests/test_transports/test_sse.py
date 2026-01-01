@@ -228,6 +228,351 @@ class TestRunSSE:
                 mock_transport.stop.assert_called_once()
 
 
+class TestSSEAuthMiddleware:
+    """SSE认证中间件功能测试"""
+
+    @pytest.mark.asyncio
+    async def test_bearer_token_auth_success(self):
+        """测试Bearer Token认证成功"""
+        from aiohttp import web
+        from aiohttp.test_utils import make_mocked_request
+
+        transport = SSETransport(app, auth_token="valid-token")
+
+        # 创建模拟请求
+        request = make_mocked_request(
+            "POST",
+            "/sse",
+            headers={"Authorization": "Bearer valid-token"},
+        )
+
+        # 创建模拟handler
+        async def mock_handler(req):
+            return web.Response(status=200, text="Success")
+
+        # 获取认证中间件
+        web_app = web.Application()
+        transport._setup_auth(web_app)
+        auth_middleware = web_app.middlewares[0]
+
+        # 调用中间件
+        response = await auth_middleware(request, mock_handler)
+
+        # 验证成功
+        assert response.status == 200
+        assert response.text == "Success"
+
+    @pytest.mark.asyncio
+    async def test_bearer_token_auth_missing(self):
+        """测试Bearer Token缺失"""
+        from aiohttp import web
+        from aiohttp.test_utils import make_mocked_request
+
+        transport = SSETransport(app, auth_token="valid-token")
+
+        # 创建没有Authorization头的请求
+        request = make_mocked_request("POST", "/sse", headers={})
+
+        async def mock_handler(req):
+            return web.Response(status=200, text="Success")
+
+        # 获取认证中间件
+        web_app = web.Application()
+        transport._setup_auth(web_app)
+        auth_middleware = web_app.middlewares[0]
+
+        # 调用中间件
+        response = await auth_middleware(request, mock_handler)
+
+        # 验证401错误
+        assert response.status == 401
+        assert "Missing Bearer token" in response.text
+
+    @pytest.mark.asyncio
+    async def test_bearer_token_auth_invalid(self):
+        """测试Bearer Token无效"""
+        from aiohttp import web
+        from aiohttp.test_utils import make_mocked_request
+
+        transport = SSETransport(app, auth_token="valid-token")
+
+        # 创建使用错误token的请求
+        request = make_mocked_request(
+            "POST",
+            "/sse",
+            headers={"Authorization": "Bearer wrong-token"},
+        )
+
+        async def mock_handler(req):
+            return web.Response(status=200, text="Success")
+
+        # 获取认证中间件
+        web_app = web.Application()
+        transport._setup_auth(web_app)
+        auth_middleware = web_app.middlewares[0]
+
+        # 调用中间件
+        response = await auth_middleware(request, mock_handler)
+
+        # 验证403错误
+        assert response.status == 403
+        assert "Invalid Bearer token" in response.text
+
+    @pytest.mark.asyncio
+    async def test_bearer_token_auth_wrong_prefix(self):
+        """测试Bearer Token前缀错误"""
+        from aiohttp import web
+        from aiohttp.test_utils import make_mocked_request
+
+        transport = SSETransport(app, auth_token="valid-token")
+
+        # 创建使用错误前缀的请求
+        request = make_mocked_request(
+            "POST",
+            "/sse",
+            headers={"Authorization": "Basic valid-token"},
+        )
+
+        async def mock_handler(req):
+            return web.Response(status=200, text="Success")
+
+        # 获取认证中间件
+        web_app = web.Application()
+        transport._setup_auth(web_app)
+        auth_middleware = web_app.middlewares[0]
+
+        # 调用中间件
+        response = await auth_middleware(request, mock_handler)
+
+        # 验证401错误
+        assert response.status == 401
+        assert "Missing Bearer token" in response.text
+
+    @pytest.mark.asyncio
+    async def test_api_key_auth_success(self):
+        """测试API Key认证成功"""
+        from aiohttp import web
+        from aiohttp.test_utils import make_mocked_request
+
+        transport = SSETransport(app, api_key="valid-api-key")
+
+        # 创建模拟请求
+        request = make_mocked_request(
+            "POST",
+            "/sse",
+            headers={"X-API-Key": "valid-api-key"},
+        )
+
+        async def mock_handler(req):
+            return web.Response(status=200, text="Success")
+
+        # 获取认证中间件
+        web_app = web.Application()
+        transport._setup_auth(web_app)
+        auth_middleware = web_app.middlewares[0]
+
+        # 调用中间件
+        response = await auth_middleware(request, mock_handler)
+
+        # 验证成功
+        assert response.status == 200
+        assert response.text == "Success"
+
+    @pytest.mark.asyncio
+    async def test_api_key_auth_missing(self):
+        """测试API Key缺失"""
+        from aiohttp import web
+        from aiohttp.test_utils import make_mocked_request
+
+        transport = SSETransport(app, api_key="valid-api-key")
+
+        # 创建没有X-API-Key头的请求
+        request = make_mocked_request("POST", "/sse", headers={})
+
+        async def mock_handler(req):
+            return web.Response(status=200, text="Success")
+
+        # 获取认证中间件
+        web_app = web.Application()
+        transport._setup_auth(web_app)
+        auth_middleware = web_app.middlewares[0]
+
+        # 调用中间件
+        response = await auth_middleware(request, mock_handler)
+
+        # 验证403错误
+        assert response.status == 403
+        assert "Invalid API Key" in response.text
+
+    @pytest.mark.asyncio
+    async def test_api_key_auth_invalid(self):
+        """测试API Key无效"""
+        from aiohttp import web
+        from aiohttp.test_utils import make_mocked_request
+
+        transport = SSETransport(app, api_key="valid-api-key")
+
+        # 创建使用错误key的请求
+        request = make_mocked_request(
+            "POST",
+            "/sse",
+            headers={"X-API-Key": "wrong-api-key"},
+        )
+
+        async def mock_handler(req):
+            return web.Response(status=200, text="Success")
+
+        # 获取认证中间件
+        web_app = web.Application()
+        transport._setup_auth(web_app)
+        auth_middleware = web_app.middlewares[0]
+
+        # 调用中间件
+        response = await auth_middleware(request, mock_handler)
+
+        # 验证403错误
+        assert response.status == 403
+        assert "Invalid API Key" in response.text
+
+    @pytest.mark.asyncio
+    async def test_dual_auth_both_success(self):
+        """测试双重认证都成功"""
+        from aiohttp import web
+        from aiohttp.test_utils import make_mocked_request
+
+        transport = SSETransport(
+            app, auth_token="valid-token", api_key="valid-api-key"
+        )
+
+        # 创建包含两种认证的请求
+        request = make_mocked_request(
+            "POST",
+            "/sse",
+            headers={
+                "Authorization": "Bearer valid-token",
+                "X-API-Key": "valid-api-key",
+            },
+        )
+
+        async def mock_handler(req):
+            return web.Response(status=200, text="Success")
+
+        # 获取认证中间件
+        web_app = web.Application()
+        transport._setup_auth(web_app)
+        auth_middleware = web_app.middlewares[0]
+
+        # 调用中间件
+        response = await auth_middleware(request, mock_handler)
+
+        # 验证成功
+        assert response.status == 200
+        assert response.text == "Success"
+
+    @pytest.mark.asyncio
+    async def test_dual_auth_token_fail(self):
+        """测试双重认证时Token失败"""
+        from aiohttp import web
+        from aiohttp.test_utils import make_mocked_request
+
+        transport = SSETransport(
+            app, auth_token="valid-token", api_key="valid-api-key"
+        )
+
+        # Token错误但API Key正确
+        request = make_mocked_request(
+            "POST",
+            "/sse",
+            headers={
+                "Authorization": "Bearer wrong-token",
+                "X-API-Key": "valid-api-key",
+            },
+        )
+
+        async def mock_handler(req):
+            return web.Response(status=200, text="Success")
+
+        # 获取认证中间件
+        web_app = web.Application()
+        transport._setup_auth(web_app)
+        auth_middleware = web_app.middlewares[0]
+
+        # 调用中间件
+        response = await auth_middleware(request, mock_handler)
+
+        # 验证403错误（Token检查失败）
+        assert response.status == 403
+
+    @pytest.mark.asyncio
+    async def test_dual_auth_api_key_fail(self):
+        """测试双重认证时API Key失败"""
+        from aiohttp import web
+        from aiohttp.test_utils import make_mocked_request
+
+        transport = SSETransport(
+            app, auth_token="valid-token", api_key="valid-api-key"
+        )
+
+        # Token正确但API Key错误
+        request = make_mocked_request(
+            "POST",
+            "/sse",
+            headers={
+                "Authorization": "Bearer valid-token",
+                "X-API-Key": "wrong-api-key",
+            },
+        )
+
+        async def mock_handler(req):
+            return web.Response(status=200, text="Success")
+
+        # 获取认证中间件
+        web_app = web.Application()
+        transport._setup_auth(web_app)
+        auth_middleware = web_app.middlewares[0]
+
+        # 调用中间件
+        response = await auth_middleware(request, mock_handler)
+
+        # 验证403错误（API Key检查失败）
+        assert response.status == 403
+        assert "Invalid API Key" in response.text
+
+    @pytest.mark.asyncio
+    async def test_dual_auth_both_fail(self):
+        """测试双重认证都失败"""
+        from aiohttp import web
+        from aiohttp.test_utils import make_mocked_request
+
+        transport = SSETransport(
+            app, auth_token="valid-token", api_key="valid-api-key"
+        )
+
+        # 两种认证都错误
+        request = make_mocked_request(
+            "POST",
+            "/sse",
+            headers={
+                "Authorization": "Bearer wrong-token",
+                "X-API-Key": "wrong-api-key",
+            },
+        )
+
+        async def mock_handler(req):
+            return web.Response(status=200, text="Success")
+
+        # 获取认证中间件
+        web_app = web.Application()
+        transport._setup_auth(web_app)
+        auth_middleware = web_app.middlewares[0]
+
+        # 调用中间件
+        response = await auth_middleware(request, mock_handler)
+
+        # 验证403错误（Token先检查失败）
+        assert response.status == 403
+
+
 class TestSSEModuleLogging:
     """SSE模块日志测试"""
 

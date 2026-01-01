@@ -342,7 +342,8 @@ def resume_session(
         "---",
         "### 上一个思考步骤",
         "",
-        f"**步骤 {last_thought.thought_number}**: {last_thought.content[:100]}{'...' if len(last_thought.content) > 100 else ''}",
+        f"**步骤 {last_thought.thought_number}**: {last_thought.content[:100]}"
+        f"{'...' if len(last_thought.content) > 100 else ''}",
         f"**类型**: {last_thought.type}",
         f"**时间**: {last_thought.timestamp.strftime('%Y-%m-%d %H:%M:%S')}",
         "",

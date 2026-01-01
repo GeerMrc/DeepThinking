@@ -195,7 +195,9 @@ class SessionFormatter:
             box-sizing: border-box;
         }}
         body {{
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family:
+                -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                "Helvetica Neue", Arial, sans-serif;
             line-height: 1.6;
             color: #333;
             background-color: #f5f5f5;
@@ -330,17 +332,24 @@ class SessionFormatter:
 
         # 描述
         if session.description:
-            html_parts.append(f'        <p class="description">{SessionFormatter._escape_html(session.description)}</p>')
+            escaped_desc = SessionFormatter._escape_html(session.description)
+            html_parts.append(f'        <p class="description">{escaped_desc}</p>')
             html_parts.append("")
 
         # 会话信息
         html_parts.append('        <h2>会话信息</h2>')
         html_parts.append('        <div class="session-info">')
-        html_parts.append(f'            <p><strong>会话ID:</strong> <code>{SessionFormatter._escape_html(session.session_id)}</code></p>')
-        html_parts.append(f'            <p><strong>状态:</strong> <span class="status {session.status}">{SessionFormatter._status_badge(session.status).split(" ", 1)[1]}</span></p>')
-        html_parts.append(f'            <p><strong>创建时间:</strong> {session.created_at.strftime("%Y-%m-%d %H:%M:%S")}</p>')
-        html_parts.append(f'            <p><strong>更新时间:</strong> {session.updated_at.strftime("%Y-%m-%d %H:%M:%S")}</p>')
-        html_parts.append(f'            <p><strong>思考步骤数:</strong> {session.thought_count()}</p>')
+        sid = SessionFormatter._escape_html(session.session_id)
+        html_parts.append(f'            <p><strong>会话ID:</strong> <code>{sid}</code></p>')
+        badge = SessionFormatter._status_badge(session.status).split(" ", 1)[1]
+        status_html = f'<span class="status {session.status}">{badge}</span>'
+        html_parts.append(f'            <p><strong>状态:</strong> {status_html}</p>')
+        created = session.created_at.strftime("%Y-%m-%d %H:%M:%S")
+        html_parts.append(f'            <p><strong>创建时间:</strong> {created}</p>')
+        updated = session.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+        html_parts.append(f'            <p><strong>更新时间:</strong> {updated}</p>')
+        count = session.thought_count()
+        html_parts.append(f'            <p><strong>思考步骤数:</strong> {count}</p>')
         html_parts.append('        </div>')
         html_parts.append("")
 
@@ -357,13 +366,15 @@ class SessionFormatter:
         if session.metadata:
             html_parts.append('        <h2>元数据</h2>')
             html_parts.append('        <div class="metadata">')
-            html_parts.append('            <pre>' + json.dumps(session.metadata, ensure_ascii=False, indent=2) + '</pre>')
+            metadata_json = json.dumps(session.metadata, ensure_ascii=False, indent=2)
+            html_parts.append(f'            <pre>{metadata_json}</pre>')
             html_parts.append('        </div>')
             html_parts.append("")
 
         # 页脚
         html_parts.append('        <div class="footer">')
-        html_parts.append(f'            <p>导出时间: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>')
+        export_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        html_parts.append(f'            <p>导出时间: {export_time}</p>')
         html_parts.append('            <p>由 DeepThinking-MCP 生成</p>')
         html_parts.append('        </div>')
 
@@ -388,23 +399,29 @@ class SessionFormatter:
         emoji = SessionFormatter.TYPE_EMOJI.get(thought.type, "💭")
 
         lines: list[str] = ["        <div class=\"thought\">"]
-        lines.append(f'            <div class="thought-header">{emoji} 步骤 {thought.thought_number}')
+        header = f'{emoji} 步骤 {thought.thought_number}'
+        lines.append(f'            <div class="thought-header">{header}')
 
         # 添加类型标签
         if thought.type != "regular":
             type_name = SessionFormatter.TYPE_NAME.get(thought.type, "思考")
-            lines.append(f'                <span class="thought-type {thought.type}">{type_name}</span>')
+            type_span = f'<span class="thought-type {thought.type}">{type_name}</span>'
+            lines.append(f'                {type_span}')
 
         lines.append('            </div>')
 
         # 添加修订/分支信息
         if thought.type == "revision" and thought.revises_thought:
-            lines.append(f'            <p style="color: #e67e22; font-size: 0.9em;">📝 修订步骤 {thought.revises_thought}</p>')
+            rev_info = f'📝 修订步骤 {thought.revises_thought}'
+            lines.append(f'            <p style="color: #e67e22; font-size: 0.9em;">{rev_info}</p>')
         elif thought.type == "branch" and thought.branch_from_thought:
-            lines.append(f'            <p style="color: #27ae60; font-size: 0.9em;">🔀 分支自步骤 {thought.branch_from_thought}')
+            branch_info = f'🔀 分支自步骤 {thought.branch_from_thought}'
+            branch_p = f'<p style="color: #27ae60; font-size: 0.9em;">{branch_info}</p>'
+            lines.append(f'            {branch_p}')
 
         # 思考内容
-        lines.append(f'            <div class="thought-content">{SessionFormatter._escape_html(thought.content)}</div>')
+        content = SessionFormatter._escape_html(thought.content)
+        lines.append(f'            <div class="thought-content">{content}</div>')
 
         # 时间戳
         time_str = thought.timestamp.strftime('%Y-%m-%d %H:%M:%S')
@@ -650,14 +667,12 @@ classDef branch fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;
             # 添加节点
             if thought.type == "revision":
                 revises = thought.revises_thought or 0
-                lines.append(
-                    f'    {node_id}["{node_label}<br/><small>(修订步骤{revises})</small>"]:::{node_class}'
-                )
+                label = f'{node_label}<br/><small>(修订步骤{revises})</small>'
+                lines.append(f'    {node_id}["{label}"]:::{node_class}')
             elif thought.type == "branch":
                 branch_from = thought.branch_from_thought or 0
-                lines.append(
-                    f'    {node_id}["{node_label}<br/><small>(分支自步骤{branch_from})</small>"]:::{node_class}'
-                )
+                label = f'{node_label}<br/><small>(分支自步骤{branch_from})</small>'
+                lines.append(f'    {node_id}["{label}"]:::{node_class}')
             else:
                 lines.append(f'    {node_id}["{node_label}"]:::{node_class}')
 
@@ -675,7 +690,9 @@ classDef branch fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;
 
             # 修订思考连接到被修订的思考
             if thought.type == "revision" and thought.revises_thought:
-                revises_id = Visualizer._find_node_id(session, thought.revises_thought, thought.thought_number)
+                revises_id = Visualizer._find_node_id(
+                    session, thought.revises_thought, thought.thought_number
+                )
                 if revises_id:
                     lines.append(f"    {current_id} -.->|修订| {revises_id}")
                     # 修订后继续
@@ -705,7 +722,9 @@ classDef branch fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;
         return f"T{thought.thought_number}{branch_suffix}".replace("-", "_")
 
     @staticmethod
-    def _find_node_id(session: ThinkingSession, target_number: int, current_number: int) -> str | None:
+    def _find_node_id(
+        session: ThinkingSession, target_number: int, current_number: int
+    ) -> str | None:
         """
         查找指定思考步骤的节点 ID
 
@@ -754,7 +773,11 @@ classDef branch fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;
             ASCII 格式的流程图
         """
         if not session.thoughts:
-            return "┌─────────────────────────────┐\n│   会话暂无思考步骤        │\n└─────────────────────────────┘"
+            return (
+                "┌─────────────────────────────┐\n"
+                "│   会话暂无思考步骤        │\n"
+                "└─────────────────────────────┘"
+            )
 
         lines: list[str] = []
 

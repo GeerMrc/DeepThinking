@@ -179,3 +179,173 @@ class TestSessionManagerIntegration:
         """测试获取不存在的会话"""
         with pytest.raises(ValueError, match="会话不存在"):
             session_manager.get_session("nonexistent-session-id")
+
+    async def test_create_with_invalid_json_metadata(self, storage_manager):
+        """测试创建带无效JSON元数据的会话"""
+        with pytest.raises(ValueError, match="元数据JSON格式错误"):
+            session_manager.create_session(
+                name="无效元数据会话",
+                metadata="{invalid json}",
+            )
+
+    async def test_list_sessions_invalid_status(self, storage_manager):
+        """测试列出会话时使用无效状态值"""
+        session_manager.create_session(name="测试会话")
+
+        with pytest.raises(ValueError, match="无效的状态值"):
+            session_manager.list_sessions(status="invalid_status")
+
+    async def test_list_sessions_with_limit(self, storage_manager):
+        """测试限制返回数量的会话列表"""
+        # 创建5个会话
+        for i in range(5):
+            session_manager.create_session(name=f"会话{i}", description=f"第{i}个会话")
+
+        # 限制返回3个
+        result = session_manager.list_sessions(limit=3)
+        assert "**总数**: 3" in result
+
+    async def test_list_empty_sessions(self, storage_manager):
+        """测试列出空会话列表"""
+        result = session_manager.list_sessions()
+        assert "暂无会话" in result
+
+    async def test_delete_nonexistent_session(self, storage_manager):
+        """测试删除不存在的会话"""
+        result = session_manager.delete_session("nonexistent-session-id")
+        assert "删除失败" in result
+        assert "会话不存在" in result
+
+    async def test_update_nonexistent_session_status(self, storage_manager):
+        """测试更新不存在会话的状态"""
+        with pytest.raises(ValueError, match="会话不存在"):
+            session_manager.update_session_status("nonexistent-session-id", "completed")
+
+    async def test_update_session_to_archived(self, storage_manager):
+        """测试将会话状态更新为archived"""
+        result = session_manager.create_session(name="归档测试会话")
+        import re
+        session_id = re.search(r"\*\*会话ID\*\*: ([a-f0-9-]+)", result).group(1)
+
+        # 标记为已归档
+        update_result = session_manager.update_session_status(session_id, "archived")
+        assert "会话状态已更新" in update_result
+        assert "archived" in update_result
+
+        # 验证状态已更新
+        session = storage_manager.get_session(session_id)
+        assert session.is_archived()
+
+    async def test_update_session_to_active(self, storage_manager):
+        """测试将会话状态更新回active"""
+        result = session_manager.create_session(name="重新激活测试会话")
+        import re
+        session_id = re.search(r"\*\*会话ID\*\*: ([a-f0-9-]+)", result).group(1)
+
+        # 先标记为已完成
+        session_manager.update_session_status(session_id, "completed")
+
+        # 再标记为活跃
+        update_result = session_manager.update_session_status(session_id, "active")
+        assert "会话状态已更新" in update_result
+        assert "active" in update_result
+
+        # 验证状态已更新
+        session = storage_manager.get_session(session_id)
+        assert session.is_active()
+
+    async def test_resume_session_with_thoughts(self, storage_manager):
+        """测试恢复有思考步骤的会话"""
+        from deep_thinking.tools import sequential_thinking
+
+        # 创建有思考步骤的会话
+        sequential_thinking.sequential_thinking(
+            thought="第一个思考步骤",
+            nextThoughtNeeded=True,
+            thoughtNumber=1,
+            totalThoughts=3,
+            session_id="resume-test",
+        )
+
+        # 恢复会话
+        result = session_manager.resume_session("resume-test")
+        assert "会话恢复成功" in result
+        assert "resume-test" in result
+        assert "上一个思考步骤" in result
+        assert "第一个思考步骤" in result
+        assert "继续思考" in result
+
+    async def test_resume_completed_session(self, storage_manager):
+        """测试恢复已完成的会话"""
+        from deep_thinking.tools import sequential_thinking
+
+        # 创建并完成会话
+        sequential_thinking.sequential_thinking(
+            thought="测试思考",
+            nextThoughtNeeded=False,
+            thoughtNumber=1,
+            totalThoughts=1,
+            session_id="completed-resume-test",
+        )
+
+        # 标记为完成
+        session = storage_manager.get_session("completed-resume-test")
+        session.mark_completed()
+        storage_manager.update_session(session)
+
+        # 尝试恢复
+        result = session_manager.resume_session("completed-resume-test")
+        assert "会话已完成" in result
+        assert "已经标记为完成" in result
+
+    async def test_resume_empty_session(self, storage_manager):
+        """测试恢复没有思考步骤的会话"""
+        # 创建空会话
+        result = session_manager.create_session(
+            name="空会话", description="没有思考步骤"
+        )
+        import re
+        session_id = re.search(r"\*\*会话ID\*\*: ([a-f0-9-]+)", result).group(1)
+
+        # 恢复空会话
+        resume_result = session_manager.resume_session(session_id)
+        assert "会话恢复成功" in resume_result
+        assert "尚未包含任何思考步骤" in resume_result
+        assert "可以直接开始思考" in resume_result
+
+    async def test_resume_nonexistent_session(self, storage_manager):
+        """测试恢复不存在的会话"""
+        with pytest.raises(ValueError, match="会话不存在"):
+            session_manager.resume_session("nonexistent-session-id")
+
+    async def test_resume_session_with_total_thoughts_history(
+        self, storage_manager
+    ):
+        """测试恢复有total_thoughts历史的会话"""
+        from deep_thinking.models.thought import Thought
+        from deep_thinking.tools import sequential_thinking
+
+        # 创建会话并添加历史记录
+        session = storage_manager.create_session(
+            name="历史记录会话", description="测试历史记录"
+        )
+        session.metadata["total_thoughts_history"] = [
+            {"timestamp": "2025-01-01T00:00:00", "old_total": 5, "new_total": 10}
+        ]
+        storage_manager.update_session(session)
+
+        # 添加思考步骤
+        thought = Thought(
+            thought_number=1,
+            content="测试思考",
+            type="regular",
+            timestamp="2025-01-01T00:00:00",
+        )
+        session.add_thought(thought)
+        storage_manager.update_session(session)
+
+        # 恢复会话
+        result = session_manager.resume_session(session.session_id)
+        assert "思考步骤调整历史" in result
+        assert "**当前总数**: 10" in result
+        assert "**调整次数**: 1" in result

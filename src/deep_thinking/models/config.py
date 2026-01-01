@@ -6,6 +6,7 @@
 
 import os
 
+import pydantic
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -41,7 +42,7 @@ class ThinkingConfig(BaseModel):
 
     @field_validator("min_thoughts")
     @classmethod
-    def validate_min_thoughts(cls, v: int, info) -> int:
+    def validate_min_thoughts(cls, v: int, info: pydantic.FieldValidationInfo) -> int:
         """
         验证最小思考步骤数
 

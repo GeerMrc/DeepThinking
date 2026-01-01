@@ -146,7 +146,9 @@ class ThoughtCreate(BaseModel):
 
     branch_from_thought: int | None = Field(default=None, ge=1, description="分支起始思考步骤编号")
 
-    branch_id: str | None = Field(default=None, min_length=1, max_length=50, description="分支标识符")
+    branch_id: str | None = Field(
+        default=None, min_length=1, max_length=50, description="分支标识符"
+    )
 
     def to_thought(self) -> Thought:
         """
