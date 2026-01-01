@@ -30,6 +30,10 @@ from deep_thinking.transports.sse import run_sse
 from deep_thinking.transports.stdio import run_stdio
 from deep_thinking.utils.logger import setup_logging
 
+# 导入 server.py 中的 app 实例（已注册所有工具）
+# 这必须在使用前导入，以确保工具装饰器执行
+from deep_thinking.server import app  # noqa: E402
+
 logger = logging.getLogger(__name__)
 
 
@@ -154,8 +158,9 @@ async def main_async() -> int:
 
     logger.info(f"传输模式: {args.transport}")
 
-    # 创建MCP服务器
-    app = create_server()
+    # 使用 server.py 中已配置工具的 app 实例
+    # 该实例已通过工具模块导入注册了所有 MCP 工具
+    # app = create_server()  # 不再需要创建新实例
 
     try:
         if args.transport == "stdio":

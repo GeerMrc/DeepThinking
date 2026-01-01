@@ -10,6 +10,7 @@ STDIO传输模块
 - 最佳性能，无网络开销
 """
 
+import asyncio
 import logging
 
 from mcp.server import FastMCP  # type: ignore[import-not-found]
@@ -32,8 +33,8 @@ async def run_stdio(app: FastMCP) -> None:
     logger.info("启动STDIO传输模式 - 日志输出到stderr")
     logger.debug("开始监听stdin的JSON-RPC请求")
 
-    # FastMCP的run()方法默认使用STDIO传输
-    # 这会阻塞当前线程，直到进程结束
-    app.run()
+    # 直接调用底层的异步方法，避免 asyncio 事件循环冲突
+    # 使用当前的 asyncio 事件循环而不是创建新的
+    await app.run_stdio_async()
 
     logger.info("STDIO传输模式已关闭")
