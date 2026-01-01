@@ -11,6 +11,8 @@
 - **[API 文档](docs/api.md)** - 完整的MCP工具API参考
 - **[用户指南](docs/user_guide.md)** - 详细的使用说明和示例
 - **[安装与配置](docs/installation.md)** - 安装步骤和配置指南
+- **[SSE 配置指南](docs/sse-guide.md)** - SSE远程模式详细配置
+- **[IDE 配置示例](docs/ide-config.md)** - Claude Desktop/Cursor 等配置
 - **[架构设计](ARCHITECTURE.md)** - 系统架构和技术设计
 
 ## 项目概述

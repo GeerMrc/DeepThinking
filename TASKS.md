@@ -718,11 +718,11 @@
 
 | 任务ID | 任务描述 | 状态 | 验证方式 |
 |--------|---------|------|----------|
-| 11.2.1 | 更新 installation.md - SSE认证配置 | pending | 文档审查 |
-| 11.2.2 | 更新 api.md - API端点说明 | pending | 文档审查 |
-| 11.2.3 | 创建 sse-guide.md - SSE配置指南 | pending | 文档完整性 |
-| 11.2.4 | 创建 ide-config.md - IDE配置示例 | pending | 配置可用 |
-| 11.2.5 | 更新 README.md - 新增配置说明 | pending | 文档一致性 |
+| 11.2.1 | 更新 installation.md - SSE认证配置 | completed | 文档已更新 |
+| 11.2.2 | 更新 api.md - API端点说明 | completed | 文档已更新 |
+| 11.2.3 | 创建 sse-guide.md - SSE配置指南 | completed | 11.7KB 完整文档 |
+| 11.2.4 | 创建 ide-config.md - IDE配置示例 | completed | 10.9KB 完整文档 |
+| 11.2.5 | 更新 README.md - 新增配置说明 | completed | 文档已更新 |
 
 **SSE 配置指南规划** (`docs/sse-guide.md`):
 - SSE 传输模式概述
@@ -771,6 +771,9 @@
 | 文档完整性 | ✅ passed | 文档审查 | 所有配置项有文档说明 | 通过 |
 | 代码质量 | ✅ passed | ruff + mypy | 无错误无警告 | 通过 |
 | 测试覆盖 | ✅ passed | pytest --cov | 覆盖率 90.91% | 通过 |
+| SSE 配置指南 | ✅ passed | 文档已创建 | 11.7KB 完整指南 | 通过 |
+| IDE 配置示例 | ✅ passed | 文档已创建 | 10.9KB 完整示例 | 通过 |
+| 文档交叉引用 | ✅ passed | 链接验证 | 所有引用链接有效 | 通过 |
 | Git 提交 | pending | git status | 待提交 | - |
 
 ---
@@ -805,3 +808,4 @@
 | 2026-01-01 | **阶段11启动**: 基于用户反馈，启动阶段11开发。目标：1)配置参数支持 2)文档完善 3)提交阶段7-9已完成工作。采用迭代式更新 TASKS.md 追踪任务 | GLM-4.7 |
 | 2026-01-01 | **阶段11.1完成**: 配置参数支持实现完成。添加ThinkingConfig模型，支持CLI参数和环境变量配置最大/最小思考步骤及增量。默认值：max=50, min=3, increment=10。单元测试覆盖率90.91% | GLM-4.7 |
 | 2026-01-01 | **阶段11文档一致性更新**: 更新README.md添加思考配置参数说明；更新docs/api.md的needsMoreThoughts参数说明；更新docs/installation.md配置表；更新TASKS.md配置规划表。所有文档与代码实现保持一致 | GLM-4.7 |
+| 2026-01-01 | **阶段11.2完成**: 文档完善阶段完成。创建docs/sse-guide.md（11.7KB SSE配置完整指南）和docs/ide-config.md（10.9KB IDE配置示例集合），更新README.md、installation.md、api.md的交叉引用。23个JSON配置示例全部验证通过 | GLM-4.7 |

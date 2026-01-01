@@ -279,6 +279,8 @@ DeepThinking-MCP 服务器
 
 DeepThinking-MCP 需要与 Claude Desktop 配合使用。
 
+> 📘 **详细配置**: 请参阅 [IDE 配置示例](./ide-config.md) 获取 Claude Desktop、Claude Code、Cursor 等 IDE 的完整配置示例。
+
 ### 1. 找到配置文件
 
 配置文件位置：
@@ -512,6 +514,8 @@ python -m deep_thinking --mode stdio
 ### SSE 模式
 
 适用于 Web 应用和远程访问。
+
+> 📘 **详细配置**: 请参阅 [SSE 配置指南](./sse-guide.md) 获取完整的 SSE 模式配置说明，包括认证机制、安全最佳实践和生产环境部署。
 
 **启动命令**：
 
@@ -747,8 +751,10 @@ mypy src/deep_thinking
 
 ### 安装与配置
 - [PyPI 发布指南](./PUBLISHING.md) - 如何发布到PyPI
-- [API 文档](./api.md)
-- [用户指南](./user_guide.md)
+- [API 文档](./api.md) - 完整的 MCP 工具 API 参考
+- [用户指南](./user_guide.md) - 详细的使用说明和示例
+- [SSE 配置指南](./sse-guide.md) - SSE 远程模式详细配置
+- [IDE 配置示例](./ide-config.md) - Claude Desktop/Cursor 等配置
 
 ### 开发文档
 - [架构设计文档](../ARCHITECTURE.md)
