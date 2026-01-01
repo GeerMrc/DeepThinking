@@ -4,6 +4,7 @@
 包含所有 Pydantic 数据模型的导出。
 """
 
+from deep_thinking.models.config import ThinkingConfig, get_global_config, set_global_config
 from deep_thinking.models.task import TaskPriority, TaskStatus, ThinkingTask
 from deep_thinking.models.template import Template
 from deep_thinking.models.thinking_session import ThinkingSession
@@ -19,4 +20,8 @@ __all__ = [
     "ThinkingTask",
     "TaskStatus",
     "TaskPriority",
+    # 配置相关
+    "ThinkingConfig",
+    "get_global_config",
+    "set_global_config",
 ]

@@ -8,6 +8,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Literal
 
+from deep_thinking.models.config import get_global_config
 from deep_thinking.models.thought import Thought
 from deep_thinking.server import app, get_storage_manager
 
@@ -65,8 +66,11 @@ def sequential_thinking(
 
     # 处理 needsMoreThoughts 功能
     original_total = totalThoughts
-    max_thoughts_limit = 1000  # 最大思考步骤限制
-    thoughts_increment = 10  # 每次增加的思考步骤数
+
+    # 从全局配置获取思考限制参数
+    config = get_global_config()
+    max_thoughts_limit = config.max_thoughts  # 最大思考步骤限制
+    thoughts_increment = config.thoughts_increment  # 每次增加的思考步骤数
 
     if needsMoreThoughts:
         # 检查是否超过最大限制

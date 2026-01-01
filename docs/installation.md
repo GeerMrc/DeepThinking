@@ -384,11 +384,21 @@ python -m deep_thinking --mode sse --host 127.0.0.1 --port 8088
 
 | 环境变量 | 描述 | 默认值 |
 |---------|------|-------|
+| **传输配置** | | |
 | `DEEP_THINKING_TRANSPORT` | 传输模式 (stdio/sse) | stdio |
 | `DEEP_THINKING_HOST` | SSE 监听地址 | 127.0.0.1 |
 | `DEEP_THINKING_PORT` | SSE 监听端口 | 8000 |
+| **认证配置** | | |
+| `DEEP_THINKING_AUTH_TOKEN` | Bearer Token（SSE 认证） | 无 |
+| `DEEP_THINKING_API_KEY` | API Key（SSE 认证） | 无 |
+| **存储配置** | | |
 | `DEEP_THINKING_DATA_DIR` | 数据存储目录 | ./.deep-thinking-mcp/ |
-| `DEEP_THINKING_LOG_LEVEL` | 日志级别 | INFO |
+| **思考配置** | | |
+| `DEEP_THINKING_MAX_THOUGHTS` | 最大思考步骤数 | 1000 |
+| `DEEP_THINKING_MIN_THOUGHTS` | 最小思考步骤数 | 1 |
+| `DEEP_THINKING_THOUGHTS_INCREMENT` | 思考步骤增量（needsMoreThoughts） | 10 |
+| **日志配置** | | |
+| `DEEP_THINKING_LOG_LEVEL` | 日志级别 (DEBUG/INFO/WARNING/ERROR) | INFO |
 
 ### 设置环境变量
 

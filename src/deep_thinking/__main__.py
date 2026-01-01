@@ -145,6 +145,28 @@ def parse_args() -> argparse.Namespace:
         help="日志级别（默认: INFO）",
     )
 
+    # 思考配置参数
+    parser.add_argument(
+        "--max-thoughts",
+        type=int,
+        default=int(os.getenv("DEEP_THINKING_MAX_THOUGHTS", "1000")),
+        help="最大思考步骤数（默认: 1000）",
+    )
+
+    parser.add_argument(
+        "--min-thoughts",
+        type=int,
+        default=int(os.getenv("DEEP_THINKING_MIN_THOUGHTS", "1")),
+        help="最小思考步骤数（默认: 1）",
+    )
+
+    parser.add_argument(
+        "--thoughts-increment",
+        type=int,
+        default=int(os.getenv("DEEP_THINKING_THOUGHTS_INCREMENT", "10")),
+        help="思考步骤增量（默认: 10）",
+    )
+
     return parser.parse_args()
 
 
@@ -161,6 +183,21 @@ async def main_async() -> int:
     # 如果指定了 --data-dir，设置环境变量
     if args.data_dir:
         os.environ["DEEP_THINKING_DATA_DIR"] = args.data_dir
+
+    # 初始化思考配置（从 CLI 参数或环境变量）
+    from deep_thinking.models.config import ThinkingConfig, set_global_config
+
+    thinking_config = ThinkingConfig(
+        max_thoughts=args.max_thoughts,
+        min_thoughts=args.min_thoughts,
+        thoughts_increment=args.thoughts_increment,
+    )
+    set_global_config(thinking_config)
+
+    logger.info(
+        f"思考配置: max={args.max_thoughts}, min={args.min_thoughts}, "
+        f"increment={args.thoughts_increment}"
+    )
 
     # 配置日志（传输感知）
     log_level = getattr(logging, args.log_level)
