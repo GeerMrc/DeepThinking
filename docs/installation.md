@@ -28,7 +28,17 @@
 
 ## 安装方法
 
+> ⚠️ **重要提示**: deep-thinking-mcp **目前未发布到 PyPI**。
+>
+> 以下方法1和方法2仅在未来包发布到PyPI后可用。
+>
+> **当前请使用方法3（开发模式安装）**。
+
+---
+
 ### 方法1: 使用 pip 安装
+
+> ⚠️ **待包发布到PyPI后可用**
 
 ```bash
 pip install deep-thinking-mcp
@@ -49,6 +59,8 @@ pip uninstall deep-thinking-mcp
 ---
 
 ### 方法2: 使用 uv 安装（推荐）⚡
+
+> ⚠️ **待包发布到PyPI后可用**
 
 [uv](https://github.com/astral-sh/uv) 是一个极速的 Python 包管理器，比 pip 快 10-100 倍。
 
@@ -95,7 +107,104 @@ uv pip uninstall deep-thinking-mcp
 
 ---
 
-### 方法3: 从源码安装
+### 方法3: 开发模式安装 ⭐ （推荐，当前可用）
+
+这是**当前唯一可用的安装方式**，直接从源代码安装。
+
+#### 方式3A: 使用 uv（推荐）
+
+```bash
+# 进入项目目录
+cd /path/to/Deep-Thinking-MCP
+
+# 以开发模式安装
+uv pip install -e .
+```
+
+#### 方式3B: 使用 pip
+
+```bash
+# 进入项目目录
+cd /path/to/Deep-Thinking-MCP
+
+# 以开发模式安装
+pip install -e .
+```
+
+#### 方式3C: 使用虚拟环境（最佳实践）
+
+```bash
+# 1. 进入项目目录
+cd /path/to/Deep-Thinking-MCP
+
+# 2. 创建虚拟环境
+python -m venv .venv
+
+# 3. 激活虚拟环境
+# macOS/Linux:
+source .venv/bin/activate
+# Windows:
+.venv\Scripts\activate
+
+# 4. 以开发模式安装
+pip install -e .
+```
+
+**什么是开发模式（Editable）？**
+
+- ✅ 代码修改立即生效，无需重新安装
+- ✅ 指向源代码目录，而非复制文件
+- ✅ 适合开发和测试
+- ✅ 可以使用 `git pull` 更新代码
+
+#### 验证安装
+
+```bash
+# 检查是否安装成功
+python -c "import deep_thinking; print('✅ 安装成功')"
+
+# 查看版本信息
+python -m deep_thinking --help
+```
+
+---
+
+### 重新安装（重装）
+
+如果遇到问题需要重新安装：
+
+#### 步骤1: 完全卸载
+
+```bash
+# 卸载包
+uv pip uninstall deep-thinking-mcp
+# 或
+pip uninstall deep-thinking-mcp
+
+# 清理Python缓存
+find /path/to/Deep-Thinking-MCP -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null
+
+# 清理构建文件
+find /path/to/Deep-Thinking-MCP -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null
+```
+
+#### 步骤2: 重新安装
+
+```bash
+# 重新以开发模式安装
+uv pip install -e /path/to/Deep-Thinking-MCP
+
+# 验证安装
+python -m deep_thinking --help
+```
+
+---
+
+### 从源码安装（仅阅读参考）
+
+> ⚠️ 此节仅用于理解项目结构，实际安装请使用上面的"方法3"
+
+#### 1. 克隆仓库
 
 #### 1. 克隆仓库
 
@@ -608,10 +717,19 @@ mypy src/deep_thinking
 
 ## 相关资源
 
+### 安装与配置
+- [PyPI 发布指南](./PUBLISHING.md) - 如何发布到PyPI
 - [API 文档](./api.md)
 - [用户指南](./user_guide.md)
+
+### 开发文档
 - [架构设计文档](../ARCHITECTURE.md)
+- [开发指南](./DEVELOPMENT.md)
+- [贡献指南](../CONTRIBUTING.md)
+
+### 支持
 - [GitHub Issues](https://github.com/your-org/deep-thinking-mcp/issues)
+- [更新日志](../CHANGELOG.md)
 
 ---
 
