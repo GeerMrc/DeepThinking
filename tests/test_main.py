@@ -258,10 +258,9 @@ class TestEnvironmentVariables:
         """测试CLI参数覆盖环境变量"""
         with patch.dict(
             "os.environ", {"DEEP_THINKING_TRANSPORT": "sse", "DEEP_THINKING_PORT": "9000"}
-        ):
-            with patch("sys.argv", ["deep-thinking", "--port", "8080"]):
-                args = parse_args()
-                # 环境变量设置传输模式
-                assert args.transport == "sse"
-                # CLI参数覆盖端口
-                assert args.port == 8080
+        ), patch("sys.argv", ["deep-thinking", "--port", "8080"]):
+            args = parse_args()
+            # 环境变量设置传输模式
+            assert args.transport == "sse"
+            # CLI参数覆盖端口
+            assert args.port == 8080

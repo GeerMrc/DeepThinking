@@ -61,7 +61,7 @@ class TestTaskManagerIntegration:
     async def test_list_tasks_with_status_filter(self, storage_manager):
         """测试按状态过滤任务"""
         # 创建任务
-        r1 = task_manager.create_task(title="待执行任务")
+        task_manager.create_task(title="待执行任务")
         r2 = task_manager.create_task(title="进行中任务")
 
         # 提取任务ID
