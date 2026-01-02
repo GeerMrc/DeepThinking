@@ -69,6 +69,26 @@ class Thought(BaseModel):
         description="对比思考的比较结论",
     )
 
+    # Reverse类型专属字段
+    reverse_from: int | None = Field(
+        default=None,
+        ge=1,
+        description="逆向思考的反推起点思考编号",
+    )
+
+    reverse_target: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=500,
+        description="逆向思考的反推目标描述",
+    )
+
+    reverse_steps: list[str] | None = Field(
+        default=None,
+        max_length=20,
+        description="逆向思考的反推步骤列表，最多20个",
+    )
+
     timestamp: datetime = Field(default_factory=datetime.utcnow, description="思考时间戳")
 
     @model_validator(mode="after")
@@ -127,6 +147,26 @@ class Thought(BaseModel):
                     if not 1 <= len(dim) <= 50:
                         raise ValueError("每个comparison_dimension必须在1-50字符之间")
 
+        elif self.type == "reverse":
+            # 逆向思考必须指定reverse_target
+            if self.reverse_target is None or not 1 <= len(self.reverse_target) <= 500:
+                raise ValueError("reverse类型必须指定reverse_target(1-500字符)")
+            # reverse_from必须小于当前thought_number
+            if self.reverse_from is not None:
+                if self.reverse_from >= self.thought_number:
+                    raise ValueError(
+                        f"reverse_from ({self.reverse_from}) 必须小于 "
+                        f"thought_number ({self.thought_number})"
+                    )
+            # reverse_steps最多20个步骤
+            if self.reverse_steps and len(self.reverse_steps) > 20:
+                raise ValueError("reverse_steps最多20个步骤")
+            # 每个step长度1-500字符
+            if self.reverse_steps:
+                for step in self.reverse_steps:
+                    if not 1 <= len(step) <= 500:
+                        raise ValueError("每个reverse_step必须在1-500字符之间")
+
         return self
 
     def is_regular_thought(self) -> bool:
@@ -144,6 +184,14 @@ class Thought(BaseModel):
     def is_comparison_thought(self) -> bool:
         """判断是否为对比思考"""
         return self.type == "comparison"
+
+    def is_reverse_thought(self) -> bool:
+        """判断是否为逆向思考"""
+        return self.type == "reverse"
+
+    def is_hypothetical_thought(self) -> bool:
+        """判断是否为假设思考"""
+        return self.type == "hypothetical"
 
     def get_display_type(self) -> str:
         """
@@ -220,6 +268,26 @@ class ThoughtCreate(BaseModel):
         description="对比思考的比较结论",
     )
 
+    # Reverse类型字段
+    reverse_from: int | None = Field(
+        default=None,
+        ge=1,
+        description="逆向思考的反推起点思考编号",
+    )
+
+    reverse_target: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=500,
+        description="逆向思考的反推目标描述",
+    )
+
+    reverse_steps: list[str] | None = Field(
+        default=None,
+        max_length=20,
+        description="逆向思考的反推步骤列表，最多20个",
+    )
+
     def to_thought(self) -> Thought:
         """
         转换为Thought模型
@@ -238,6 +306,9 @@ class ThoughtCreate(BaseModel):
             comparison_items=self.comparison_items,
             comparison_dimensions=self.comparison_dimensions,
             comparison_result=self.comparison_result,
+            reverse_from=self.reverse_from,
+            reverse_target=self.reverse_target,
+            reverse_steps=self.reverse_steps,
         )
 
 
@@ -267,3 +338,10 @@ class ThoughtUpdate(BaseModel):
     comparison_dimensions: list[str] | None = Field(None, max_length=10, description="对比思考的比较维度列表")
 
     comparison_result: str | None = Field(None, min_length=1, max_length=2000, description="对比思考的比较结论")
+
+    # Reverse类型字段
+    reverse_from: int | None = Field(None, ge=1, description="逆向思考的反推起点思考编号")
+
+    reverse_target: str | None = Field(None, min_length=1, max_length=500, description="逆向思考的反推目标描述")
+
+    reverse_steps: list[str] | None = Field(None, max_length=20, description="逆向思考的反推步骤列表")

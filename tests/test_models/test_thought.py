@@ -379,3 +379,136 @@ class TestThoughtComparison:
         data = thought.to_dict()
         assert data["display_type"] == "⚖️"
         assert data["comparison_items"] == ["A", "B"]
+
+
+class TestThoughtReverse:
+    """Reverse类型思考测试"""
+
+    def test_create_reverse_thought_valid(self):
+        """测试创建有效的逆向思考"""
+        thought = Thought(
+            thought_number=5,
+            content="反推微服务架构决策的前提条件",
+            type="reverse",
+            reverse_from=3,
+            reverse_target="验证微服务架构结论的前提条件",
+            reverse_steps=[
+                "前提1: 团队规模超过20人",
+                "前提2: 业务模块边界清晰",
+                "前提3: 具备分布式运维能力"
+            ]
+        )
+        assert thought.type == "reverse"
+        assert thought.is_reverse_thought() is True
+        assert thought.reverse_target == "验证微服务架构结论的前提条件"
+        assert len(thought.reverse_steps) == 3
+        assert thought.get_display_type() == "🔙"
+
+    def test_reverse_requires_target(self):
+        """测试逆向思考必须指定reverse_target"""
+        with pytest.raises(ValidationError) as exc_info:
+            Thought(
+                thought_number=1,
+                content="反推",
+                type="reverse",
+            )
+        assert "reverse_target" in str(exc_info.value)
+
+    def test_reverse_target_length_validation(self):
+        """测试reverse_target长度验证"""
+        with pytest.raises(ValidationError):
+            Thought(
+                thought_number=1,
+                content="反推",
+                type="reverse",
+                reverse_target="x" * 501,  # 超过500字符
+            )
+
+    def test_reverse_from_must_be_less_than_thought_number(self):
+        """测试reverse_from必须小于当前thought_number"""
+        with pytest.raises(ValidationError) as exc_info:
+            Thought(
+                thought_number=5,
+                content="反推",
+                type="reverse",
+                reverse_from=5,  # 不能等于当前编号
+                reverse_target="验证",
+            )
+        assert "必须小于" in str(exc_info.value)
+
+        with pytest.raises(ValidationError):
+            Thought(
+                thought_number=5,
+                content="反推",
+                type="reverse",
+                reverse_from=10,  # 不能大于当前编号
+                reverse_target="验证",
+            )
+
+    def test_reverse_steps_max_twenty(self):
+        """测试reverse_steps最多20个"""
+        with pytest.raises(ValidationError) as exc_info:
+            Thought(
+                thought_number=1,
+                content="反推",
+                type="reverse",
+                reverse_target="验证",
+                reverse_steps=[f"步骤{i}" for i in range(21)],  # 21个步骤
+            )
+        assert "20" in str(exc_info.value) or "too_long" in str(exc_info.value)
+
+    def test_reverse_steps_optional(self):
+        """测试reverse_steps是可选的"""
+        thought = Thought(
+            thought_number=1,
+            content="反推",
+            type="reverse",
+            reverse_target="验证前提条件",
+        )
+        assert thought.reverse_steps is None
+
+    def test_reverse_from_optional(self):
+        """测试reverse_from是可选的"""
+        thought = Thought(
+            thought_number=1,
+            content="反推",
+            type="reverse",
+            reverse_target="验证前提条件",
+        )
+        assert thought.reverse_from is None
+
+    def test_thoughtcreate_reverse_valid(self):
+        """测试ThoughtCreate支持reverse类型"""
+        create_data = ThoughtCreate(
+            thought_number=1,
+            content="反推",
+            type="reverse",
+            reverse_target="验证",
+            reverse_steps=["步骤1", "步骤2"],
+        )
+        thought = create_data.to_thought()
+        assert thought.is_reverse_thought() is True
+        assert thought.reverse_target == "验证"
+
+    def test_thoughtupdate_reverse_fields(self):
+        """测试ThoughtUpdate支持reverse字段"""
+        update_data = ThoughtUpdate(
+            reverse_target="新目标",
+            reverse_steps=["新步骤"],
+        )
+        assert update_data.reverse_target == "新目标"
+        assert update_data.reverse_steps == ["新步骤"]
+
+    def test_reverse_to_dict(self):
+        """测试逆向思考转换为字典"""
+        thought = Thought(
+            thought_number=5,
+            content="反推",
+            type="reverse",
+            reverse_from=3,
+            reverse_target="验证",
+            reverse_steps=["步骤1"],
+        )
+        data = thought.to_dict()
+        assert data["display_type"] == "🔙"
+        assert data["reverse_target"] == "验证"
