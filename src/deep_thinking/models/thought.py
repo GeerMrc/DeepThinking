@@ -89,6 +89,28 @@ class Thought(BaseModel):
         description="逆向思考的反推步骤列表，最多20个",
     )
 
+    # Hypothetical类型专属字段
+    hypothetical_condition: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=500,
+        description="假设思考的假设条件描述",
+    )
+
+    hypothetical_impact: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=2000,
+        description="假设思考的影响分析",
+    )
+
+    hypothetical_probability: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=50,
+        description="假设思考的可能性评估",
+    )
+
     timestamp: datetime = Field(default_factory=datetime.utcnow, description="思考时间戳")
 
     @model_validator(mode="after")
@@ -166,6 +188,17 @@ class Thought(BaseModel):
                 for step in self.reverse_steps:
                     if not 1 <= len(step) <= 500:
                         raise ValueError("每个reverse_step必须在1-500字符之间")
+
+        elif self.type == "hypothetical":
+            # 假设思考必须指定hypothetical_condition
+            if self.hypothetical_condition is None or not 1 <= len(self.hypothetical_condition) <= 500:
+                raise ValueError("hypothetical类型必须指定hypothetical_condition(1-500字符)")
+            # hypothetical_impact长度1-2000字符
+            if self.hypothetical_impact is not None and not 1 <= len(self.hypothetical_impact) <= 2000:
+                raise ValueError("hypothetical_impact必须在1-2000字符之间")
+            # hypothetical_probability长度1-50字符
+            if self.hypothetical_probability is not None and not 1 <= len(self.hypothetical_probability) <= 50:
+                raise ValueError("hypothetical_probability必须在1-50字符之间")
 
         return self
 
@@ -288,6 +321,28 @@ class ThoughtCreate(BaseModel):
         description="逆向思考的反推步骤列表，最多20个",
     )
 
+    # Hypothetical类型字段
+    hypothetical_condition: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=500,
+        description="假设思考的假设条件描述",
+    )
+
+    hypothetical_impact: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=2000,
+        description="假设思考的影响分析",
+    )
+
+    hypothetical_probability: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=50,
+        description="假设思考的可能性评估",
+    )
+
     def to_thought(self) -> Thought:
         """
         转换为Thought模型
@@ -309,6 +364,9 @@ class ThoughtCreate(BaseModel):
             reverse_from=self.reverse_from,
             reverse_target=self.reverse_target,
             reverse_steps=self.reverse_steps,
+            hypothetical_condition=self.hypothetical_condition,
+            hypothetical_impact=self.hypothetical_impact,
+            hypothetical_probability=self.hypothetical_probability,
         )
 
 
@@ -345,3 +403,10 @@ class ThoughtUpdate(BaseModel):
     reverse_target: str | None = Field(None, min_length=1, max_length=500, description="逆向思考的反推目标描述")
 
     reverse_steps: list[str] | None = Field(None, max_length=20, description="逆向思考的反推步骤列表")
+
+    # Hypothetical类型字段
+    hypothetical_condition: str | None = Field(None, min_length=1, max_length=500, description="假设思考的假设条件描述")
+
+    hypothetical_impact: str | None = Field(None, min_length=1, max_length=2000, description="假设思考的影响分析")
+
+    hypothetical_probability: str | None = Field(None, min_length=1, max_length=50, description="假设思考的可能性评估")

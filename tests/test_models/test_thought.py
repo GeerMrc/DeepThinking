@@ -512,3 +512,120 @@ class TestThoughtReverse:
         data = thought.to_dict()
         assert data["display_type"] == "🔙"
         assert data["reverse_target"] == "验证"
+
+
+class TestThoughtHypothetical:
+    """Hypothetical类型思考测试"""
+
+    def test_create_hypothetical_thought_valid(self):
+        """测试创建有效的假设思考"""
+        thought = Thought(
+            thought_number=7,
+            content="探索用户增长10倍的影响",
+            type="hypothetical",
+            hypothetical_condition="如果用户数量从10万增长到100万",
+            hypothetical_impact="服务器负载增加10倍，需要扩容",
+            hypothetical_probability="可能性：高",
+        )
+        assert thought.type == "hypothetical"
+        assert thought.is_hypothetical_thought() is True
+        assert thought.hypothetical_condition == "如果用户数量从10万增长到100万"
+        assert thought.get_display_type() == "🤔"
+
+    def test_hypothetical_requires_condition(self):
+        """测试假设思考必须指定hypothetical_condition"""
+        with pytest.raises(ValidationError) as exc_info:
+            Thought(
+                thought_number=1,
+                content="假设",
+                type="hypothetical",
+            )
+        assert "hypothetical_condition" in str(exc_info.value)
+
+    def test_hypothetical_condition_length_validation(self):
+        """测试hypothetical_condition长度验证"""
+        with pytest.raises(ValidationError):
+            Thought(
+                thought_number=1,
+                content="假设",
+                type="hypothetical",
+                hypothetical_condition="x" * 501,  # 超过500字符
+            )
+
+    def test_hypothetical_impact_optional(self):
+        """测试hypothetical_impact是可选的"""
+        thought = Thought(
+            thought_number=1,
+            content="假设",
+            type="hypothetical",
+            hypothetical_condition="如果发生X",
+        )
+        assert thought.hypothetical_impact is None
+
+    def test_hypothetical_impact_length_validation(self):
+        """测试hypothetical_impact长度验证"""
+        with pytest.raises(ValidationError):
+            Thought(
+                thought_number=1,
+                content="假设",
+                type="hypothetical",
+                hypothetical_condition="如果发生X",
+                hypothetical_impact="x" * 2001,  # 超过2000字符
+            )
+
+    def test_hypothetical_probability_optional(self):
+        """测试hypothetical_probability是可选的"""
+        thought = Thought(
+            thought_number=1,
+            content="假设",
+            type="hypothetical",
+            hypothetical_condition="如果发生X",
+            hypothetical_impact="影响分析",
+        )
+        assert thought.hypothetical_probability is None
+
+    def test_hypothetical_probability_length_validation(self):
+        """测试hypothetical_probability长度验证"""
+        with pytest.raises(ValidationError):
+            Thought(
+                thought_number=1,
+                content="假设",
+                type="hypothetical",
+                hypothetical_condition="如果发生X",
+                hypothetical_probability="x" * 51,  # 超过50字符
+            )
+
+    def test_thoughtcreate_hypothetical_valid(self):
+        """测试ThoughtCreate支持hypothetical类型"""
+        create_data = ThoughtCreate(
+            thought_number=1,
+            content="假设",
+            type="hypothetical",
+            hypothetical_condition="如果发生X",
+            hypothetical_impact="影响Y",
+        )
+        thought = create_data.to_thought()
+        assert thought.is_hypothetical_thought() is True
+        assert thought.hypothetical_condition == "如果发生X"
+
+    def test_thoughtupdate_hypothetical_fields(self):
+        """测试ThoughtUpdate支持hypothetical字段"""
+        update_data = ThoughtUpdate(
+            hypothetical_condition="新假设",
+            hypothetical_probability="可能性：中",
+        )
+        assert update_data.hypothetical_condition == "新假设"
+        assert update_data.hypothetical_probability == "可能性：中"
+
+    def test_hypothetical_to_dict(self):
+        """测试假设思考转换为字典"""
+        thought = Thought(
+            thought_number=1,
+            content="假设",
+            type="hypothetical",
+            hypothetical_condition="如果发生X",
+            hypothetical_impact="影响Y",
+        )
+        data = thought.to_dict()
+        assert data["display_type"] == "🤔"
+        assert data["hypothetical_condition"] == "如果发生X"
