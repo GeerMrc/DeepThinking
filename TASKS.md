@@ -852,6 +852,331 @@
 - [ ] **编码前**: 确认新类型设计不影响现有regular/revision/branch类型
 - [ ] **编码中**: 实时运行pytest检查模型验证
 - [ ] **编码后**: 验证向后兼容性，现有测试全部通过
+
+---
+
+### 12.1.2 Comparison (对比思考) 类型详细设计
+
+**设计时间**: 2026-01-02
+**状态**: ✅ 设计完成
+**设计人**: GLM-4.7
+
+#### 使用场景
+
+对比思考用于比较多个选项/观点/解决方案，包括：
+- 技术方案比较（如方案A vs 方案B vs 方案C）
+- 观点对比分析（如正面观点 vs 反面观点）
+- 解决方案评估（如方案X vs 方案Y）
+
+#### 数据模型设计
+
+**扩展Thought字段**:
+
+| 字段名 | 类型 | 必需 | 默认值 | 验证规则 | 说明 |
+|--------|------|------|--------|----------|------|
+| `type` | Literal | - | - | 必须为"comparison" | 思考类型标识 |
+| `comparison_items` | list[str] | ✅ | - | 最少2个，每个1-500字符，无重复 | 比较项列表 |
+| `comparison_dimensions` | list[str] | ❌ | None | 最多10个，每个1-50字符 | 比较维度（可选） |
+| `comparison_result` | str | ❌ | None | 1-2000字符 | 比较结论（可选） |
+
+**字段说明**:
+
+```python
+# comparison_items示例
+["方案A: 成本低但维护复杂", "方案B: 成本高但维护简单", "方案C: 成本中等维护适中"]
+
+# comparison_dimensions示例
+["成本", "维护性", "可扩展性", "性能"]
+
+# comparison_result示例
+"综合评估：方案A适合短期项目，方案B适合长期项目，方案C为平衡选择"
+```
+
+#### 验证逻辑设计
+
+```python
+@model_validator(mode="after")
+def validate_comparison_type(self) -> "Thought":
+    """验证comparison类型的字段一致性"""
+
+    if self.type == "comparison":
+        # 1. comparison_items必须至少有2个元素
+        if not self.comparison_items or len(self.comparison_items) < 2:
+            raise ValueError("comparison类型必须指定至少2个comparison_items")
+
+        # 2. comparison_items不能有重复项
+        if len(self.comparison_items) != len(set(self.comparison_items)):
+            raise ValueError("comparison_items不能有重复项")
+
+        # 3. 每个comparison_item长度1-500字符
+        for item in self.comparison_items:
+            if not 1 <= len(item) <= 500:
+                raise ValueError("每个comparison_item必须在1-500字符之间")
+
+        # 4. comparison_dimensions最多10个维度
+        if self.comparison_dimensions and len(self.comparison_dimensions) > 10:
+            raise ValueError("comparison_dimensions最多10个维度")
+
+        # 5. 每个dimension长度1-50字符
+        if self.comparison_dimensions:
+            for dim in self.comparison_dimensions:
+                if not 1 <= len(dim) <= 50:
+                    raise ValueError("每个comparison_dimension必须在1-50字符之间")
+
+        # 6. comparison_result长度1-2000字符
+        if self.comparison_result and not 1 <= len(self.comparison_result) <= 2000:
+            raise ValueError("comparison_result必须在1-2000字符之间")
+
+    return self
+```
+
+#### 显示符号设计
+
+```python
+# 对比思考使用双箭头符号 "⚖️"
+type_symbols = {
+    "regular": "💭",
+    "revision": "🔄",
+    "branch": "🌿",
+    "comparison": "⚖️",  # 新增
+}
+```
+
+#### 向后兼容保证
+
+- ✅ 现有regular/revision/branch类型验证逻辑不变
+- ✅ 新字段仅对comparison类型生效
+- ✅ 现有356个测试必须全部通过
+- ✅ API保持向后兼容
+
+#### 示例数据
+
+```python
+# 创建对比思考示例
+thought = Thought(
+    thought_number=5,
+    content="比较三种数据库方案的优缺点",
+    type="comparison",
+    comparison_items=[
+        "MySQL: 成熟稳定，社区活跃",
+        "PostgreSQL: 功能丰富，扩展性强",
+        "MongoDB: 灵活文档存储"
+    ],
+    comparison_dimensions=["性能", "可靠性", "成本", "学习曲线"],
+    comparison_result="PostgreSQL在功能和扩展性上最优，MySQL最稳定，MongoDB适合灵活场景"
+)
+```
+
+---
+
+### 12.1.3 Reverse (逆向思考) 类型详细设计
+
+**设计时间**: 2026-01-02
+**状态**: ✅ 设计完成
+**设计人**: GLM-4.7
+
+#### 使用场景
+
+逆向思考用于从结论反推前提和假设，包括：
+- 反推前提条件（如"结论X成立需要哪些前提"）
+- 验证假设有效性（如"如果结论Y为真，前置条件是什么"）
+- 发现逻辑漏洞（如"反推发现前提Z不成立"）
+
+#### 数据模型设计
+
+**扩展Thought字段**:
+
+| 字段名 | 类型 | 必需 | 默认值 | 验证规则 | 说明 |
+|--------|------|------|--------|----------|------|
+| `type` | Literal | - | - | 必须为"reverse" | 思考类型标识 |
+| `reverse_from` | int | ❌ | None | 必须<thought_number，≥1 | 反推起点的思考编号 |
+| `reverse_target` | str | ✅ | - | 1-500字符 | 反推目标描述 |
+| `reverse_steps` | list[str] | ❌ | None | 最多20个，每个1-500字符 | 反推步骤列表（可选） |
+
+**字段说明**:
+
+```python
+# reverse_from示例
+5  # 反推从第5个思考步骤开始
+
+# reverse_target示例
+"验证'采用微服务架构'这个结论的前提条件"
+
+# reverse_steps示例
+[
+    "前提1: 团队规模超过20人",
+    "前提2: 业务模块边界清晰",
+    "前提3: 具备分布式运维能力",
+    "反推结论: 前提1和2满足，但前提3不成立，暂不适合微服务"
+]
+```
+
+#### 验证逻辑设计
+
+```python
+@model_validator(mode="after")
+def validate_reverse_type(self) -> "Thought":
+    """验证reverse类型的字段一致性"""
+
+    if self.type == "reverse":
+        # 1. reverse_target必须存在且1-500字符
+        if not self.reverse_target or not 1 <= len(self.reverse_target) <= 500:
+            raise ValueError("reverse类型必须指定reverse_target(1-500字符)")
+
+        # 2. reverse_from必须小于当前thought_number
+        if self.reverse_from is not None:
+            if self.reverse_from >= self.thought_number:
+                raise ValueError(f"reverse_from ({self.reverse_from}) 必须小于 thought_number ({self.thought_number})")
+
+        # 3. reverse_steps最多20个步骤
+        if self.reverse_steps and len(self.reverse_steps) > 20:
+            raise ValueError("reverse_steps最多20个步骤")
+
+        # 4. 每个step长度1-500字符
+        if self.reverse_steps:
+            for step in self.reverse_steps:
+                if not 1 <= len(step) <= 500:
+                    raise ValueError("每个reverse_step必须在1-500字符之间")
+
+    return self
+```
+
+#### 显示符号设计
+
+```python
+# 逆向思考使用反向箭头符号 "🔙"
+type_symbols = {
+    "regular": "💭",
+    "revision": "🔄",
+    "branch": "🌿",
+    "comparison": "⚖️",
+    "reverse": "🔙",  # 新增
+}
+```
+
+#### 向后兼容保证
+
+- ✅ 现有regular/revision/branch/comparison类型验证逻辑不变
+- ✅ 新字段仅对reverse类型生效
+- ✅ 现有356个测试必须全部通过
+- ✅ API保持向后兼容
+
+#### 示例数据
+
+```python
+# 创建逆向思考示例
+thought = Thought(
+    thought_number=6,
+    content="反推微服务架构决策的前提条件",
+    type="reverse",
+    reverse_from=3,
+    reverse_target="验证'采用微服务架构'结论的前提条件",
+    reverse_steps=[
+        "前提1: 团队规模超过20人",
+        "前提2: 业务模块边界清晰",
+        "前提3: 具备分布式运维能力",
+        "验证结果: 前提3不成立，建议暂缓微服务改造"
+    ]
+)
+```
+
+---
+
+### 12.1.4 Hypothetical (假设思考) 类型详细设计
+
+**设计时间**: 2026-01-02
+**状态**: ✅ 设计完成
+**设计人**: GLM-4.7
+
+#### 使用场景
+
+假设思考用于探索"如果...会怎样"的情景分析，包括：
+- 探索可能性（如"如果用户增长10倍会怎样"）
+- 风险评估（如"如果服务器宕机会怎样"）
+- 灵感探索（如"如果预算翻倍会怎样"）
+
+#### 数据模型设计
+
+**扩展Thought字段**:
+
+| 字段名 | 类型 | 必需 | 默认值 | 验证规则 | 说明 |
+|--------|------|------|--------|----------|------|
+| `type` | Literal | - | - | 必须为"hypothetical" | 思考类型标识 |
+| `hypothetical_condition` | str | ✅ | - | 1-500字符 | 假设条件描述 |
+| `hypothetical_impact` | str | ❌ | None | 1-2000字符 | 影响分析（可选） |
+| `hypothetical_probability` | str | ❌ | None | 1-50字符 | 可能性评估（可选） |
+
+**字段说明**:
+
+```python
+# hypothetical_condition示例
+"如果用户数量从10万增长到100万"
+
+# hypothetical_impact示例
+"服务器负载增加10倍，需要：1.数据库分库分表 2.引入缓存层 3.CDN加速"
+
+# hypothetical_probability示例
+"可能性：高（市场趋势分析显示需求强劲）"
+```
+
+#### 验证逻辑设计
+
+```python
+@model_validator(mode="after")
+def validate_hypothetical_type(self) -> "Thought":
+    """验证hypothetical类型的字段一致性"""
+
+    if self.type == "hypothetical":
+        # 1. hypothetical_condition必须存在且1-500字符
+        if not self.hypothetical_condition or not 1 <= len(self.hypothetical_condition) <= 500:
+            raise ValueError("hypothetical类型必须指定hypothetical_condition(1-500字符)")
+
+        # 2. hypothetical_impact长度1-2000字符
+        if self.hypothetical_impact and not 1 <= len(self.hypothetical_impact) <= 2000:
+            raise ValueError("hypothetical_impact必须在1-2000字符之间")
+
+        # 3. hypothetical_probability长度1-50字符
+        if self.hypothetical_probability and not 1 <= len(self.hypothetical_probability) <= 50:
+            raise ValueError("hypothetical_probability必须在1-50字符之间")
+
+    return self
+```
+
+#### 显示符号设计
+
+```python
+# 假设思考使用问号符号 "🤔"
+type_symbols = {
+    "regular": "💭",
+    "revision": "🔄",
+    "branch": "🌿",
+    "comparison": "⚖️",
+    "reverse": "🔙",
+    "hypothetical": "🤔",  # 新增
+}
+```
+
+#### 向后兼容保证
+
+- ✅ 现有regular/revision/branch/comparison/reverse类型验证逻辑不变
+- ✅ 新字段仅对hypothetical类型生效
+- ✅ 现有356个测试必须全部通过
+- ✅ API保持向后兼容
+
+#### 示例数据
+
+```python
+# 创建假设思考示例
+thought = Thought(
+    thought_number=7,
+    content="探索用户增长10倍的影响",
+    type="hypothetical",
+    hypothetical_condition="如果用户数量从10万增长到100万",
+    hypothetical_impact="服务器负载增加10倍，需要：1.数据库分库分表 2.引入缓存层 3.CDN加速",
+    hypothetical_probability="可能性：高"
+)
+```
+
 - [ ] **文档**: 更新ARCHITECTURE.md中的思考类型说明
 
 **完成标准**:
