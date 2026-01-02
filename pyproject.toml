@@ -73,10 +73,10 @@ dev = [
 deep-thinking = "deep_thinking.__main__:main"
 
 [project.urls]
-Homepage = "https://github.com/maric/deep-thinking-mcp"
-Documentation = "https://github.com/maric/deep-thinking-mcp#readme"
-Repository = "https://github.com/maric/deep-thinking-mcp"
-Issues = "https://github.com/maric/deep-thinking-mcp/issues"
+Homepage = "https://github.com/GeerMrc/Deep-Thinking-MCP"
+Documentation = "https://github.com/GeerMrc/Deep-Thinking-MCP#readme"
+Repository = "https://github.com/GeerMrc/Deep-Thinking-MCP"
+Issues = "https://github.com/GeerMrc/Deep-Thinking-MCP/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/deep_thinking"]
