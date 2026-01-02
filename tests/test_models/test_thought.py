@@ -242,3 +242,140 @@ class TestThoughtUpdate:
         assert update_data.content is None
         assert update_data.type is None
         assert update_data.is_revision is None
+
+
+class TestThoughtComparison:
+    """Comparison类型思考测试"""
+
+    def test_create_comparison_thought_valid(self):
+        """测试创建有效的对比思考"""
+        thought = Thought(
+            thought_number=1,
+            content="比较两种数据库方案",
+            type="comparison",
+            comparison_items=[
+                "MySQL: 成熟稳定，社区活跃",
+                "PostgreSQL: 功能丰富，扩展性强"
+            ],
+            comparison_dimensions=["性能", "可靠性", "成本"],
+            comparison_result="PostgreSQL在功能和扩展性上更优"
+        )
+        assert thought.type == "comparison"
+        assert thought.is_comparison_thought() is True
+        assert len(thought.comparison_items) == 2
+        assert thought.get_display_type() == "⚖️"
+
+    def test_comparison_requires_items(self):
+        """测试对比思考必须指定comparison_items"""
+        with pytest.raises(ValidationError) as exc_info:
+            Thought(
+                thought_number=1,
+                content="比较",
+                type="comparison",
+            )
+        assert "comparison_items" in str(exc_info.value)
+
+    def test_comparison_requires_at_least_two_items(self):
+        """测试对比思考至少需要2个比较项"""
+        with pytest.raises(ValidationError) as exc_info:
+            Thought(
+                thought_number=1,
+                content="比较",
+                type="comparison",
+                comparison_items=["只有一个项"],
+            )
+        # Pydantic会自动验证min_length
+        assert "at least 2" in str(exc_info.value) or "too_short" in str(exc_info.value)
+
+    def test_comparison_items_no_duplicates(self):
+        """测试对比思考不能有重复的比较项"""
+        with pytest.raises(ValidationError) as exc_info:
+            Thought(
+                thought_number=1,
+                content="比较",
+                type="comparison",
+                comparison_items=["相同的项", "相同的项"],
+            )
+        assert "重复" in str(exc_info.value)
+
+    def test_comparison_item_length_validation(self):
+        """测试比较项长度验证"""
+        # 空字符串应该被Pydantic的min_length=1拦截
+        with pytest.raises(ValidationError):
+            Thought(
+                thought_number=1,
+                content="比较",
+                type="comparison",
+                comparison_items=["", "有效项"],
+            )
+
+    def test_comparison_dimensions_max_ten(self):
+        """测试比较维度最多10个"""
+        with pytest.raises(ValidationError) as exc_info:
+            Thought(
+                thought_number=1,
+                content="比较",
+                type="comparison",
+                comparison_items=["A", "B"],
+                comparison_dimensions=[f"维度{i}" for i in range(11)],  # 11个维度
+            )
+        # Pydantic会自动验证max_length
+        assert "at most 10" in str(exc_info.value) or "too_long" in str(exc_info.value)
+
+    def test_comparison_result_optional(self):
+        """测试comparison_result是可选的"""
+        thought = Thought(
+            thought_number=1,
+            content="比较",
+            type="comparison",
+            comparison_items=["选项A", "选项B"],
+        )
+        assert thought.comparison_result is None
+
+    def test_comparison_dimensions_optional(self):
+        """测试comparison_dimensions是可选的"""
+        thought = Thought(
+            thought_number=1,
+            content="比较",
+            type="comparison",
+            comparison_items=["选项A", "选项B"],
+            comparison_result="A更好",
+        )
+        assert thought.comparison_dimensions is None
+        assert thought.comparison_result == "A更好"
+
+    def test_thoughtcreate_comparison_valid(self):
+        """测试ThoughtCreate支持comparison类型"""
+        create_data = ThoughtCreate(
+            thought_number=1,
+            content="比较",
+            type="comparison",
+            comparison_items=["A", "B"],
+            comparison_dimensions=["成本", "性能"],
+        )
+        thought = create_data.to_thought()
+        assert thought.is_comparison_thought() is True
+        assert thought.comparison_items == ["A", "B"]
+
+    def test_thoughtupdate_comparison_fields(self):
+        """测试ThoughtUpdate支持comparison字段"""
+        update_data = ThoughtUpdate(
+            comparison_items=["新A", "新B"],
+            comparison_result="新结论",
+        )
+        assert update_data.comparison_items == ["新A", "新B"]
+        assert update_data.comparison_result == "新结论"
+
+    def test_comparison_to_dict(self):
+        """测试对比思考转换为字典"""
+        thought = Thought(
+            thought_number=1,
+            content="比较",
+            type="comparison",
+            comparison_items=["A", "B"],
+            comparison_dimensions=["成本"],
+            comparison_result="A胜出",
+        )
+        data = thought.to_dict()
+        assert data["display_type"] == "⚖️"
+        assert data["comparison_items"] == ["A", "B"]

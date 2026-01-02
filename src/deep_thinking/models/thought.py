@@ -2,13 +2,16 @@
 思考步骤模型
 
 定义单个思考步骤的数据结构和验证规则。
-支持常规思考、修订思考和分支思考三种类型。
+支持常规思考、修订思考、分支思考、对比思考、逆向思考、假设思考六种类型。
 """
 
 from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
+
+# 定义思考类型的联合类型
+ThoughtType = Literal["regular", "revision", "branch", "comparison", "reverse", "hypothetical"]
 
 
 class Thought(BaseModel):
@@ -32,7 +35,7 @@ class Thought(BaseModel):
 
     content: str = Field(..., min_length=1, max_length=10000, description="思考内容，1-10000个字符")
 
-    type: Literal["regular", "revision", "branch"] = Field(
+    type: ThoughtType = Field(
         default="regular", description="思考类型"
     )
 
@@ -44,6 +47,26 @@ class Thought(BaseModel):
 
     branch_id: str | None = Field(
         default=None, min_length=1, max_length=50, description="分支标识符"
+    )
+
+    # Comparison类型专属字段
+    comparison_items: list[str] | None = Field(
+        default=None,
+        min_length=2,
+        description="对比思考的比较项列表，至少2个",
+    )
+
+    comparison_dimensions: list[str] | None = Field(
+        default=None,
+        max_length=10,
+        description="对比思考的比较维度列表，最多10个",
+    )
+
+    comparison_result: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=2000,
+        description="对比思考的比较结论",
     )
 
     timestamp: datetime = Field(default_factory=datetime.utcnow, description="思考时间戳")
@@ -84,6 +107,26 @@ class Thought(BaseModel):
                     f"thought_number ({self.thought_number})"
                 )
 
+        elif self.type == "comparison":
+            # 对比思考必须指定comparison_items
+            if self.comparison_items is None or len(self.comparison_items) < 2:
+                raise ValueError("comparison类型必须指定至少2个comparison_items")
+            # comparison_items不能有重复项
+            if len(self.comparison_items) != len(set(self.comparison_items)):
+                raise ValueError("comparison_items不能有重复项")
+            # 每个comparison_item长度1-500字符
+            for item in self.comparison_items:
+                if not 1 <= len(item) <= 500:
+                    raise ValueError("每个comparison_item必须在1-500字符之间")
+            # comparison_dimensions最多10个维度
+            if self.comparison_dimensions and len(self.comparison_dimensions) > 10:
+                raise ValueError("comparison_dimensions最多10个维度")
+            # 每个dimension长度1-50字符
+            if self.comparison_dimensions:
+                for dim in self.comparison_dimensions:
+                    if not 1 <= len(dim) <= 50:
+                        raise ValueError("每个comparison_dimension必须在1-50字符之间")
+
         return self
 
     def is_regular_thought(self) -> bool:
@@ -98,6 +141,10 @@ class Thought(BaseModel):
         """判断是否为分支思考"""
         return self.type == "branch"
 
+    def is_comparison_thought(self) -> bool:
+        """判断是否为对比思考"""
+        return self.type == "comparison"
+
     def get_display_type(self) -> str:
         """
         获取思考类型的显示符号
@@ -109,6 +156,9 @@ class Thought(BaseModel):
             "regular": "💭",
             "revision": "🔄",
             "branch": "🌿",
+            "comparison": "⚖️",
+            "reverse": "🔙",
+            "hypothetical": "🤔",
         }
         return type_symbols.get(self.type, "❓")
 
@@ -136,7 +186,7 @@ class ThoughtCreate(BaseModel):
 
     content: str = Field(..., min_length=1, max_length=10000, description="思考内容")
 
-    type: Literal["regular", "revision", "branch"] = Field(
+    type: ThoughtType = Field(
         default="regular", description="思考类型"
     )
 
@@ -148,6 +198,26 @@ class ThoughtCreate(BaseModel):
 
     branch_id: str | None = Field(
         default=None, min_length=1, max_length=50, description="分支标识符"
+    )
+
+    # Comparison类型字段
+    comparison_items: list[str] | None = Field(
+        default=None,
+        min_length=2,
+        description="对比思考的比较项列表，至少2个",
+    )
+
+    comparison_dimensions: list[str] | None = Field(
+        default=None,
+        max_length=10,
+        description="对比思考的比较维度列表，最多10个",
+    )
+
+    comparison_result: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=2000,
+        description="对比思考的比较结论",
     )
 
     def to_thought(self) -> Thought:
@@ -165,6 +235,9 @@ class ThoughtCreate(BaseModel):
             revises_thought=self.revises_thought,
             branch_from_thought=self.branch_from_thought,
             branch_id=self.branch_id,
+            comparison_items=self.comparison_items,
+            comparison_dimensions=self.comparison_dimensions,
+            comparison_result=self.comparison_result,
         )
 
 
@@ -178,7 +251,7 @@ class ThoughtUpdate(BaseModel):
 
     content: str | None = Field(None, min_length=1, max_length=10000, description="思考内容")
 
-    type: Literal["regular", "revision", "branch"] | None = Field(None, description="思考类型")
+    type: ThoughtType | None = Field(None, description="思考类型")
 
     is_revision: bool | None = Field(None, description="是否为修订思考")
 
@@ -187,3 +260,10 @@ class ThoughtUpdate(BaseModel):
     branch_from_thought: int | None = Field(None, ge=1, description="分支起始思考步骤编号")
 
     branch_id: str | None = Field(None, min_length=1, max_length=50, description="分支标识符")
+
+    # Comparison类型字段
+    comparison_items: list[str] | None = Field(None, min_length=2, description="对比思考的比较项列表")
+
+    comparison_dimensions: list[str] | None = Field(None, max_length=10, description="对比思考的比较维度列表")
+
+    comparison_result: str | None = Field(None, min_length=1, max_length=2000, description="对比思考的比较结论")
