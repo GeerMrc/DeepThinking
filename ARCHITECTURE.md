@@ -433,11 +433,14 @@ from pydantic import BaseModel, Field
 from typing import Literal
 from datetime import datetime
 
+# 定义思考类型的联合类型
+ThoughtType = Literal["regular", "revision", "branch", "comparison", "reverse", "hypothetical"]
+
 class Thought(BaseModel):
     """单个思考步骤"""
     thought_number: int = Field(..., description="思考步骤编号")
     content: str = Field(..., description="思考内容")
-    type: Literal["regular", "revision", "branch"] = Field(
+    type: ThoughtType = Field(
         default="regular",
         description="思考类型"
     )
@@ -454,6 +457,49 @@ class Thought(BaseModel):
         default=None,
         description="分支标识符"
     )
+
+    # Comparison类型专属字段
+    comparison_items: list[str] | None = Field(
+        default=None,
+        description="对比思考的比较项列表，至少2个"
+    )
+    comparison_dimensions: list[str] | None = Field(
+        default=None,
+        description="对比思考的比较维度列表，最多10个"
+    )
+    comparison_result: str | None = Field(
+        default=None,
+        description="对比思考的比较结论"
+    )
+
+    # Reverse类型专属字段
+    reverse_from: int | None = Field(
+        default=None,
+        description="逆向思考的反推起点思考编号"
+    )
+    reverse_target: str | None = Field(
+        default=None,
+        description="逆向思考的反推目标描述"
+    )
+    reverse_steps: list[str] | None = Field(
+        default=None,
+        description="逆向思考的反推步骤列表，最多20个"
+    )
+
+    # Hypothetical类型专属字段
+    hypothetical_condition: str | None = Field(
+        default=None,
+        description="假设思考的假设条件描述"
+    )
+    hypothetical_impact: str | None = Field(
+        default=None,
+        description="假设思考的影响分析"
+    )
+    hypothetical_probability: str | None = Field(
+        default=None,
+        description="假设思考的可能性评估"
+    )
+
     timestamp: datetime = Field(
         default_factory=datetime.utcnow,
         description="创建时间"
@@ -462,6 +508,17 @@ class Thought(BaseModel):
     class Config:
         frozen = True  # 不可变
 ```
+
+**思考类型说明**：
+
+| 类型 | 说明 | 显示符号 | 必需字段 |
+|------|------|---------|---------|
+| regular | 常规思考 | 💭 | content |
+| revision | 修订思考 | 🔄 | content, revises_thought |
+| branch | 分支思考 | 🌿 | content, branch_from_thought, branch_id |
+| comparison | 对比思考 | ⚖️ | content, comparison_items |
+| reverse | 逆向思考 | 🔙 | content, reverse_target |
+| hypothetical | 假设思考 | 🤔 | content, hypothetical_condition |
 
 #### 思考会话模型 (thinking_session.py)
 
