@@ -1,7 +1,13 @@
 """
 顺序思考工具
 
-实现MCP顺序思考工具，支持常规、修订、分支三种思考类型。
+实现MCP顺序思考工具，支持六种思考类型：
+- 常规思考(Regular): 正常顺序思考步骤 💭
+- 修订思考(Revision): 修订之前的思考内容 🔄
+- 分支思考(Branch): 从某点分出新思考分支 🌿
+- 对比思考(Comparison): 比较多个选项或方案的优劣 ⚖️
+- 逆向思考(Reverse): 从结论反推前提条件 🔙
+- 假设思考(Hypothetical): 探索假设条件下的影响 🤔
 """
 
 import logging
@@ -27,11 +33,23 @@ def sequential_thinking(
     branchFromThought: int | None = None,
     branchId: str | None = None,
     needsMoreThoughts: bool = False,
+    # Comparison类型参数
+    comparisonItems: list[str] | None = None,
+    comparisonDimensions: list[str] | None = None,
+    comparisonResult: str | None = None,
+    # Reverse类型参数
+    reverseFrom: int | None = None,
+    reverseTarget: str | None = None,
+    reverseSteps: list[str] | None = None,
+    # Hypothetical类型参数
+    hypotheticalCondition: str | None = None,
+    hypotheticalImpact: str | None = None,
+    hypotheticalProbability: str | None = None,
 ) -> str:
     """
     执行顺序思考步骤
 
-    支持常规思考、修订思考和分支思考三种类型。
+    支持六种思考类型：常规思考、修订思考、分支思考、对比思考、逆向思考、假设思考。
 
     Args:
         thought: 当前思考内容
@@ -44,6 +62,18 @@ def sequential_thinking(
         branchFromThought: 分支来源思考步骤编号（仅分支思考使用）
         branchId: 分支ID（仅分支思考使用，格式如"branch-0-1"）
         needsMoreThoughts: 是否需要增加总思考步骤数
+        # Comparison类型参数
+        comparisonItems: 对比思考的比较项列表（至少2个，每个1-500字符）
+        comparisonDimensions: 对比思考的比较维度列表（最多10个，每个1-50字符）
+        comparisonResult: 对比思考的比较结论（1-2000字符）
+        # Reverse类型参数
+        reverseFrom: 逆向思考的反推起点思考编号
+        reverseTarget: 逆向思考的反推目标描述（1-500字符）
+        reverseSteps: 逆向思考的反推步骤列表（最多20个，每个1-500字符）
+        # Hypothetical类型参数
+        hypotheticalCondition: 假设思考的假设条件描述（1-500字符）
+        hypotheticalImpact: 假设思考的影响分析（1-2000字符）
+        hypotheticalProbability: 假设思考的可能性评估（1-50字符）
 
     Returns:
         思考结果描述，包含当前思考信息和会话状态
@@ -115,11 +145,19 @@ def sequential_thinking(
         logger.info(f"会话 {session_id} 调整思考步骤数: {original_total} -> {new_total}")
 
     # 确定思考类型
-    thought_type: Literal["regular", "revision", "branch"] = "regular"
+    # 优先级: Revision > Branch > Comparison > Reverse > Hypothetical > Regular
+    thought_type: Literal["regular", "revision", "branch", "comparison", "reverse", "hypothetical"] = "regular"
+
     if isRevision:
         thought_type = "revision"
     elif branchFromThought is not None:
         thought_type = "branch"
+    elif comparisonItems is not None and len(comparisonItems) >= 2:
+        thought_type = "comparison"
+    elif reverseTarget is not None:
+        thought_type = "reverse"
+    elif hypotheticalCondition is not None:
+        thought_type = "hypothetical"
 
     # 创建思考步骤对象
     thought_obj = Thought(
@@ -130,6 +168,18 @@ def sequential_thinking(
         revises_thought=revisesThought,
         branch_from_thought=branchFromThought,
         branch_id=branchId,
+        # Comparison类型字段
+        comparison_items=comparisonItems,
+        comparison_dimensions=comparisonDimensions,
+        comparison_result=comparisonResult,
+        # Reverse类型字段
+        reverse_from=reverseFrom,
+        reverse_target=reverseTarget,
+        reverse_steps=reverseSteps,
+        # Hypothetical类型字段
+        hypothetical_condition=hypotheticalCondition,
+        hypothetical_impact=hypotheticalImpact,
+        hypothetical_probability=hypotheticalProbability,
         timestamp=datetime.now(timezone.utc),
     )
 
@@ -162,6 +212,42 @@ def sequential_thinking(
         if branchId:
             branch_info += f" (分支ID: {branchId})"
         result_parts.append(branch_info)
+        result_parts.append("")
+
+    # 添加对比思考信息
+    if thought_type == "comparison" and comparisonItems:
+        result_parts.append("⚖️ 对比思考")
+        result_parts.append(f"**比较项** ({len(comparisonItems)}个):")
+        for i, item in enumerate(comparisonItems, 1):
+            result_parts.append(f"  {i}. {item}")
+        if comparisonDimensions:
+            result_parts.append(f"**比较维度**: {', '.join(comparisonDimensions)}")
+        if comparisonResult:
+            result_parts.append(f"**比较结论**: {comparisonResult}")
+        result_parts.append("")
+
+    # 添加逆向思考信息
+    if thought_type == "reverse":
+        result_parts.append("🔙 逆向思考")
+        if reverseFrom is not None:
+            result_parts.append(f"**反推起点**: 思考步骤 {reverseFrom}")
+        if reverseTarget:
+            result_parts.append(f"**反推目标**: {reverseTarget}")
+        if reverseSteps:
+            result_parts.append(f"**反推步骤** ({len(reverseSteps)}个):")
+            for i, step in enumerate(reverseSteps, 1):
+                result_parts.append(f"  {i}. {step}")
+        result_parts.append("")
+
+    # 添加假设思考信息
+    if thought_type == "hypothetical":
+        result_parts.append("🤔 假设思考")
+        if hypotheticalCondition:
+            result_parts.append(f"**假设条件**: {hypotheticalCondition}")
+        if hypotheticalImpact:
+            result_parts.append(f"**影响分析**: {hypotheticalImpact}")
+        if hypotheticalProbability:
+            result_parts.append(f"**可能性**: {hypotheticalProbability}")
         result_parts.append("")
 
     # 添加思考步骤调整信息
@@ -207,6 +293,9 @@ def get_type_name(thought_type: str) -> str:
         "regular": "常规思考 💭",
         "revision": "修订思考 🔄",
         "branch": "分支思考 🌿",
+        "comparison": "对比思考 ⚖️",
+        "reverse": "逆向思考 🔙",
+        "hypothetical": "假设思考 🤔",
     }
     return type_names.get(thought_type, "常规思考 💭")
 

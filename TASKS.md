@@ -799,6 +799,58 @@
 
 ---
 
+## 技术债务追踪
+
+### TD-001: 新增思考类型工具层未实现 (P0)
+
+**状态**: `pending` 🚧
+
+**发现时间**: 2026-01-02
+**发现人**: GLM-4.7
+**优先级**: P0 - 阻塞发布
+
+> **问题描述**:
+> 阶段12实现了3种新思考类型（Comparison⚖️、Reverse🔙、Hypothetical🤔），但仅在模型层(`models/thought.py`)扩展，工具层(`tools/sequential_thinking.py`)未实现支持。
+
+> **影响范围**:
+> - 用户无法通过MCP协议调用新思考类型
+> - 宣称的"六种思考模式"实际只实现了3种
+> - 阻塞v0.2.0版本发布
+
+> **根本原因**:
+> 阶段12实现时选择了模型层扩展而非工具层扩展，导致：
+> - 数据模型支持新类型 ✅
+> - 验证逻辑工作正常 ✅
+> - 单元测试覆盖完整 ✅
+> - 但MCP客户端无法调用新类型 ❌
+
+> **修复方案**: 方案A - 修复工具层（推荐）
+>
+> **修复任务清单**:
+>
+> | 任务ID | 任务描述 | 状态 | 负责模块 | 验证方式 |
+> |--------|---------|------|----------|---------|
+> | TD.1 | 添加技术债务记录到TASKS.md | in_progress | TASKS.md | 文档已更新 |
+> | TD.2 | 更新sequential_thinking工具支持6种类型 | pending | tools/sequential_thinking.py | 代码审查 |
+> | TD.3 | 添加新类型参数到工具接口 | pending | tools/sequential_thinking.py | 功能测试 |
+> | TD.4 | 更新工具文档注释 | pending | tools/sequential_thinking.py | 文档审查 |
+> | TD.5 | 添加工具层集成测试 | pending | tests/test_integration/ | pytest通过 |
+> | TD.6 | 验证新类型可通过MCP调用 | pending | MCP Inspector | 工具可调用 |
+> | TD.7 | 提交工具层修复代码 | pending | Git | 提交完成 |
+
+> **修复验证清单**:
+> - [ ] sequential_thinking工具支持6种思考类型
+> - [ ] 新类型参数(comparison_items, reverse_target等)可正常传递
+> - [ ] MCP Inspector可调用新类型
+> - [ ] 集成测试覆盖新类型工具调用
+> - [ ] 所有现有测试继续通过（向后兼容）
+> - [ ] 文档与代码实现一致
+
+> **预计工作量**: 2-3小时
+> **预计完成**: 2026-01-02
+
+---
+
 ## 变更记录
 
 | 日期 | 变更内容 | 变更人 |
