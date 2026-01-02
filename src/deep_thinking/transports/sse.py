@@ -15,7 +15,7 @@ import json
 import logging
 
 from aiohttp import web
-from mcp.server import FastMCP  # type: ignore[import-not-found]
+from mcp.server import FastMCP
 
 logger = logging.getLogger(__name__)
 
