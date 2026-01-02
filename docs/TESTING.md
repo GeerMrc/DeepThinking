@@ -109,14 +109,15 @@
 **测试目的**: 验证AI能进行多方案对比分析
 
 **对话提示词**:
-> "使用sequential_thinking的对比思考功能，对比React、Vue、Angular三个前端框架在性能、学习曲线、生态系统三个维度的优劣。"
+> "使用sequential_thinking工具，对比React、Vue、Angular三个前端框架在性能、学习曲线、生态系统三个维度的优劣。请提供comparisonItems参数列出对比项，comparisonDimensions参数列出比较维度。"
 
 **预期AI行为**:
 - 调用sequential_thinking工具
 - 参数包含:
-  - `type`: "comparison"
-  - `comparisonItems`: ["React: ...", "Vue: ...", "Angular: ..."]
+  - `comparisonItems`: ["React: 社区大生态成熟", "Vue: 学习曲线平缓", "Angular: 企业级框架"]
   - `comparisonDimensions`: ["性能", "学习曲线", "生态系统"]
+  - `comparisonResult`: 对比结论
+- **注意**: 无需传递type参数，系统会根据comparisonItems自动识别为对比思考
 
 **通过标准**:
 - [ ] 显示"对比思考 ⚖️"
@@ -131,15 +132,15 @@
 **测试目的**: 验证AI能反向推理验证结论
 
 **对话提示词**:
-> "使用sequential_thinking的逆向思考功能。你已经得出结论'应该采用微服务架构'，现在请反推验证这个结论的前提条件是否成立。"
+> "使用sequential_thinking工具的逆向思考功能。你已经得出结论'应该采用微服务架构'，现在请反推验证这个结论的前提条件是否成立。请提供reverseTarget参数描述反推目标，reverseSteps参数列出验证步骤。"
 
 **预期AI行为**:
 - 调用sequential_thinking工具
 - 参数包含:
-  - `type`: "reverse"
-  - `reverseFrom`: 之前思考步骤编号
   - `reverseTarget`: "验证'采用微服务架构'结论的前提条件"
-  - `reverseSteps`: 前提条件列表
+  - `reverseSteps`: ["团队规模>20人", "业务模块边界清晰", "技术储备充足"]
+  - `reverseFrom`: (可选) 反推起点的思考编号
+- **注意**: 无需传递type参数，系统会根据reverseTarget自动识别为逆向思考
 
 **通过标准**:
 - [ ] 显示"逆向思考 🔙"
@@ -154,15 +155,15 @@
 **测试目的**: 验证AI能进行假设性分析
 
 **对话提示词**:
-> "使用sequential_thinking的假设思考功能。假设用户数量从10万增长到100万，分析这对服务器架构的影响。"
+> "使用sequential_thinking工具的假设思考功能。假设用户数量从10万增长到100万，分析这对服务器架构的影响。请提供hypotheticalCondition参数描述假设条件，hypotheticalImpact参数分析影响。"
 
 **预期AI行为**:
 - 调用sequential_thinking工具
 - 参数包含:
-  - `type`: "hypothetical"
   - `hypotheticalCondition`: "如果用户数量从10万增长到100万"
-  - `hypotheticalImpact`: 影响分析
-  - `hypotheticalProbability`: 可能性评估
+  - `hypotheticalImpact`: "服务器负载增加10倍，需要：1.数据库分库分表 2.引入缓存层"
+  - `hypotheticalProbability`: "可能性：高"
+- **注意**: 无需传递type参数，系统会根据hypotheticalCondition自动识别为假设思考
 
 **通过标准**:
 - [ ] 显示"假设思考 🤔"

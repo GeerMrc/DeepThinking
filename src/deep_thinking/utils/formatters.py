@@ -28,6 +28,9 @@ class SessionFormatter:
         "regular": "💭",
         "revision": "🔄",
         "branch": "🌿",
+        "comparison": "⚖️",
+        "reverse": "🔙",
+        "hypothetical": "🤔",
     }
 
     # 思考类型中文名称
@@ -35,6 +38,9 @@ class SessionFormatter:
         "regular": "常规思考",
         "revision": "修订思考",
         "branch": "分支思考",
+        "comparison": "对比思考",
+        "reverse": "逆向思考",
+        "hypothetical": "假设思考",
     }
 
     @staticmethod
@@ -639,6 +645,9 @@ class Visualizer:
 classDef regular fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
 classDef revision fill:#fff3e0,stroke:#f57c00,stroke-width:2px;
 classDef branch fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;
+classDef comparison fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
+classDef reverse fill:#fff8e1,stroke:#ffa000,stroke-width:2px;
+classDef hypothetical fill:#fce4ec,stroke:#c2185b,stroke-width:2px;
 """
 
     @staticmethod
@@ -840,6 +849,9 @@ classDef branch fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;
             "regular": "常规",
             "revision": "修订",
             "branch": "分支",
+            "comparison": "对比",
+            "reverse": "逆向",
+            "hypothetical": "假设",
         }.get(thought.type, "")
 
         lines.append(f"        {prefix} {emoji} 步骤 {thought.thought_number} [{type_label}]")
