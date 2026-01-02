@@ -174,12 +174,11 @@ class Thought(BaseModel):
             if self.reverse_target is None or not 1 <= len(self.reverse_target) <= 500:
                 raise ValueError("reverse类型必须指定reverse_target(1-500字符)")
             # reverse_from必须小于当前thought_number
-            if self.reverse_from is not None:
-                if self.reverse_from >= self.thought_number:
-                    raise ValueError(
-                        f"reverse_from ({self.reverse_from}) 必须小于 "
-                        f"thought_number ({self.thought_number})"
-                    )
+            if self.reverse_from is not None and self.reverse_from >= self.thought_number:
+                raise ValueError(
+                    f"reverse_from ({self.reverse_from}) 必须小于 "
+                    f"thought_number ({self.thought_number})"
+                )
             # reverse_steps最多20个步骤
             if self.reverse_steps and len(self.reverse_steps) > 20:
                 raise ValueError("reverse_steps最多20个步骤")
