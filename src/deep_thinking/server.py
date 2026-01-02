@@ -10,7 +10,7 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from mcp.server import FastMCP
+from mcp.server import FastMCP  # type: ignore[import-not-found]
 
 from deep_thinking.storage.migration import (
     create_migration_backup,

@@ -22,7 +22,7 @@ import sys
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-from mcp.server import FastMCP
+from mcp.server import FastMCP  # type: ignore[import-not-found]
 
 # 导入 server.py 中的 app 实例（已注册所有工具）
 # 这必须在使用前导入，以确保工具装饰器执行

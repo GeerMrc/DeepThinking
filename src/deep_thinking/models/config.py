@@ -6,8 +6,7 @@
 
 import os
 
-import pydantic
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, ValidationInfo, field_validator
 
 
 class ThinkingConfig(BaseModel):
@@ -42,7 +41,7 @@ class ThinkingConfig(BaseModel):
 
     @field_validator("min_thoughts")
     @classmethod
-    def validate_min_thoughts(cls, v: int, info: pydantic.FieldValidationInfo) -> int:
+    def validate_min_thoughts(cls, v: int, info: ValidationInfo) -> int:
         """
         验证最小思考步骤数
 
@@ -58,9 +57,10 @@ class ThinkingConfig(BaseModel):
         Raises:
             ValueError: 如果 min_thoughts > max_thoughts
         """
-        if "max_thoughts" in info.data and v > info.data["max_thoughts"]:
+        max_thoughts = info.data.get("max_thoughts")
+        if max_thoughts is not None and v > max_thoughts:
             raise ValueError(
-                f"min_thoughts ({v}) 不能大于 max_thoughts ({info.data['max_thoughts']})"
+                f"min_thoughts ({v}) 不能大于 max_thoughts ({max_thoughts})"
             )
         return v
 
