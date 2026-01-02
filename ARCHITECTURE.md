@@ -469,7 +469,7 @@ class Thought(BaseModel):
     )
     comparison_result: str | None = Field(
         default=None,
-        description="对比思考的比较结论"
+        description="对比思考的比较结论，最多10000字符"
     )
 
     # Reverse类型专属字段
@@ -479,7 +479,7 @@ class Thought(BaseModel):
     )
     reverse_target: str | None = Field(
         default=None,
-        description="逆向思考的反推目标描述"
+        description="逆向思考的反推目标描述，最多2000字符"
     )
     reverse_steps: list[str] | None = Field(
         default=None,
@@ -489,11 +489,11 @@ class Thought(BaseModel):
     # Hypothetical类型专属字段
     hypothetical_condition: str | None = Field(
         default=None,
-        description="假设思考的假设条件描述"
+        description="假设思考的假设条件描述，最多2000字符"
     )
     hypothetical_impact: str | None = Field(
         default=None,
-        description="假设思考的影响分析"
+        description="假设思考的影响分析，最多10000字符"
     )
     hypothetical_probability: str | None = Field(
         default=None,

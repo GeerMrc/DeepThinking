@@ -1026,7 +1026,7 @@
 | `type` | Literal | - | - | 必须为"comparison" | 思考类型标识 |
 | `comparison_items` | list[str] | ✅ | - | 最少2个，每个1-500字符，无重复 | 比较项列表 |
 | `comparison_dimensions` | list[str] | ❌ | None | 最多10个，每个1-50字符 | 比较维度（可选） |
-| `comparison_result` | str | ❌ | None | 1-2000字符 | 比较结论（可选） |
+| `comparison_result` | str | ❌ | None | 1-10000字符 | 比较结论（可选） |
 
 **字段说明**:
 
@@ -1072,9 +1072,9 @@ def validate_comparison_type(self) -> "Thought":
                 if not 1 <= len(dim) <= 50:
                     raise ValueError("每个comparison_dimension必须在1-50字符之间")
 
-        # 6. comparison_result长度1-2000字符
-        if self.comparison_result and not 1 <= len(self.comparison_result) <= 2000:
-            raise ValueError("comparison_result必须在1-2000字符之间")
+        # 6. comparison_result长度1-10000字符
+        if self.comparison_result and not 1 <= len(self.comparison_result) <= 10000:
+            raise ValueError("comparison_result必须在1-10000字符之间")
 
     return self
 ```
@@ -1139,7 +1139,7 @@ thought = Thought(
 |--------|------|------|--------|----------|------|
 | `type` | Literal | - | - | 必须为"reverse" | 思考类型标识 |
 | `reverse_from` | int | ❌ | None | 必须<thought_number，≥1 | 反推起点的思考编号 |
-| `reverse_target` | str | ✅ | - | 1-500字符 | 反推目标描述 |
+| `reverse_target` | str | ✅ | - | 1-2000字符 | 反推目标描述 |
 | `reverse_steps` | list[str] | ❌ | None | 最多20个，每个1-500字符 | 反推步骤列表（可选） |
 
 **字段说明**:
@@ -1168,9 +1168,9 @@ def validate_reverse_type(self) -> "Thought":
     """验证reverse类型的字段一致性"""
 
     if self.type == "reverse":
-        # 1. reverse_target必须存在且1-500字符
-        if not self.reverse_target or not 1 <= len(self.reverse_target) <= 500:
-            raise ValueError("reverse类型必须指定reverse_target(1-500字符)")
+        # 1. reverse_target必须存在且1-2000字符
+        if not self.reverse_target or not 1 <= len(self.reverse_target) <= 2000:
+            raise ValueError("reverse类型必须指定reverse_target(1-2000字符)")
 
         # 2. reverse_from必须小于当前thought_number
         if self.reverse_from is not None:
@@ -1251,8 +1251,8 @@ thought = Thought(
 | 字段名 | 类型 | 必需 | 默认值 | 验证规则 | 说明 |
 |--------|------|------|--------|----------|------|
 | `type` | Literal | - | - | 必须为"hypothetical" | 思考类型标识 |
-| `hypothetical_condition` | str | ✅ | - | 1-500字符 | 假设条件描述 |
-| `hypothetical_impact` | str | ❌ | None | 1-2000字符 | 影响分析（可选） |
+| `hypothetical_condition` | str | ✅ | - | 1-2000字符 | 假设条件描述 |
+| `hypothetical_impact` | str | ❌ | None | 1-10000字符 | 影响分析（可选） |
 | `hypothetical_probability` | str | ❌ | None | 1-50字符 | 可能性评估（可选） |
 
 **字段说明**:
@@ -1276,13 +1276,13 @@ def validate_hypothetical_type(self) -> "Thought":
     """验证hypothetical类型的字段一致性"""
 
     if self.type == "hypothetical":
-        # 1. hypothetical_condition必须存在且1-500字符
-        if not self.hypothetical_condition or not 1 <= len(self.hypothetical_condition) <= 500:
-            raise ValueError("hypothetical类型必须指定hypothetical_condition(1-500字符)")
+        # 1. hypothetical_condition必须存在且1-2000字符
+        if not self.hypothetical_condition or not 1 <= len(self.hypothetical_condition) <= 2000:
+            raise ValueError("hypothetical类型必须指定hypothetical_condition(1-2000字符)")
 
-        # 2. hypothetical_impact长度1-2000字符
-        if self.hypothetical_impact and not 1 <= len(self.hypothetical_impact) <= 2000:
-            raise ValueError("hypothetical_impact必须在1-2000字符之间")
+        # 2. hypothetical_impact长度1-10000字符
+        if self.hypothetical_impact and not 1 <= len(self.hypothetical_impact) <= 10000:
+            raise ValueError("hypothetical_impact必须在1-10000字符之间")
 
         # 3. hypothetical_probability长度1-50字符
         if self.hypothetical_probability and not 1 <= len(self.hypothetical_probability) <= 50:

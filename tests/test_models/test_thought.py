@@ -421,7 +421,7 @@ class TestThoughtReverse:
                 thought_number=1,
                 content="反推",
                 type="reverse",
-                reverse_target="x" * 501,  # 超过500字符
+                reverse_target="x" * 2001,  # 超过2000字符
             )
 
     def test_reverse_from_must_be_less_than_thought_number(self):
@@ -549,7 +549,7 @@ class TestThoughtHypothetical:
                 thought_number=1,
                 content="假设",
                 type="hypothetical",
-                hypothetical_condition="x" * 501,  # 超过500字符
+                hypothetical_condition="x" * 2001,  # 超过2000字符
             )
 
     def test_hypothetical_impact_optional(self):
@@ -570,7 +570,7 @@ class TestThoughtHypothetical:
                 content="假设",
                 type="hypothetical",
                 hypothetical_condition="如果发生X",
-                hypothetical_impact="x" * 2001,  # 超过2000字符
+                hypothetical_impact="x" * 10001,  # 超过10000字符
             )
 
     def test_hypothetical_probability_optional(self):
@@ -629,3 +629,115 @@ class TestThoughtHypothetical:
         data = thought.to_dict()
         assert data["display_type"] == "🤔"
         assert data["hypothetical_condition"] == "如果发生X"
+
+
+class TestThoughtLongContent:
+    """长内容边界测试 - 验证新边界值允许更长的内容"""
+
+    def test_comparison_result_with_5000_chars(self):
+        """测试comparison_result支持5000字符"""
+        long_result = "分析结论：" + "详细说明" * 1249  # 5 + 4996 = 5001，截断到5000
+        long_result = long_result[:5000]
+        thought = Thought(
+            thought_number=1,
+            content="比较分析",
+            type="comparison",
+            comparison_items=["方案A", "方案B"],
+            comparison_result=long_result,
+        )
+        assert len(thought.comparison_result) == 5000
+        assert thought.comparison_result == long_result
+
+    def test_comparison_result_with_10000_chars(self):
+        """测试comparison_result支持10000字符"""
+        long_result = "分析结论：" + "详细说明" * 2499  # ~10000字符
+        long_result = long_result[:10000]
+        thought = Thought(
+            thought_number=1,
+            content="比较分析",
+            type="comparison",
+            comparison_items=["方案A", "方案B"],
+            comparison_result=long_result,
+        )
+        assert len(thought.comparison_result) == 10000
+        assert thought.comparison_result == long_result
+
+    def test_hypothetical_impact_with_5000_chars(self):
+        """测试hypothetical_impact支持5000字符"""
+        long_impact = "影响分析：" + "详细描述" * 1249
+        long_impact = long_impact[:5000]
+        thought = Thought(
+            thought_number=1,
+            content="假设分析",
+            type="hypothetical",
+            hypothetical_condition="如果发生X",
+            hypothetical_impact=long_impact,
+        )
+        assert len(thought.hypothetical_impact) == 5000
+        assert thought.hypothetical_impact == long_impact
+
+    def test_hypothetical_impact_with_10000_chars(self):
+        """测试hypothetical_impact支持10000字符"""
+        long_impact = "影响分析：" + "详细描述" * 2499
+        long_impact = long_impact[:10000]
+        thought = Thought(
+            thought_number=1,
+            content="假设分析",
+            type="hypothetical",
+            hypothetical_condition="如果发生X",
+            hypothetical_impact=long_impact,
+        )
+        assert len(thought.hypothetical_impact) == 10000
+        assert thought.hypothetical_impact == long_impact
+
+    def test_reverse_target_with_1000_chars(self):
+        """测试reverse_target支持1000字符"""
+        long_target = "验证目标：" + "详细说明" * 249
+        long_target = long_target[:1000]
+        thought = Thought(
+            thought_number=1,
+            content="反推分析",
+            type="reverse",
+            reverse_target=long_target,
+        )
+        assert len(thought.reverse_target) == 1000
+        assert thought.reverse_target == long_target
+
+    def test_reverse_target_with_2000_chars(self):
+        """测试reverse_target支持2000字符"""
+        long_target = "验证目标：" + "详细说明" * 499
+        long_target = long_target[:2000]
+        thought = Thought(
+            thought_number=1,
+            content="反推分析",
+            type="reverse",
+            reverse_target=long_target,
+        )
+        assert len(thought.reverse_target) == 2000
+        assert thought.reverse_target == long_target
+
+    def test_hypothetical_condition_with_1000_chars(self):
+        """测试hypothetical_condition支持1000字符"""
+        long_condition = "假设条件：" + "详细描述" * 249
+        long_condition = long_condition[:1000]
+        thought = Thought(
+            thought_number=1,
+            content="假设分析",
+            type="hypothetical",
+            hypothetical_condition=long_condition,
+        )
+        assert len(thought.hypothetical_condition) == 1000
+        assert thought.hypothetical_condition == long_condition
+
+    def test_hypothetical_condition_with_2000_chars(self):
+        """测试hypothetical_condition支持2000字符"""
+        long_condition = "假设条件：" + "详细描述" * 499
+        long_condition = long_condition[:2000]
+        thought = Thought(
+            thought_number=1,
+            content="假设分析",
+            type="hypothetical",
+            hypothetical_condition=long_condition,
+        )
+        assert len(thought.hypothetical_condition) == 2000
+        assert thought.hypothetical_condition == long_condition

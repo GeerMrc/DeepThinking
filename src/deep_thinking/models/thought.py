@@ -65,7 +65,7 @@ class Thought(BaseModel):
     comparison_result: str | None = Field(
         default=None,
         min_length=1,
-        max_length=2000,
+        max_length=10000,
         description="对比思考的比较结论",
     )
 
@@ -79,7 +79,7 @@ class Thought(BaseModel):
     reverse_target: str | None = Field(
         default=None,
         min_length=1,
-        max_length=500,
+        max_length=2000,
         description="逆向思考的反推目标描述",
     )
 
@@ -93,14 +93,14 @@ class Thought(BaseModel):
     hypothetical_condition: str | None = Field(
         default=None,
         min_length=1,
-        max_length=500,
+        max_length=2000,
         description="假设思考的假设条件描述",
     )
 
     hypothetical_impact: str | None = Field(
         default=None,
         min_length=1,
-        max_length=2000,
+        max_length=10000,
         description="假设思考的影响分析",
     )
 
@@ -171,8 +171,8 @@ class Thought(BaseModel):
 
         elif self.type == "reverse":
             # 逆向思考必须指定reverse_target
-            if self.reverse_target is None or not 1 <= len(self.reverse_target) <= 500:
-                raise ValueError("reverse类型必须指定reverse_target(1-500字符)")
+            if self.reverse_target is None or not 1 <= len(self.reverse_target) <= 2000:
+                raise ValueError("reverse类型必须指定reverse_target(1-2000字符)")
             # reverse_from必须小于当前thought_number
             if self.reverse_from is not None and self.reverse_from >= self.thought_number:
                 raise ValueError(
@@ -190,11 +190,11 @@ class Thought(BaseModel):
 
         elif self.type == "hypothetical":
             # 假设思考必须指定hypothetical_condition
-            if self.hypothetical_condition is None or not 1 <= len(self.hypothetical_condition) <= 500:
-                raise ValueError("hypothetical类型必须指定hypothetical_condition(1-500字符)")
-            # hypothetical_impact长度1-2000字符
-            if self.hypothetical_impact is not None and not 1 <= len(self.hypothetical_impact) <= 2000:
-                raise ValueError("hypothetical_impact必须在1-2000字符之间")
+            if self.hypothetical_condition is None or not 1 <= len(self.hypothetical_condition) <= 2000:
+                raise ValueError("hypothetical类型必须指定hypothetical_condition(1-2000字符)")
+            # hypothetical_impact长度1-10000字符
+            if self.hypothetical_impact is not None and not 1 <= len(self.hypothetical_impact) <= 10000:
+                raise ValueError("hypothetical_impact必须在1-10000字符之间")
             # hypothetical_probability长度1-50字符
             if self.hypothetical_probability is not None and not 1 <= len(self.hypothetical_probability) <= 50:
                 raise ValueError("hypothetical_probability必须在1-50字符之间")
@@ -296,7 +296,7 @@ class ThoughtCreate(BaseModel):
     comparison_result: str | None = Field(
         default=None,
         min_length=1,
-        max_length=2000,
+        max_length=10000,
         description="对比思考的比较结论",
     )
 
@@ -310,7 +310,7 @@ class ThoughtCreate(BaseModel):
     reverse_target: str | None = Field(
         default=None,
         min_length=1,
-        max_length=500,
+        max_length=2000,
         description="逆向思考的反推目标描述",
     )
 
@@ -324,14 +324,14 @@ class ThoughtCreate(BaseModel):
     hypothetical_condition: str | None = Field(
         default=None,
         min_length=1,
-        max_length=500,
+        max_length=2000,
         description="假设思考的假设条件描述",
     )
 
     hypothetical_impact: str | None = Field(
         default=None,
         min_length=1,
-        max_length=2000,
+        max_length=10000,
         description="假设思考的影响分析",
     )
 
@@ -394,18 +394,18 @@ class ThoughtUpdate(BaseModel):
 
     comparison_dimensions: list[str] | None = Field(None, max_length=10, description="对比思考的比较维度列表")
 
-    comparison_result: str | None = Field(None, min_length=1, max_length=2000, description="对比思考的比较结论")
+    comparison_result: str | None = Field(None, min_length=1, max_length=10000, description="对比思考的比较结论")
 
     # Reverse类型字段
     reverse_from: int | None = Field(None, ge=1, description="逆向思考的反推起点思考编号")
 
-    reverse_target: str | None = Field(None, min_length=1, max_length=500, description="逆向思考的反推目标描述")
+    reverse_target: str | None = Field(None, min_length=1, max_length=2000, description="逆向思考的反推目标描述")
 
     reverse_steps: list[str] | None = Field(None, max_length=20, description="逆向思考的反推步骤列表")
 
     # Hypothetical类型字段
-    hypothetical_condition: str | None = Field(None, min_length=1, max_length=500, description="假设思考的假设条件描述")
+    hypothetical_condition: str | None = Field(None, min_length=1, max_length=2000, description="假设思考的假设条件描述")
 
-    hypothetical_impact: str | None = Field(None, min_length=1, max_length=2000, description="假设思考的影响分析")
+    hypothetical_impact: str | None = Field(None, min_length=1, max_length=10000, description="假设思考的影响分析")
 
     hypothetical_probability: str | None = Field(None, min_length=1, max_length=50, description="假设思考的可能性评估")
