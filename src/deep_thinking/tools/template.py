@@ -213,7 +213,7 @@ async def list_templates(
     parts.append("")
     parts.append("示例:")
     parts.append("```")
-    parts.append(f"apply_template(\"{templates[0]['template_id']}\", \"我的问题上下文\")")
+    parts.append(f'apply_template("{templates[0]["template_id"]}", "我的问题上下文")')
     parts.append("```")
 
     return "\n".join(parts)

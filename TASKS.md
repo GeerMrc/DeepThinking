@@ -1,4 +1,4 @@
-# DeepThinking-MCP 项目任务追踪
+# DeepThinking MCP 项目任务追踪
 
 > 项目级唯一任务追踪文档
 > 更新时间: 2026-01-01
@@ -435,7 +435,7 @@
 **优先级**: P0 - 高优先级基础架构优化
 
 > **设计目标**:
-> - 将存储从全局目录 (~/.deep-thinking-mcp/) 迁移到项目本地 (./.deep-thinking-mcp/)
+> - 将存储从全局目录 (~/.Deep-Thinking-MCP/) 迁移到项目本地 (./.Deep-Thinking-MCP/)
 > - 实现自动数据迁移机制
 > - 更新所有相关文档
 

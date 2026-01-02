@@ -24,7 +24,7 @@ from deep_thinking.storage.migration import (
 @pytest.fixture
 def temp_old_data_dir(tmp_path: Path):
     """创建临时旧数据目录"""
-    old_dir = tmp_path / ".deep-thinking-mcp"
+    old_dir = tmp_path / ".deepthinking"
     old_dir.mkdir(parents=True, exist_ok=True)
 
     # 创建会话目录和索引文件
@@ -34,28 +34,32 @@ def temp_old_data_dir(tmp_path: Path):
     # 创建索引文件
     index_file = sessions_dir / ".index.json"
     index_file.write_text(
-        json.dumps({
-            "test-session-1": {
-                "name": "Test Session 1",
-                "status": "completed",
-                "updated_at": "2026-01-01T00:00:00",
+        json.dumps(
+            {
+                "test-session-1": {
+                    "name": "Test Session 1",
+                    "status": "completed",
+                    "updated_at": "2026-01-01T00:00:00",
+                }
             }
-        }),
+        ),
         encoding="utf-8",
     )
 
     # 创建测试会话文件
     session_file = sessions_dir / "test-session-1.json"
     session_file.write_text(
-        json.dumps({
-            "session_id": "test-session-1",
-            "name": "Test Session 1",
-            "description": "Test Description",
-            "created_at": "2026-01-01T00:00:00",
-            "updated_at": "2026-01-01T00:00:00",
-            "status": "completed",
-            "thoughts": [],
-        }),
+        json.dumps(
+            {
+                "session_id": "test-session-1",
+                "name": "Test Session 1",
+                "description": "Test Description",
+                "created_at": "2026-01-01T00:00:00",
+                "updated_at": "2026-01-01T00:00:00",
+                "status": "completed",
+                "thoughts": [],
+            }
+        ),
         encoding="utf-8",
     )
 
@@ -72,7 +76,7 @@ class TestDetectOldData:
 
     def test_old_data_dir_exists_empty(self, tmp_path: Path):
         """测试：旧数据目录存在但为空"""
-        old_dir = tmp_path / ".deep-thinking-mcp"
+        old_dir = tmp_path / ".deepthinking"
         old_dir.mkdir(parents=True, exist_ok=True)
 
         with mock.patch("deep_thinking.storage.migration.OLD_DATA_DIR", old_dir):
@@ -85,7 +89,7 @@ class TestDetectOldData:
 
     def test_old_data_dir_with_index_only(self, tmp_path: Path):
         """测试：旧数据目录存在且只有索引文件"""
-        old_dir = tmp_path / ".deep-thinking-mcp"
+        old_dir = tmp_path / ".deepthinking"
         old_dir.mkdir(parents=True, exist_ok=True)
 
         sessions_dir = old_dir / "sessions"
@@ -133,7 +137,7 @@ class TestMigrateData:
 
     def test_migrate_success(self, temp_old_data_dir: Path, tmp_path: Path):
         """测试：成功迁移数据"""
-        target_dir = tmp_path / ".deep-thinking-mcp-new"
+        target_dir = tmp_path / ".deepthinking-new"
 
         with mock.patch("deep_thinking.storage.migration.OLD_DATA_DIR", temp_old_data_dir):
             success = migrate_data(target_dir)
@@ -145,7 +149,7 @@ class TestMigrateData:
 
     def test_migrate_no_old_data(self, tmp_path: Path):
         """测试：旧数据不存在时迁移"""
-        target_dir = tmp_path / ".deep-thinking-mcp"
+        target_dir = tmp_path / ".deepthinking"
 
         with mock.patch("deep_thinking.storage.migration.OLD_DATA_DIR", tmp_path / "nonexistent"):
             success = migrate_data(target_dir)
@@ -153,7 +157,7 @@ class TestMigrateData:
 
     def test_migrate_already_completed(self, temp_old_data_dir: Path, tmp_path: Path):
         """测试：已完成的迁移不再重复"""
-        target_dir = tmp_path / ".deep-thinking-mcp"
+        target_dir = tmp_path / ".deepthinking"
         target_dir.mkdir(parents=True, exist_ok=True)
         (target_dir / MIGRATION_MARKER).write_text("migration_date: 2026-01-01")
 
@@ -163,7 +167,7 @@ class TestMigrateData:
 
     def test_migrate_force_overwrite(self, temp_old_data_dir: Path, tmp_path: Path):
         """测试：强制迁移覆盖已有数据"""
-        target_dir = tmp_path / ".deep-thinking-mcp-force"
+        target_dir = tmp_path / ".deepthinking-force"
         target_dir.mkdir(parents=True, exist_ok=True)
 
         # 创建旧会话文件
@@ -182,7 +186,7 @@ class TestRollbackMigration:
 
     def test_rollback_success(self, temp_old_data_dir: Path, tmp_path: Path):
         """测试：成功回滚迁移"""
-        target_dir = tmp_path / ".deep-thinking-mcp"
+        target_dir = tmp_path / ".deepthinking"
         target_dir.mkdir(parents=True, exist_ok=True)
         (target_dir / MIGRATION_MARKER).write_text("migration_date: 2026-01-01")
 
@@ -198,7 +202,7 @@ class TestRollbackMigration:
 
     def test_rollback_no_marker(self, tmp_path: Path):
         """测试：没有迁移标记时回滚"""
-        target_dir = tmp_path / ".deep-thinking-mcp"
+        target_dir = tmp_path / ".deepthinking"
         target_dir.mkdir(parents=True, exist_ok=True)
 
         success = rollback_migration(target_dir)
@@ -210,12 +214,12 @@ class TestGetMigrationInfo:
 
     def test_get_migration_info_exists(self, tmp_path: Path):
         """测试：成功获取迁移信息"""
-        target_dir = tmp_path / ".deep-thinking-mcp"
+        target_dir = tmp_path / ".deepthinking"
         target_dir.mkdir(parents=True, exist_ok=True)
         (target_dir / MIGRATION_MARKER).write_text(
             "migration_date: 2026-01-01T00:00:00\n"
-            "source: ~/.deep-thinking-mcp/\n"
-            "target: ./.deep-thinking-mcp/\n",
+            "source: ~/.deepthinking/\n"
+            "target: ./.deepthinking/\n",
             encoding="utf-8",
         )
 
@@ -223,12 +227,12 @@ class TestGetMigrationInfo:
 
         assert info is not None
         assert info["migration_date"] == "2026-01-01T00:00:00"
-        assert info["source"] == "~/.deep-thinking-mcp/"
-        assert info["target"] == "./.deep-thinking-mcp/"
+        assert info["source"] == "~/.deepthinking/"
+        assert info["target"] == "./.deepthinking/"
 
     def test_get_migration_info_not_exists(self, tmp_path: Path):
         """测试：迁移标记不存在时返回 None"""
-        target_dir = tmp_path / ".deep-thinking-mcp"
+        target_dir = tmp_path / ".deepthinking"
         target_dir.mkdir(parents=True, exist_ok=True)
 
         info = get_migration_info(target_dir)
@@ -240,7 +244,7 @@ class TestShouldMigrate:
 
     def test_should_migrate_yes(self, temp_old_data_dir: Path, tmp_path: Path):
         """测试：需要迁移"""
-        target_dir = tmp_path / ".deep-thinking-mcp"
+        target_dir = tmp_path / ".deepthinking"
         target_dir.mkdir(parents=True, exist_ok=True)
 
         with mock.patch("deep_thinking.storage.migration.OLD_DATA_DIR", temp_old_data_dir):
@@ -248,7 +252,7 @@ class TestShouldMigrate:
 
     def test_should_migrate_no_old_data(self, tmp_path: Path):
         """测试：没有旧数据，不需要迁移"""
-        target_dir = tmp_path / ".deep-thinking-mcp"
+        target_dir = tmp_path / ".deepthinking"
         target_dir.mkdir(parents=True, exist_ok=True)
 
         with mock.patch("deep_thinking.storage.migration.OLD_DATA_DIR", tmp_path / "nonexistent"):
@@ -256,7 +260,7 @@ class TestShouldMigrate:
 
     def test_should_migrate_already_done(self, temp_old_data_dir: Path, tmp_path: Path):
         """测试：已完成迁移，不需要再迁移"""
-        target_dir = tmp_path / ".deep-thinking-mcp"
+        target_dir = tmp_path / ".deepthinking"
         target_dir.mkdir(parents=True, exist_ok=True)
         (target_dir / MIGRATION_MARKER).write_text("migration_date: 2026-01-01")
 

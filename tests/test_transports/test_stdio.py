@@ -32,6 +32,7 @@ class TestStdioTransport:
         """测试run_stdio接受FastMCP app实例"""
         # 验证app是FastMCP实例
         from mcp.server import FastMCP
+
         assert isinstance(app, FastMCP)
 
         # 测试run_stdio可以被调用（不实际运行）
@@ -88,7 +89,7 @@ class TestStdioTransportIntegration:
     @pytest.mark.asyncio
     async def test_stdio_app_name(self):
         """测试STDIO使用的app实例有正确的名称"""
-        assert app.name == "deep-thinking"
+        assert app.name == "DeepThinking"
 
     @pytest.mark.asyncio
     async def test_stdio_app_lifespan(self):

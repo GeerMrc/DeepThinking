@@ -1,7 +1,7 @@
 """
 数据迁移模块
 
-提供从旧存储位置（~/.deep-thinking-mcp/）迁移到新位置（./.deep-thinking-mcp/）的功能。
+提供从旧存储位置（~/.deepthinking/）迁移到新位置（./.deepthinking/）的功能。
 """
 
 import logging
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 # 旧数据目录位置
-OLD_DATA_DIR = Path.home() / ".deep-thinking-mcp"
+OLD_DATA_DIR = Path.home() / ".deepthinking"
 
 # 迁移状态文件
 MIGRATION_MARKER = ".migration_completed"
@@ -41,7 +41,7 @@ def create_migration_backup(backup_dir: Path | None = None) -> Path | None:
     创建迁移前备份
 
     Args:
-        backup_dir: 备份目录路径，默认为 ~/.deep-thinking-mcp/backups/migration_backup_<timestamp>
+        backup_dir: 备份目录路径，默认为 ~/.deepthinking/backups/migration_backup_<timestamp>
 
     Returns:
         备份目录路径，失败返回None

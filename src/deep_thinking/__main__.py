@@ -67,7 +67,7 @@ def create_server() -> FastMCP:
     Returns:
         FastMCP服务器实例（基础实例，实际使用 server.py 中的全局实例）
     """
-    app = FastMCP(name="deep-thinking", lifespan=server_lifespan)
+    app = FastMCP(name="DeepThinking", lifespan=server_lifespan)
 
     # 工具通过导入 server.py 自动注册：
     # - sequential_thinking (顺序思考)
@@ -87,7 +87,7 @@ def parse_args() -> argparse.Namespace:
         解析后的参数命名空间
     """
     parser = argparse.ArgumentParser(
-        prog="deep-thinking", description="DeepThinking-MCP - 高级深度思考MCP服务器"
+        prog="deepthinking", description="DeepThinking MCP - 高级深度思考MCP服务器"
     )
 
     # 传输模式选择
@@ -133,7 +133,7 @@ def parse_args() -> argparse.Namespace:
         "--data-dir",
         type=str,
         default=os.getenv("DEEP_THINKING_DATA_DIR"),
-        help="数据存储目录路径（默认: ./.deep-thinking-mcp/）",
+        help="数据存储目录路径（默认: ./.deepthinking/）",
     )
 
     # 日志级别

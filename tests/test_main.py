@@ -86,17 +86,18 @@ class TestCreateServer:
         server = create_server()
 
         assert isinstance(server, FastMCP)
-        assert server.name == "deep-thinking"
+        assert server.name == "DeepThinking"
 
     def test_create_server_has_lifespan(self):
         """测试create_server的服务器配置"""
         server = create_server()
 
         # 验证服务器名称
-        assert server.name == "deep-thinking"
+        assert server.name == "DeepThinking"
 
         # 验证服务器是FastMCP类型
         from mcp.server import FastMCP
+
         assert isinstance(server, FastMCP)
 
 
@@ -157,7 +158,9 @@ class TestMainAsync:
     async def test_main_async_sse_with_auth(self):
         """测试SSE模式带认证"""
         with patch("deep_thinking.__main__.run_sse", new_callable=AsyncMock) as mock_run_sse:
-            with patch("sys.argv", ["deep-thinking", "--transport", "sse", "--auth-token", "token"]):
+            with patch(
+                "sys.argv", ["deep-thinking", "--transport", "sse", "--auth-token", "token"]
+            ):
                 return_code = await main_async()
 
                 # 验证返回成功
@@ -173,7 +176,10 @@ class TestMainAsync:
     async def test_main_async_sse_with_host_port(self):
         """测试SSE模式带主机端口"""
         with patch("deep_thinking.__main__.run_sse", new_callable=AsyncMock) as mock_run_sse:
-            with patch("sys.argv", ["deep-thinking", "--transport", "sse", "--host", "0.0.0.0", "--port", "9000"]):
+            with patch(
+                "sys.argv",
+                ["deep-thinking", "--transport", "sse", "--host", "0.0.0.0", "--port", "9000"],
+            ):
                 return_code = await main_async()
 
                 # 验证返回成功
@@ -250,7 +256,9 @@ class TestEnvironmentVariables:
 
     def test_cli_args_override_env(self):
         """测试CLI参数覆盖环境变量"""
-        with patch.dict("os.environ", {"DEEP_THINKING_TRANSPORT": "sse", "DEEP_THINKING_PORT": "9000"}):
+        with patch.dict(
+            "os.environ", {"DEEP_THINKING_TRANSPORT": "sse", "DEEP_THINKING_PORT": "9000"}
+        ):
             with patch("sys.argv", ["deep-thinking", "--port", "8080"]):
                 args = parse_args()
                 # 环境变量设置传输模式

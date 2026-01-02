@@ -1,6 +1,6 @@
 # Python DeepThinking MCP 开发计划
 
-> 项目名称: DeepThinking-MCP
+> 项目名称: DeepThinking MCP
 > 开发语言: Python 3.10+
 > MCP框架: FastMCP
 > 传输协议: STDIO + SSE (Streamable HTTP)
@@ -60,7 +60,7 @@ HTTP框架: aiohttp (SSE服务器)
 ### 2.1 目录结构
 
 ```
-deep-thinking-mcp/
+Deep-Thinking-MCP/
 ├── pyproject.toml                # 项目配置
 ├── README.md                     # 项目说明
 ├── .env.example                  # 环境变量示例
@@ -120,7 +120,7 @@ deep-thinking-mcp/
 ### 2.2 数据存储结构
 
 ```
-~/.deep-thinking-mcp/
+~/.Deep-Thinking-MCP/
 ├── sessions/
 │   ├── {session_id}.json       # 单个会话文件
 │   └── .index.json            # 会话索引
@@ -413,7 +413,7 @@ async def visualize_session(
 ### 4.3 禁止行为（严格遵守）
 
 **禁止随意创建文档**
-- 只创建3个核心文档：PYTHON-DeepThinking-MCP-开发计划.md、TASKS.md、ARCHITECTURE.md
+- 只创建3个核心文档：PYTHON-DeepThinking MCP-开发计划.md、TASKS.md、ARCHITECTURE.md
 - 其他文档创建必须经过审批
 - 文档创建前检查是否已有相关文档
 
@@ -622,7 +622,7 @@ feature/阶段7 - 文档与发布
 
 ### 5.1 三大核心文档职责分离
 
-**PYTHON-DeepThinking-MCP-开发计划.md**（本文件）
+**PYTHON-DeepThinking MCP-开发计划.md**（本文件）
 - 项目概述和目标
 - 开发阶段划分
 - 规范开发流程
@@ -696,7 +696,7 @@ feature/阶段7 - 文档与发布
     "deep-thinking": {
       "command": "uv",
       "args": [
-        "--directory", "/path/to/deep-thinking-mcp",
+        "--directory", "/path/to/Deep-Thinking-MCP",
         "run", "python", "-m", "deep_thinking",
         "--transport", "stdio"
       ]
@@ -777,7 +777,7 @@ DEEP_THINKING_HOST=0.0.0.0
 - [ ] docs/api.md（API文档）
 - [ ] docs/architecture.md（架构文档）
 - [ ] docs/user_guide.md（用户指南）
-- [ ] PYTHON-DeepThinking-MCP-开发计划.md（本文件）
+- [ ] PYTHON-DeepThinking MCP-开发计划.md（本文件）
 - [ ] TASKS.md（任务追踪）
 - [ ] ARCHITECTURE.md（架构设计）
 

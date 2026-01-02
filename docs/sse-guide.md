@@ -1,4 +1,4 @@
-# DeepThinking-MCP SSE 配置指南
+# DeepThinking MCP SSE 配置指南
 
 > 版本: 0.1.0
 > 更新日期: 2026-01-01
@@ -8,7 +8,7 @@
 
 ## 概述
 
-SSE（Server-Sent Events）是 DeepThinking-MCP 的远程传输模式，适用于需要通过网络访问的场景。
+SSE（Server-Sent Events）是 DeepThinking MCP 的远程传输模式，适用于需要通过网络访问的场景。
 
 ### SSE vs STDIO
 
@@ -235,7 +235,7 @@ python -m deep_thinking --transport sse [OPTIONS]
 | `--port` | integer | 8000 | 监听端口 |
 | `--auth-token` | string | 无 | Bearer Token 认证 |
 | `--api-key` | string | 无 | API Key 认证 |
-| `--data-dir` | string | .deep-thinking-mcp/ | 数据存储目录 |
+| `--data-dir` | string | .Deep-Thinking-MCP/ | 数据存储目录 |
 | `--log-level` | string | INFO | 日志级别（DEBUG/INFO/WARNING/ERROR） |
 | `--max-thoughts` | integer | 50 | 最大思考步骤数（1-10000） |
 | `--min-thoughts` | integer | 3 | 最小思考步骤数（1-10000） |
@@ -351,7 +351,7 @@ After=network.target
 Type=simple
 User=deep-thinking
 Group=deep-thinking
-WorkingDirectory=/opt/deep-thinking-mcp
+WorkingDirectory=/opt/Deep-Thinking-MCP
 Environment="DEEP_THINKING_TRANSPORT=sse"
 Environment="DEEP_THINKING_HOST=0.0.0.0"
 Environment="DEEP_THINKING_PORT=8088"

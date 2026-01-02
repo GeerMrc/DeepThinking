@@ -142,8 +142,12 @@ class TestThinkingTask:
     def test_is_active(self):
         """测试：检查任务是否活跃"""
         task_pending = ThinkingTask(task_id="test-8", title="Pending")
-        task_in_progress = ThinkingTask(task_id="test-9", title="In Progress", status=TaskStatus.IN_PROGRESS)
-        task_completed = ThinkingTask(task_id="test-10", title="Completed", status=TaskStatus.COMPLETED)
+        task_in_progress = ThinkingTask(
+            task_id="test-9", title="In Progress", status=TaskStatus.IN_PROGRESS
+        )
+        task_completed = ThinkingTask(
+            task_id="test-10", title="Completed", status=TaskStatus.COMPLETED
+        )
 
         assert task_pending.is_active() is True
         assert task_in_progress.is_active() is True
@@ -152,7 +156,9 @@ class TestThinkingTask:
     def test_can_start(self):
         """测试：检查任务是否可以开始"""
         task_pending = ThinkingTask(task_id="test-11", title="Pending")
-        task_in_progress = ThinkingTask(task_id="test-12", title="In Progress", status=TaskStatus.IN_PROGRESS)
+        task_in_progress = ThinkingTask(
+            task_id="test-12", title="In Progress", status=TaskStatus.IN_PROGRESS
+        )
 
         assert task_pending.can_start() is True
         assert task_in_progress.can_start() is False
@@ -160,7 +166,9 @@ class TestThinkingTask:
     def test_is_completed(self):
         """测试：检查任务是否完成"""
         task_pending = ThinkingTask(task_id="test-13", title="Pending")
-        task_completed = ThinkingTask(task_id="test-14", title="Completed", status=TaskStatus.COMPLETED)
+        task_completed = ThinkingTask(
+            task_id="test-14", title="Completed", status=TaskStatus.COMPLETED
+        )
 
         assert task_pending.is_completed() is False
         assert task_completed.is_completed() is True
@@ -176,4 +184,8 @@ class TestThinkingTask:
         assert task_p2.get_priority_weight() == 10
 
         # 验证排序：P0 > P1 > P2
-        assert task_p0.get_priority_weight() > task_p1.get_priority_weight() > task_p2.get_priority_weight()
+        assert (
+            task_p0.get_priority_weight()
+            > task_p1.get_priority_weight()
+            > task_p2.get_priority_weight()
+        )

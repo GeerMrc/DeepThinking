@@ -1,4 +1,4 @@
-# DeepThinking-MCP API 文档
+# DeepThinking MCP API 文档
 
 > 版本: 0.1.0
 > 更新日期: 2026-01-01
@@ -12,7 +12,7 @@
 
 ## 概述
 
-DeepThinking-MCP 是一个基于 Model Context Protocol (MCP) 的深度思考服务器，提供顺序思考、会话管理、模板应用、导出和可视化等功能。
+DeepThinking MCP 是一个基于 Model Context Protocol (MCP) 的深度思考服务器，提供顺序思考、会话管理、模板应用、导出和可视化等功能。
 
 ### MCP工具列表
 
@@ -43,11 +43,11 @@ DeepThinking-MCP 是一个基于 Model Context Protocol (MCP) 的深度思考服
 
 ### 存储位置
 
-DeepThinking-MCP 将思考会话数据存储在本地文件系统中。
+DeepThinking MCP 将思考会话数据存储在本地文件系统中。
 
 **默认存储路径（项目本地）**:
 ```
-./.deep-thinking-mcp/
+./.Deep-Thinking-MCP/
 ├── sessions/           # 会话数据目录
 │   ├── .index.json    # 会话索引文件
 │   └── *.json         # 各个会话的数据文件
@@ -69,11 +69,11 @@ DeepThinking-MCP 将思考会话数据存储在本地文件系统中。
    python -m deep_thinking --data-dir /custom/path
    ```
 
-3. **默认值**: 项目本地目录 `.deep-thinking-mcp/`
+3. **默认值**: 项目本地目录 `.Deep-Thinking-MCP/`
 
 ### 数据迁移
 
-**自动迁移**: 从旧版本（`~/.deep-thinking-mcp/`）升级时，系统会：
+**自动迁移**: 从旧版本（`~/.Deep-Thinking-MCP/`）升级时，系统会：
 - 检测旧数据目录
 - 自动创建备份
 - 迁移数据到新位置
@@ -838,7 +838,7 @@ tree_structure = visualize_session_simple("abc-123", "tree")
 
 ## 传输模式
 
-DeepThinking-MCP 支持两种传输模式：
+DeepThinking MCP 支持两种传输模式：
 
 ### STDIO 模式
 - 适用于命令行和本地应用

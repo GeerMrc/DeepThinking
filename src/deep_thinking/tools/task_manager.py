@@ -172,11 +172,7 @@ def update_task_status(
 
     if success:
         logger.info(f"任务状态更新: {task_id} {old_status.value} -> {new_status}")
-        return (
-            f"✅ 任务状态已更新\n"
-            f"ID: {task_id}\n"
-            f"状态: {old_status.value} → {new_status}"
-        )
+        return f"✅ 任务状态已更新\nID: {task_id}\n状态: {old_status.value} → {new_status}"
     else:
         return "❌ 错误: 更新任务失败"
 
@@ -243,11 +239,7 @@ def link_task_session(
 
     if success:
         logger.info(f"任务关联会话: {task_id} -> {session_id}")
-        return (
-            f"✅ 任务已关联到思考会话\n"
-            f"任务ID: {task_id}\n"
-            f"会话ID: {session_id}"
-        )
+        return f"✅ 任务已关联到思考会话\n任务ID: {task_id}\n会话ID: {session_id}"
     else:
         return "❌ 错误: 关联失败"
 

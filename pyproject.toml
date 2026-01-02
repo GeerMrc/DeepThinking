@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "deep-thinking-mcp"
+name = "DeepThinking"
 version = "0.1.0"
 description = "Advanced sequential thinking MCP server with session management, templates, and visualization"
 readme = "README.md"

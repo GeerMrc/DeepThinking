@@ -1,4 +1,4 @@
-# DeepThinking-MCP 用户指南
+# DeepThinking MCP 用户指南
 
 > 版本: 0.1.0
 > 更新日期: 2025-12-31
@@ -7,7 +7,7 @@
 
 ## 简介
 
-DeepThinking-MCP 是一个强大的深度思考工具，通过 Model Context Protocol (MCP) 为 Claude 提供结构化的思考能力。它支持顺序思考、会话管理、模板应用、导出和可视化等功能。
+DeepThinking MCP 是一个强大的深度思考工具，通过 Model Context Protocol (MCP) 为 Claude 提供结构化的思考能力。它支持顺序思考、会话管理、模板应用、导出和可视化等功能。
 
 ### 核心特性
 
@@ -25,12 +25,12 @@ DeepThinking-MCP 是一个强大的深度思考工具，通过 Model Context Pro
 ### 1. 安装
 
 ```bash
-pip install deep-thinking-mcp
+pip install Deep-Thinking-MCP
 ```
 
 ### 2. 配置 Claude Desktop
 
-在 Claude Desktop 配置文件中添加 DeepThinking-MCP 服务器（详见安装指南）
+在 Claude Desktop 配置文件中添加 DeepThinking MCP 服务器（详见安装指南）
 
 ### 3. 开始使用
 
@@ -255,7 +255,7 @@ Claude 会调用 `sequential_thinking` 工具，生成5个思考步骤：
 
 ### 结合其他 MCP 工具
 
-DeepThinking-MCP 可以与其他 MCP 工具配合使用：
+DeepThinking MCP 可以与其他 MCP 工具配合使用：
 
 #### 与 WebSearch 结合
 
@@ -449,7 +449,7 @@ A: 可以。数据存储在 `~/.deep-thinking/` 目录，可以直接复制备�
 - [API 文档](./api.md)
 - [安装与配置指南](./installation.md)
 - [架构设计文档](../ARCHITECTURE.md)
-- [项目主页](https://github.com/your-org/deep-thinking-mcp)
+- [项目主页](https://github.com/your-org/Deep-Thinking-MCP)
 
 ---
 

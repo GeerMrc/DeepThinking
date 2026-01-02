@@ -98,10 +98,7 @@ class ThinkingConfig(BaseModel):
         Returns:
             是否在合理范围内
         """
-        return (
-            self.min_thoughts <= current <= self.max_thoughts
-            and total <= self.max_thoughts
-        )
+        return self.min_thoughts <= current <= self.max_thoughts and total <= self.max_thoughts
 
     def get_incremented_total(self, current_total: int) -> int:
         """
@@ -137,9 +134,7 @@ class ThinkingConfig(BaseModel):
         return cls(
             max_thoughts=int(os.getenv("DEEP_THINKING_MAX_THOUGHTS", "50")),
             min_thoughts=int(os.getenv("DEEP_THINKING_MIN_THOUGHTS", "3")),
-            thoughts_increment=int(
-                os.getenv("DEEP_THINKING_THOUGHTS_INCREMENT", "10")
-            ),
+            thoughts_increment=int(os.getenv("DEEP_THINKING_THOUGHTS_INCREMENT", "10")),
         )
 
 

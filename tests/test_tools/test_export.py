@@ -327,9 +327,7 @@ class TestExportSessionTool:
     """测试 export_session MCP 工具"""
 
     @pytest.mark.asyncio
-    async def test_export_session_default_format(
-        self, sample_session_data, temp_dir, clean_env
-    ):
+    async def test_export_session_default_format(self, sample_session_data, temp_dir, clean_env):
         """测试默认格式导出"""
         # Mock 存储管理器
         session = ThinkingSession(**sample_session_data)
@@ -337,8 +335,10 @@ class TestExportSessionTool:
         mock_manager = MagicMock()
         mock_manager.get_session.return_value = session
 
-        with patch("deep_thinking.tools.export.get_storage_manager", return_value=mock_manager), \
-             patch("deep_thinking.tools.export.Path.home", return_value=temp_dir):
+        with (
+            patch("deep_thinking.tools.export.get_storage_manager", return_value=mock_manager),
+            patch("deep_thinking.tools.export.Path.home", return_value=temp_dir),
+        ):
             result = await export.export_session("test-session-123")
 
         # 验证返回结果
@@ -347,26 +347,24 @@ class TestExportSessionTool:
         assert "markdown" in result
 
     @pytest.mark.asyncio
-    async def test_export_session_json_format(
-        self, sample_session_data, temp_dir, clean_env
-    ):
+    async def test_export_session_json_format(self, sample_session_data, temp_dir, clean_env):
         """测试 JSON 格式导出"""
         session = ThinkingSession(**sample_session_data)
 
         mock_manager = MagicMock()
         mock_manager.get_session.return_value = session
 
-        with patch("deep_thinking.tools.export.get_storage_manager", return_value=mock_manager), \
-             patch("deep_thinking.tools.export.Path.home", return_value=temp_dir):
+        with (
+            patch("deep_thinking.tools.export.get_storage_manager", return_value=mock_manager),
+            patch("deep_thinking.tools.export.Path.home", return_value=temp_dir),
+        ):
             result = await export.export_session("test-session-123", "json")
 
         assert "会话已导出" in result
         assert "json" in result
 
     @pytest.mark.asyncio
-    async def test_export_session_custom_path(
-        self, sample_session_data, temp_dir, clean_env
-    ):
+    async def test_export_session_custom_path(self, sample_session_data, temp_dir, clean_env):
         """测试自定义输出路径"""
         session = ThinkingSession(**sample_session_data)
         output_path = temp_dir / "custom_output.md"
@@ -387,22 +385,24 @@ class TestExportSessionTool:
         mock_manager = MagicMock()
         mock_manager.get_session.return_value = None
 
-        with patch("deep_thinking.tools.export.get_storage_manager", return_value=mock_manager), \
-             pytest.raises(ValueError, match="会话不存在"):
+        with (
+            patch("deep_thinking.tools.export.get_storage_manager", return_value=mock_manager),
+            pytest.raises(ValueError, match="会话不存在"),
+        ):
             await export.export_session("nonexistent-session")
 
     @pytest.mark.asyncio
-    async def test_export_session_invalid_format(
-        self, sample_session_data, temp_dir, clean_env
-    ):
+    async def test_export_session_invalid_format(self, sample_session_data, temp_dir, clean_env):
         """测试无效格式时的错误处理"""
         session = ThinkingSession(**sample_session_data)
 
         mock_manager = MagicMock()
         mock_manager.get_session.return_value = session
 
-        with patch("deep_thinking.tools.export.get_storage_manager", return_value=mock_manager), \
-             pytest.raises(ValueError, match="不支持的格式"):
+        with (
+            patch("deep_thinking.tools.export.get_storage_manager", return_value=mock_manager),
+            pytest.raises(ValueError, match="不支持的格式"),
+        ):
             await export.export_session("test-session-123", "invalid_format")
 
 

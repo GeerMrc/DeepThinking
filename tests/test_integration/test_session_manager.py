@@ -35,6 +35,7 @@ class TestSessionManagerIntegration:
 
         # 提取会话ID（支持Markdown格式）
         import re
+
         session_id = re.search(r"\*\*会话ID\*\*: ([a-f0-9-]+)", result)
         assert session_id is not None
         session_id = session_id.group(1)
@@ -67,6 +68,7 @@ class TestSessionManagerIntegration:
 
         # 提取会话ID（支持Markdown格式）
         import re
+
         re.search(r"\*\*会话ID\*\*: ([a-f0-9-]+)", r1).group(1)
         session_id2 = re.search(r"\*\*会话ID\*\*: ([a-f0-9-]+)", r2).group(1)
 
@@ -87,6 +89,7 @@ class TestSessionManagerIntegration:
         # 创建会话
         result = session_manager.create_session(name="状态测试会话")
         import re
+
         session_id = re.search(r"\*\*会话ID\*\*: ([a-f0-9-]+)", result).group(1)
 
         # 标记为已完成
@@ -103,6 +106,7 @@ class TestSessionManagerIntegration:
         # 创建会话
         result = session_manager.create_session(name="待删除会话")
         import re
+
         session_id = re.search(r"\*\*会话ID\*\*: ([a-f0-9-]+)", result).group(1)
 
         # 删除会话
@@ -159,6 +163,7 @@ class TestSessionManagerIntegration:
 
         # 验证元数据已保存
         import re
+
         session_id = re.search(r"\*\*会话ID\*\*: ([a-f0-9-]+)", result).group(1)
         session = storage_manager.get_session(session_id)
         assert session is not None
@@ -169,6 +174,7 @@ class TestSessionManagerIntegration:
         """测试无效的状态更新"""
         result = session_manager.create_session(name="测试会话")
         import re
+
         session_id = re.search(r"\*\*会话ID\*\*: ([a-f0-9-]+)", result).group(1)
 
         # 尝试使用无效状态
@@ -225,6 +231,7 @@ class TestSessionManagerIntegration:
         """测试将会话状态更新为archived"""
         result = session_manager.create_session(name="归档测试会话")
         import re
+
         session_id = re.search(r"\*\*会话ID\*\*: ([a-f0-9-]+)", result).group(1)
 
         # 标记为已归档
@@ -240,6 +247,7 @@ class TestSessionManagerIntegration:
         """测试将会话状态更新回active"""
         result = session_manager.create_session(name="重新激活测试会话")
         import re
+
         session_id = re.search(r"\*\*会话ID\*\*: ([a-f0-9-]+)", result).group(1)
 
         # 先标记为已完成
@@ -301,10 +309,9 @@ class TestSessionManagerIntegration:
     async def test_resume_empty_session(self, storage_manager):
         """测试恢复没有思考步骤的会话"""
         # 创建空会话
-        result = session_manager.create_session(
-            name="空会话", description="没有思考步骤"
-        )
+        result = session_manager.create_session(name="空会话", description="没有思考步骤")
         import re
+
         session_id = re.search(r"\*\*会话ID\*\*: ([a-f0-9-]+)", result).group(1)
 
         # 恢复空会话
@@ -318,17 +325,12 @@ class TestSessionManagerIntegration:
         with pytest.raises(ValueError, match="会话不存在"):
             session_manager.resume_session("nonexistent-session-id")
 
-    async def test_resume_session_with_total_thoughts_history(
-        self, storage_manager
-    ):
+    async def test_resume_session_with_total_thoughts_history(self, storage_manager):
         """测试恢复有total_thoughts历史的会话"""
         from deep_thinking.models.thought import Thought
-        from deep_thinking.tools import sequential_thinking
 
         # 创建会话并添加历史记录
-        session = storage_manager.create_session(
-            name="历史记录会话", description="测试历史记录"
-        )
+        session = storage_manager.create_session(name="历史记录会话", description="测试历史记录")
         session.metadata["total_thoughts_history"] = [
             {"timestamp": "2025-01-01T00:00:00", "old_total": 5, "new_total": 10}
         ]

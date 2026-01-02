@@ -1,8 +1,8 @@
-# DeepThinking-MCP
+# DeepThinking MCP
 
 > 高级深度思考MCP服务器 - 使用Python构建的功能完整、架构清晰的MCP服务器
 
-[![PyPI version](https://badge.fury.io/py/deep-thinking-mcp.svg)](https://badge.fury.io/py/deep-thinking-mcp)
+[![PyPI version](https://badge.fury.io/py/DeepThinking.svg)](https://badge.fury.io/py/DeepThinking)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -18,7 +18,7 @@
 
 ## 项目概述
 
-DeepThinking-MCP是一个功能完整的MCP（Model Context Protocol）服务器，提供顺序思考工具，支持常规思考、修订思考和分支思考三种模式。
+DeepThinking MCP是一个功能完整的MCP（Model Context Protocol）服务器，提供顺序思考工具，支持常规思考、修订思考和分支思考三种模式。
 
 ### 核心特性
 
@@ -40,14 +40,14 @@ DeepThinking-MCP是一个功能完整的MCP（Model Context Protocol）服务器
 # 安装 uv (macOS/Linux)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# 安装 DeepThinking-MCP
-uv pip install deep-thinking-mcp
+# 安装 DeepThinking
+uv pip install DeepThinking
 ```
 
 ### 使用 pip 安装
 
 ```bash
-pip install deep-thinking-mcp
+pip install DeepThinking
 ```
 
 ### 从源码安装
@@ -55,8 +55,8 @@ pip install deep-thinking-mcp
 **开发模式（推荐开发使用）**：
 ```bash
 # 克隆仓库
-git clone https://github.com/yourusername/deep-thinking-mcp.git
-cd deep-thinking-mcp
+git clone https://github.com/yourusername/Deep-Thinking-MCP.git
+cd Deep-Thinking-MCP
 
 # 创建虚拟环境
 python -m venv venv
@@ -70,14 +70,14 @@ pip install -e .
 **生产模式（推荐部署使用）**：
 ```bash
 # 克隆仓库
-git clone https://github.com/yourusername/deep-thinking-mcp.git
-cd deep-thinking-mcp
+git clone https://github.com/yourusername/Deep-Thinking-MCP.git
+cd Deep-Thinking-MCP
 
 # 构建 Wheel 文件
 uv build  # 或 python -m build
 
 # 安装 Wheel 文件（不显示源代码路径）
-uv pip install dist/deep_thinking_mcp-0.1.0-py3-none-any.whl
+uv pip install dist/DeepThinking-0.1.0-py3-none-any.whl
 ```
 
 > 📘 **详细安装指南**: 请参阅 [安装与配置文档](docs/installation.md) 获取完整的安装说明，包括开发模式和生产模式Wheel安装的详细对比。
@@ -117,7 +117,7 @@ DEEP_THINKING_AUTH_TOKEN=your-secret-token
 DEEP_THINKING_API_KEY=your-api-key
 
 # 存储配置
-DEEP_THINKING_DATA_DIR=./.deep-thinking-mcp
+DEEP_THINKING_DATA_DIR=./.deepthinking
 
 # 思考配置
 DEEP_THINKING_MAX_THOUGHTS=50           # 最大思考步骤数（推荐 50，支持 1-10000）
@@ -128,7 +128,7 @@ DEEP_THINKING_THOUGHTS_INCREMENT=10     # 思考步骤增量（默认 10，支�
 DEEP_THINKING_LOG_LEVEL=INFO
 ```
 
-**数据存储**: 默认存储在项目本地目录 `.deep-thinking-mcp/`，包含会话数据和索引文件。详见[数据迁移指南](docs/MIGRATION.md)。
+**数据存储**: 默认存储在项目本地目录 `.deepthinking/`，包含会话数据和索引文件。详见[数据迁移指南](docs/MIGRATION.md)。
 
 ## Claude Desktop配置
 
@@ -140,7 +140,7 @@ DEEP_THINKING_LOG_LEVEL=INFO
     "deep-thinking": {
       "command": "uv",
       "args": [
-        "--directory", "/path/to/deep-thinking-mcp",
+        "--directory", "/path/to/Deep-Thinking-MCP",
         "run", "python", "-m", "deep_thinking",
         "--transport", "stdio"
       ]
@@ -201,7 +201,7 @@ mypy src/deep_thinking/
 ## 项目结构
 
 ```
-deep-thinking-mcp/
+Deep-Thinking-MCP/
 ├── src/deep_thinking/
 │   ├── __main__.py           # CLI入口
 │   ├── transports/            # 传输层实现

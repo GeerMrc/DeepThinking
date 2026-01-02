@@ -1,9 +1,9 @@
-# DeepThinking-MCP 开发流程规范
+# DeepThinking MCP 开发流程规范
 
 > **版本**: 1.0
 > **创建日期**: 2026-01-01
 > **维护者**: Maric
-> **适用范围**: DeepThinking-MCP 项目开发
+> **适用范围**: DeepThinking MCP 项目开发
 
 ---
 

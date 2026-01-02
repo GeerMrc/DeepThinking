@@ -17,6 +17,7 @@ def temp_task_store(tmp_path: Path):
     yield store
     # 清理
     import shutil
+
     if tmp_path.exists():
         shutil.rmtree(tmp_path)
 

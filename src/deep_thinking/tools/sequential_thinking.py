@@ -101,12 +101,14 @@ def sequential_thinking(
         if "total_thoughts_history" not in session.metadata:
             session.metadata["total_thoughts_history"] = []
 
-        session.metadata["total_thoughts_history"].append({
-            "original_total": original_total,
-            "new_total": new_total,
-            "thought_number": thoughtNumber,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        })
+        session.metadata["total_thoughts_history"].append(
+            {
+                "original_total": original_total,
+                "new_total": new_total,
+                "thought_number": thoughtNumber,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+        )
 
         # 更新会话
         manager.update_session(session)
@@ -168,14 +170,16 @@ def sequential_thinking(
         result_parts.append("")
 
     # 添加会话状态
-    result_parts.extend([
-        "---",
-        "**会话信息**:",
-        f"- 会话ID: {session_id}",
-        f"- 总思考数: {session.thought_count()}",
-        f"- 预计总数: {totalThoughts}",
-        "",
-    ])
+    result_parts.extend(
+        [
+            "---",
+            "**会话信息**:",
+            f"- 会话ID: {session_id}",
+            f"- 总思考数: {session.thought_count()}",
+            f"- 预计总数: {totalThoughts}",
+            "",
+        ]
+    )
 
     # 下一步提示
     if nextThoughtNeeded:

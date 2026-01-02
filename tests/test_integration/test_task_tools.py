@@ -38,6 +38,7 @@ class TestTaskManagerIntegration:
 
         # 提取任务ID
         import re
+
         task_id = re.search(r"ID: (task-[a-f0-9]+)", result)
         assert task_id is not None
         task_id = task_id.group(1)
@@ -65,7 +66,7 @@ class TestTaskManagerIntegration:
 
         # 提取任务ID
         import re
-        task_id1 = re.search(r"ID: (task-[a-f0-9]+)", r1).group(1)
+
         task_id2 = re.search(r"ID: (task-[a-f0-9]+)", r2).group(1)
 
         # 更新第二个任务状态
@@ -85,6 +86,7 @@ class TestTaskManagerIntegration:
         # 创建任务
         result = task_manager.create_task(title="状态测试任务")
         import re
+
         task_id = re.search(r"ID: (task-[a-f0-9]+)", result).group(1)
 
         # 更新状态
@@ -120,10 +122,12 @@ class TestTaskManagerIntegration:
         # 创建任务
         task_result = task_manager.create_task(title="需要会话的任务")
         import re
+
         task_id = re.search(r"ID: (task-[a-f0-9]+)", task_result).group(1)
 
         # 创建会话
         from deep_thinking.tools import session_manager
+
         session_result = session_manager.create_session(name="测试会话")
         session_id = re.search(r"\*\*会话ID\*\*: ([a-f0-9-]+)", session_result).group(1)
 
@@ -150,6 +154,7 @@ class TestTaskManagerIntegration:
         # 创建一个已完成任务
         result = task_manager.create_task(title="已完成任务")
         import re
+
         task_id = re.search(r"ID: (task-[a-f0-9]+)", result).group(1)
         task_manager.update_task_status(task_id, "completed")
 

@@ -202,9 +202,7 @@ class TestRunSSE:
                     )
 
                 # 验证transport被创建时包含认证参数
-                mock_transport_class.assert_called_once_with(
-                    app, auth_token="token", api_key="key"
-                )
+                mock_transport_class.assert_called_once_with(app, auth_token="token", api_key="key")
 
     @pytest.mark.asyncio
     async def test_run_sse_cleanup_on_error(self):
@@ -440,9 +438,7 @@ class TestSSEAuthMiddleware:
         from aiohttp import web
         from aiohttp.test_utils import make_mocked_request
 
-        transport = SSETransport(
-            app, auth_token="valid-token", api_key="valid-api-key"
-        )
+        transport = SSETransport(app, auth_token="valid-token", api_key="valid-api-key")
 
         # 创建包含两种认证的请求
         request = make_mocked_request(
@@ -475,9 +471,7 @@ class TestSSEAuthMiddleware:
         from aiohttp import web
         from aiohttp.test_utils import make_mocked_request
 
-        transport = SSETransport(
-            app, auth_token="valid-token", api_key="valid-api-key"
-        )
+        transport = SSETransport(app, auth_token="valid-token", api_key="valid-api-key")
 
         # Token错误但API Key正确
         request = make_mocked_request(
@@ -509,9 +503,7 @@ class TestSSEAuthMiddleware:
         from aiohttp import web
         from aiohttp.test_utils import make_mocked_request
 
-        transport = SSETransport(
-            app, auth_token="valid-token", api_key="valid-api-key"
-        )
+        transport = SSETransport(app, auth_token="valid-token", api_key="valid-api-key")
 
         # Token正确但API Key错误
         request = make_mocked_request(
@@ -544,9 +536,7 @@ class TestSSEAuthMiddleware:
         from aiohttp import web
         from aiohttp.test_utils import make_mocked_request
 
-        transport = SSETransport(
-            app, auth_token="valid-token", api_key="valid-api-key"
-        )
+        transport = SSETransport(app, auth_token="valid-token", api_key="valid-api-key")
 
         # 两种认证都错误
         request = make_mocked_request(

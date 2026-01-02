@@ -1,4 +1,4 @@
-# DeepThinking-MCP 安装与配置指南
+# DeepThinking MCP 安装与配置指南
 
 > 版本: 0.2.0
 > 更新日期: 2026-01-02
@@ -28,7 +28,7 @@
 
 ## 安装方法
 
-> ⚠️ **重要提示**: deep-thinking-mcp **目前未发布到 PyPI**。
+> ⚠️ **重要提示**: Deep-Thinking-MCP **目前未发布到 PyPI**。
 >
 > **可用安装方式**：
 > - **方法3（开发模式）**: 从源码以可编辑模式安装，适合开发测试
@@ -43,19 +43,19 @@
 > ⚠️ **待包发布到PyPI后可用**
 
 ```bash
-pip install deep-thinking-mcp
+pip install DeepThinking
 ```
 
 #### 升级到最新版本
 
 ```bash
-pip install --upgrade deep-thinking-mcp
+pip install --upgrade DeepThinking
 ```
 
 #### 卸载
 
 ```bash
-pip uninstall deep-thinking-mcp
+pip uninstall DeepThinking
 ```
 
 ---
@@ -79,26 +79,26 @@ powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 pip install uv
 ```
 
-#### 使用 uv 安装 DeepThinking-MCP
+#### 使用 uv 安装 DeepThinking MCP
 
 ```bash
 # 全局安装
-uv pip install deep-thinking-mcp
+uv pip install DeepThinking
 
 # 或在项目中安装
-uv pip install deep-thinking-mcp
+uv pip install DeepThinking
 ```
 
 #### 升级到最新版本
 
 ```bash
-uv pip install --upgrade deep-thinking-mcp
+uv pip install --upgrade DeepThinking
 ```
 
 #### 卸载
 
 ```bash
-uv pip uninstall deep-thinking-mcp
+uv pip uninstall DeepThinking
 ```
 
 **为什么选择 uv？**
@@ -193,8 +193,8 @@ python -m build
 
 **构建输出**：
 ```
-Built /path/to/Deep-Thinking-MCP/dist/deep_thinking_mcp-0.1.0-py3-none-any.whl
-Built /path/to/Deep-Thinking-MCP/dist/deep_thinking_mcp-0.1.0.tar.gz
+Built /path/to/Deep-Thinking-MCP/dist/DeepThinking-0.1.0-py3-none-any.whl
+Built /path/to/Deep-Thinking-MCP/dist/DeepThinking-0.1.0.tar.gz
 ```
 
 #### 4.2 安装 Wheel 文件
@@ -202,46 +202,46 @@ Built /path/to/Deep-Thinking-MCP/dist/deep_thinking_mcp-0.1.0.tar.gz
 **使用 uv 安装**（推荐）：
 ```bash
 # 从本地 wheel 文件安装
-uv pip install dist/deep_thinking_mcp-0.1.0-py3-none-any.whl
+uv pip install dist/DeepThinking-0.1.0-py3-none-any.whl
 
 # 指定完整路径安装
-uv pip install /path/to/Deep-Thinking-MCP/dist/deep_thinking_mcp-0.1.0-py3-none-any.whl
+uv pip install /path/to/Deep-Thinking-MCP/dist/DeepThinking-0.1.0-py3-none-any.whl
 ```
 
 **使用 pip 安装**：
 ```bash
 # 从本地 wheel 文件安装
-pip install dist/deep_thinking_mcp-0.1.0-py3-none-any.whl
+pip install dist/DeepThinking-0.1.0-py3-none-any.whl
 
 # 指定完整路径安装
-pip install /path/to/Deep-Thinking-MCP/dist/deep_thinking_mcp-0.1.0-py3-none-any.whl
+pip install /path/to/Deep-Thinking-MCP/dist/DeepThinking-0.1.0-py3-none-any.whl
 ```
 
 #### 4.3 验证 Wheel 安装
 
 ```bash
 # 查看已安装的包（不显示源代码路径）
-uv pip list | grep deep-thinking-mcp
+uv pip list | grep -i deep
 # 或
-pip list | grep deep-thinking-mcp
+pip list | grep -i deep
 ```
 
 **Wheel 安装输出示例**：
 ```
-deep-thinking-mcp    0.1.0
+DeepThinking         0.1.0
 # （无源代码路径显示）
 ```
 
 **详细安装信息**：
 ```bash
-uv pip show deep-thinking-mcp
+uv pip show DeepThinking
 # 或
-pip show deep-thinking-mcp
+pip show DeepThinking
 ```
 
 **输出示例**：
 ```
-Name: deep-thinking-mcp
+Name: DeepThinking
 Version: 0.1.0
 Summary: Advanced sequential thinking MCP server...
 Location: /Users/maric/miniconda3/lib/python3.12/site-packages
@@ -261,15 +261,15 @@ Requires: mcp, pydantic
 
 **Editable 模式示例**（开发模式）：
 ```bash
-$ uv pip list | grep deep-thinking-mcp
-deep-thinking-mcp    0.1.0    /Volumes/DISK/Claude-code-glm/Deep-Thinking-MCP
+$ uv pip list | grep -i deep
+DeepThinking         0.1.0    /Volumes/DISK/Claude-code-glm/Deep-Thinking-MCP
 #                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 显示源代码目录
 ```
 
 **Wheel 模式示例**（生产环境）：
 ```bash
-$ uv pip list | grep deep-thinking-mcp
-deep-thinking-mcp    0.1.0
+$ uv pip list | grep -i deep
+DeepThinking         0.1.0
 #                     （不显示源代码路径，清洁安装）
 ```
 
@@ -289,19 +289,19 @@ deep-thinking-mcp    0.1.0
 **示例：团队共享安装**
 ```bash
 # 构建后分享 wheel 文件
-scp dist/deep_thinking_mcp-0.1.0-py3-none-any.whl user@server:/tmp/
+scp dist/DeepThinking-0.1.0-py3-none-any.whl user@server:/tmp/
 
 # 服务器上安装
-uv pip install /tmp/deep_thinking_mcp-0.1.0-py3-none-any.whl
+uv pip install /tmp/DeepThinking-0.1.0-py3-none-any.whl
 ```
 
 #### 4.6 卸载 Wheel 安装
 
 ```bash
 # 卸载 wheel 安装的包
-uv pip uninstall deep-thinking-mcp
+uv pip uninstall DeepThinking
 # 或
-pip uninstall deep-thinking-mcp
+pip uninstall DeepThinking
 ```
 
 ---
@@ -314,9 +314,9 @@ pip uninstall deep-thinking-mcp
 
 ```bash
 # 卸载包
-uv pip uninstall deep-thinking-mcp
+uv pip uninstall DeepThinking
 # 或
-pip uninstall deep-thinking-mcp
+pip uninstall DeepThinking
 
 # 清理Python缓存
 find /path/to/Deep-Thinking-MCP -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null
@@ -346,8 +346,8 @@ python -m deep_thinking --help
 #### 1. 克隆仓库
 
 ```bash
-git clone https://github.com/your-org/deep-thinking-mcp.git
-cd deep-thinking-mcp
+git clone https://github.com/your-org/Deep-Thinking-MCP.git
+cd Deep-Thinking-MCP
 ```
 
 #### 2. 创建虚拟环境（推荐）
@@ -377,8 +377,8 @@ pip install -e .
 pip install poetry
 
 # 克隆仓库
-git clone https://github.com/your-org/deep-thinking-mcp.git
-cd deep-thinking-mcp
+git clone https://github.com/your-org/Deep-Thinking-MCP.git
+cd Deep-Thinking-MCP
 
 # 安装依赖
 poetry install
@@ -397,7 +397,7 @@ python -m deep_thinking --help
 预期输出：
 
 ```
-DeepThinking-MCP 服务器
+DeepThinking MCP 服务器
 
 用法: python -m deep_thinking [OPTIONS]
 
@@ -414,7 +414,7 @@ DeepThinking-MCP 服务器
 
 ## 配置 Claude Desktop
 
-DeepThinking-MCP 需要与 Claude Desktop 配合使用。
+DeepThinking MCP 需要与 Claude Desktop 配合使用。
 
 > 📘 **详细配置**: 请参阅 [IDE 配置示例](./ide-config.md) 获取 Claude Desktop、Claude Code、Cursor 等 IDE 的完整配置示例。
 
@@ -519,7 +519,7 @@ python -m deep_thinking --mode sse --host 127.0.0.1 --port 8088
 
 ## 环境变量配置
 
-您也可以通过环境变量配置 DeepThinking-MCP：
+您也可以通过环境变量配置 DeepThinking MCP：
 
 | 环境变量 | 描述 | 默认值 |
 |---------|------|-------|
@@ -531,7 +531,7 @@ python -m deep_thinking --mode sse --host 127.0.0.1 --port 8088
 | `DEEP_THINKING_AUTH_TOKEN` | Bearer Token（SSE 认证） | 无 |
 | `DEEP_THINKING_API_KEY` | API Key（SSE 认证） | 无 |
 | **存储配置** | | |
-| `DEEP_THINKING_DATA_DIR` | 数据存储目录 | ./.deep-thinking-mcp/ |
+| `DEEP_THINKING_DATA_DIR` | 数据存储目录 | ./.Deep-Thinking-MCP/ |
 | **思考配置** | | |
 | `DEEP_THINKING_MAX_THOUGHTS` | 最大思考步骤数（推荐 50，支持 1-10000） | 50 |
 | `DEEP_THINKING_MIN_THOUGHTS` | 最小思考步骤数（推荐 3，支持 1-10000） | 3 |
@@ -571,10 +571,10 @@ set DEEP_THINKING_LOG_LEVEL=DEBUG
 
 ### 存储目录结构
 
-**默认存储目录：项目本地** `./.deep-thinking-mcp/`
+**默认存储目录：项目本地** `./.deepthinking/`
 
 ```
-./.deep-thinking-mcp/
+./.deepthinking/
 ├── sessions/              # 会话数据
 │   ├── .index.json       # 会话索引文件
 │   └── *.json            # 各会话文件
@@ -582,17 +582,17 @@ set DEEP_THINKING_LOG_LEVEL=DEBUG
 └── .gitignore            # 防止数据提交到版本控制
 ```
 
-**旧版本存储目录（向后兼容）**: `~/.deep-thinking-mcp/`
+**旧版本存储目录（向后兼容）**: `~/.deepthinking/`
 
 ### 存储路径优先级
 
 1. **环境变量** `DEEP_THINKING_DATA_DIR`
 2. **CLI参数** `--data-dir`
-3. **默认值** 项目本地目录 `.deep-thinking-mcp/`
+3. **默认值** 项目本地目录 `.deepthinking/`
 
 ### 数据迁移
 
-从旧版本（`~/.deep-thinking-mcp/`）升级时，系统会自动：
+从旧版本（`~/.deepthinking/`）升级时，系统会自动：
 - 检测旧数据目录
 - 创建自动备份
 - 迁移数据到新位置
@@ -608,10 +608,10 @@ set DEEP_THINKING_LOG_LEVEL=DEBUG
 
 ```bash
 # 备份整个数据目录
-cp -r .deep-thinking-mcp .deep-thinking-mcp.backup.$(date +%Y%m%d)
+cp -r .deepthinking .deepthinking.backup.$(date +%Y%m%d)
 
 # 只备份会话数据
-cp -r .deep-thinking-mcp/sessions .deep-thinking-mcp/sessions.backup.$(date +%Y%m%d)
+cp -r .deepthinking/sessions .deepthinking/sessions.backup.$(date +%Y%m%d)
 ```
 
 ### 数据恢复
@@ -620,11 +620,11 @@ cp -r .deep-thinking-mcp/sessions .deep-thinking-mcp/sessions.backup.$(date +%Y%
 
 ```bash
 # 恢复整个数据目录
-rm -rf .deep-thinking-mcp
-cp -r .deep-thinking-mcp.backup.20251231 .deep-thinking-mcp
+rm -rf .deepthinking
+cp -r .deepthinking.backup.20251231 .deepthinking
 
 # 从备份目录恢复
-cp -r ~/.deep-thinking-mcp/backups/migration_backup_*/* .deep-thinking-mcp/sessions/
+cp -r ~/.deepthinking/backups/migration_backup_*/* .deepthinking/sessions/
 ```
 
 ---
@@ -682,7 +682,7 @@ After=network.target
 [Service]
 Type=simple
 User=your-user
-WorkingDirectory=/path/to/deep-thinking-mcp
+WorkingDirectory=/path/to/Deep-Thinking-MCP
 ExecStart=/usr/bin/python3 -m deep_thinking --mode sse --host 0.0.0.0 --port 8088
 Restart=always
 RestartSec=10
@@ -746,7 +746,7 @@ sudo firewall-cmd --reload
 **解决方案**：
 
 1. 确认安装成功：`pip list | grep deep-thinking`
-2. 重新安装：`pip install --force-reinstall deep-thinking-mcp`
+2. 重新安装：`pip install --force-reinstall DeepThinking`
 3. 检查 Python 路径：`which python` 和 `pip --version` 是否匹配
 
 ---
@@ -801,10 +801,10 @@ sudo firewall-cmd --reload
 
 ```bash
 # 备份数据
-cp -r ~/.deep-thinking ~/.deep-thinking.backup
+cp -r ~/.deepthinking ~/.deepthinking.backup
 
 # 升级包
-pip install --upgrade deep-thinking-mcp
+pip install --upgrade DeepThinking
 
 # 验证升级
 python -m deep_thinking --help
@@ -817,8 +817,8 @@ python -m deep_thinking --help
 如有问题，从备份恢复：
 
 ```bash
-rm -rf ~/.deep-thinking
-cp -r ~/.deep-thinking.backup ~/.deep-thinking
+rm -rf ~/.deepthinking
+cp -r ~/.deepthinking.backup ~/.deepthinking
 ```
 
 ---
@@ -829,10 +829,10 @@ cp -r ~/.deep-thinking.backup ~/.deep-thinking
 
 ```bash
 # 1. 卸载 Python 包
-pip uninstall deep-thinking-mcp
+pip uninstall DeepThinking
 
 # 2. 删除数据目录（可选）
-rm -rf ~/.deep-thinking
+rm -rf ~/.deepthinking
 
 # 3. 删除 Claude Desktop 配置（可选）
 # 编辑 claude_desktop_config.json，删除 deep-thinking 服务器配置
@@ -899,7 +899,7 @@ mypy src/deep_thinking
 - [贡献指南](../CONTRIBUTING.md)
 
 ### 支持
-- [GitHub Issues](https://github.com/your-org/deep-thinking-mcp/issues)
+- [GitHub Issues](https://github.com/your-org/Deep-Thinking-MCP/issues)
 - [更新日志](../CHANGELOG.md)
 
 ---

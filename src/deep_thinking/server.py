@@ -29,8 +29,8 @@ def get_default_data_dir() -> Path:
 
     优先级：
     1. 环境变量 DEEP_THINKING_DATA_DIR
-    2. 项目本地目录 .deep-thinking-mcp/
-    3. 用户主目录 .deep-thinking-mcp/ (向后兼容)
+    2. 项目本地目录 .deepthinking/
+    3. 用户主目录 .deepthinking/ (向后兼容)
 
     Returns:
         数据存储目录路径
@@ -41,10 +41,10 @@ def get_default_data_dir() -> Path:
         return Path(custom_dir)
 
     # 2. 默认使用项目本地目录
-    local_dir = Path.cwd() / ".deep-thinking-mcp"
+    local_dir = Path.cwd() / ".deepthinking"
 
     # 3. 向后兼容：如果本地目录不存在但旧目录存在，使用旧目录
-    old_dir = Path.home() / ".deep-thinking-mcp"
+    old_dir = Path.home() / ".deepthinking"
     if not local_dir.exists() and old_dir.exists():
         logger.info(f"检测到旧数据目录: {old_dir}")
         logger.info("建议迁移数据到项目本地目录")
@@ -79,6 +79,7 @@ def ensure_gitignore(data_dir: Path) -> None:
             encoding="utf-8",
         )
         logger.debug(f"创建 .gitignore: {gitignore_path}")
+
 
 # 全局存储管理器实例
 _storage_manager: StorageManager | None = None
@@ -151,7 +152,7 @@ async def server_lifespan(_server: FastMCP) -> AsyncGenerator[None, None]:
 
 # 创建FastMCP服务器实例
 app = FastMCP(
-    name="deep-thinking",
+    name="DeepThinking",
     instructions="深度思考MCP服务器 - 提供顺序思考、会话管理和状态持久化功能",
     lifespan=server_lifespan,
 )

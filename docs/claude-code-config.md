@@ -8,7 +8,7 @@
 
 ## 概述
 
-Claude Code 是 Anthropic 官方的 VSCode AI 助手，支持通过 MCP (Model Context Protocol) 协议集成 DeepThinking-MCP 服务器。
+Claude Code 是 Anthropic 官方的 VSCode AI 助手，支持通过 MCP (Model Context Protocol) 协议集成 DeepThinking MCP 服务器。
 
 ### 配置方式对比
 

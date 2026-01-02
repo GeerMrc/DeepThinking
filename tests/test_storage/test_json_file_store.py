@@ -272,6 +272,7 @@ class TestJsonFileStoreCustomBackupDir:
 
         # 验证备份内容
         import json
+
         with open(backup_path, encoding="utf-8") as f:
             backup_data = json.load(f)
         assert backup_data == {"data": "value1"}

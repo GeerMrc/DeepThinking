@@ -1,4 +1,4 @@
-# DeepThinking-MCP 开发规范
+# DeepThinking MCP 开发规范
 
 > 版本: 1.0
 > 更新日期: 2026-01-01

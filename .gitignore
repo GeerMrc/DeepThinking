@@ -92,3 +92,18 @@ sessions/
 exports/
 backups/
 *.session.json
+
+# 数据目录
+.deep-thinking-mcp/
+test_env/
+test_install_venv/
+
+# 参考项目（不应该提交）
+autonomous-coding/
+claude-code-docs/
+
+# 临时计划文件（使用TASKS.md作为唯一追踪源）
+Plan-*.md
+prompt*.md
+*开发计划.md
+*深度分析.md

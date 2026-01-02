@@ -140,9 +140,7 @@ def _normalize_format(format_type: str) -> str:
     normalized = format_map.get(format_type.lower())
     if normalized is None:
         supported = ", ".join(set(format_map.values()))
-        raise ValueError(
-            f"不支持的格式: {format_type}。支持的格式: {supported}"
-        )
+        raise ValueError(f"不支持的格式: {format_type}。支持的格式: {supported}")
 
     return normalized
 

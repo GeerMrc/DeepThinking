@@ -1,6 +1,6 @@
-# DeepThinking-MCP 架构设计文档
+# DeepThinking MCP 架构设计文档
 
-> 项目: DeepThinking-MCP
+> 项目: DeepThinking MCP
 > 版本: 1.0.0
 > 更新时间: 2026-01-01
 
@@ -834,7 +834,7 @@ def format_mermaid(session: ThinkingSession) -> str:
          │ 5. 原子写入JSON文件
          ▼
 ┌─────────────────────────────┐
-│   ./.deep-thinking-mcp/     │
+│   ./.deepthinking/          │
 │   sessions/{session_id}.json│
 └────────┬────────────────────┘
          │

@@ -307,9 +307,7 @@ class TestVisualizeSessionTool:
     """测试 visualize_session MCP 工具"""
 
     @pytest.mark.asyncio
-    async def test_visualize_session_default_mermaid(
-        self, sample_session_data, clean_env
-    ):
+    async def test_visualize_session_default_mermaid(self, sample_session_data, clean_env):
         """测试默认 Mermaid 格式可视化"""
         thought = Thought(thought_number=1, content="测试", type="regular")
         session = ThinkingSession(**sample_session_data)
@@ -318,7 +316,9 @@ class TestVisualizeSessionTool:
         mock_manager = MagicMock()
         mock_manager.get_session.return_value = session
 
-        with patch("deep_thinking.tools.visualization.get_storage_manager", return_value=mock_manager):
+        with patch(
+            "deep_thinking.tools.visualization.get_storage_manager", return_value=mock_manager
+        ):
             result = await visualization.visualize_session("test-session-123")
 
         assert "思考会话可视化" in result
@@ -327,9 +327,7 @@ class TestVisualizeSessionTool:
         assert "graph TD" in result
 
     @pytest.mark.asyncio
-    async def test_visualize_session_ascii_format(
-        self, sample_session_data, clean_env
-    ):
+    async def test_visualize_session_ascii_format(self, sample_session_data, clean_env):
         """测试 ASCII 格式可视化"""
         thought = Thought(thought_number=1, content="测试", type="regular")
         session = ThinkingSession(**sample_session_data)
@@ -338,15 +336,15 @@ class TestVisualizeSessionTool:
         mock_manager = MagicMock()
         mock_manager.get_session.return_value = session
 
-        with patch("deep_thinking.tools.visualization.get_storage_manager", return_value=mock_manager):
+        with patch(
+            "deep_thinking.tools.visualization.get_storage_manager", return_value=mock_manager
+        ):
             result = await visualization.visualize_session("test-session-123", "ascii")
 
         assert "ASCII 流程图" in result
 
     @pytest.mark.asyncio
-    async def test_visualize_session_tree_format(
-        self, sample_session_data, clean_env
-    ):
+    async def test_visualize_session_tree_format(self, sample_session_data, clean_env):
         """测试树状结构可视化"""
         thought = Thought(thought_number=1, content="测试", type="regular")
         session = ThinkingSession(**sample_session_data)
@@ -355,7 +353,9 @@ class TestVisualizeSessionTool:
         mock_manager = MagicMock()
         mock_manager.get_session.return_value = session
 
-        with patch("deep_thinking.tools.visualization.get_storage_manager", return_value=mock_manager):
+        with patch(
+            "deep_thinking.tools.visualization.get_storage_manager", return_value=mock_manager
+        ):
             result = await visualization.visualize_session("test-session-123", "tree")
 
         assert "树状结构" in result
@@ -366,22 +366,28 @@ class TestVisualizeSessionTool:
         mock_manager = MagicMock()
         mock_manager.get_session.return_value = None
 
-        with patch("deep_thinking.tools.visualization.get_storage_manager", return_value=mock_manager), \
-             pytest.raises(ValueError, match="会话不存在"):
+        with (
+            patch(
+                "deep_thinking.tools.visualization.get_storage_manager", return_value=mock_manager
+            ),
+            pytest.raises(ValueError, match="会话不存在"),
+        ):
             await visualization.visualize_session("nonexistent-session")
 
     @pytest.mark.asyncio
-    async def test_visualize_session_invalid_format(
-        self, sample_session_data, clean_env
-    ):
+    async def test_visualize_session_invalid_format(self, sample_session_data, clean_env):
         """测试无效格式时的错误处理"""
         session = ThinkingSession(**sample_session_data)
 
         mock_manager = MagicMock()
         mock_manager.get_session.return_value = session
 
-        with patch("deep_thinking.tools.visualization.get_storage_manager", return_value=mock_manager), \
-             pytest.raises(ValueError, match="不支持的格式"):
+        with (
+            patch(
+                "deep_thinking.tools.visualization.get_storage_manager", return_value=mock_manager
+            ),
+            pytest.raises(ValueError, match="不支持的格式"),
+        ):
             await visualization.visualize_session("test-session-123", "invalid")
 
 
@@ -394,9 +400,7 @@ class TestVisualizeSessionSimpleTool:
     """测试 visualize_session_simple MCP 工具"""
 
     @pytest.mark.asyncio
-    async def test_visualize_session_simple_mermaid(
-        self, sample_session_data, clean_env
-    ):
+    async def test_visualize_session_simple_mermaid(self, sample_session_data, clean_env):
         """测试简化版 Mermaid 可视化"""
         thought = Thought(thought_number=1, content="测试", type="regular")
         session = ThinkingSession(**sample_session_data)
@@ -405,7 +409,9 @@ class TestVisualizeSessionSimpleTool:
         mock_manager = MagicMock()
         mock_manager.get_session.return_value = session
 
-        with patch("deep_thinking.tools.visualization.get_storage_manager", return_value=mock_manager):
+        with patch(
+            "deep_thinking.tools.visualization.get_storage_manager", return_value=mock_manager
+        ):
             # 明确指定 mermaid 格式
             result = await visualization.visualize_session_simple("test-session-123", "mermaid")
 
@@ -414,9 +420,7 @@ class TestVisualizeSessionSimpleTool:
         assert "思考会话可视化" not in result
 
     @pytest.mark.asyncio
-    async def test_visualize_session_simple_ascii(
-        self, sample_session_data, clean_env
-    ):
+    async def test_visualize_session_simple_ascii(self, sample_session_data, clean_env):
         """测试简化版 ASCII 可视化"""
         thought = Thought(thought_number=1, content="测试", type="regular")
         session = ThinkingSession(**sample_session_data)
@@ -425,15 +429,15 @@ class TestVisualizeSessionSimpleTool:
         mock_manager = MagicMock()
         mock_manager.get_session.return_value = session
 
-        with patch("deep_thinking.tools.visualization.get_storage_manager", return_value=mock_manager):
+        with patch(
+            "deep_thinking.tools.visualization.get_storage_manager", return_value=mock_manager
+        ):
             result = await visualization.visualize_session_simple("test-session-123", "ascii")
 
         assert "步骤 1" in result
 
     @pytest.mark.asyncio
-    async def test_visualize_session_simple_tree(
-        self, sample_session_data, clean_env
-    ):
+    async def test_visualize_session_simple_tree(self, sample_session_data, clean_env):
         """测试简化版树状结构可视化"""
         thought = Thought(thought_number=1, content="测试", type="regular")
         session = ThinkingSession(**sample_session_data)
@@ -442,7 +446,9 @@ class TestVisualizeSessionSimpleTool:
         mock_manager = MagicMock()
         mock_manager.get_session.return_value = session
 
-        with patch("deep_thinking.tools.visualization.get_storage_manager", return_value=mock_manager):
+        with patch(
+            "deep_thinking.tools.visualization.get_storage_manager", return_value=mock_manager
+        ):
             result = await visualization.visualize_session_simple("test-session-123", "tree")
 
         assert "🧠 思考流程树" in result

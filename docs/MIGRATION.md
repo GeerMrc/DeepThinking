@@ -1,4 +1,4 @@
-# DeepThinking-MCP 数据迁移指南
+# DeepThinking MCP 数据迁移指南
 
 > 版本: 0.2.0
 > 更新日期: 2026-01-01
@@ -7,7 +7,7 @@
 
 ## 概述
 
-从版本 0.2.0 开始，DeepThinking-MCP 将默认存储位置从用户主目录 (`~/.deep-thinking-mcp/`) 迁移到项目本地目录 (`./.deep-thinking-mcp/`)。
+从版本 0.2.0 开始，DeepThinking MCP 将默认存储位置从用户主目录 (`~/.Deep-Thinking-MCP/`) 迁移到项目本地目录 (`./.Deep-Thinking-MCP/`)。
 
 本指南详细说明数据迁移的机制、流程和故障排除。
 
@@ -26,8 +26,8 @@
 
 | 版本 | 存储位置 | 特点 |
 |------|---------|------|
-| 旧版本 (<0.2.0) | `~/.deep-thinking-mcp/` | 全局共享，用户级别 |
-| 新版本 (≥0.2.0) | `./.deep-thinking-mcp/` | 项目本地，团队协作 |
+| 旧版本 (<0.2.0) | `~/.Deep-Thinking-MCP/` | 全局共享，用户级别 |
+| 新版本 (≥0.2.0) | `./.Deep-Thinking-MCP/` | 项目本地，团队协作 |
 
 ---
 
@@ -37,8 +37,8 @@
 
 服务器启动时会自动检查以下条件：
 
-1. 旧数据目录存在：`~/.deep-thinking-mcp/`
-2. 新数据目录不存在或为空：`./.deep-thinking-mcp/`
+1. 旧数据目录存在：`~/.Deep-Thinking-MCP/`
+2. 新数据目录不存在或为空：`./.Deep-Thinking-MCP/`
 
 ### 迁移步骤
 
@@ -57,11 +57,11 @@
 ### 迁移日志示例
 
 ```
-INFO: 初始化数据目录: /project/.deep-thinking-mcp
-INFO: 检测到旧数据目录: /home/user/.deep-thinking-mcp
+INFO: 初始化数据目录: /project/.Deep-Thinking-MCP
+INFO: 检测到旧数据目录: /home/user/.Deep-Thinking-MCP
 INFO: 开始自动迁移...
-INFO: 创建迁移备份: /home/user/.deep-thinking-mcp/backups/migration_backup_20260101_120000
-INFO: 迁移备份已创建: /home/user/.deep-thinking-mcp/backups/migration_backup_20260101_120000
+INFO: 创建迁移备份: /home/user/.Deep-Thinking-MCP/backups/migration_backup_20260101_120000
+INFO: 迁移备份已创建: /home/user/.Deep-Thinking-MCP/backups/migration_backup_20260101_120000
 INFO: 数据迁移完成
 ```
 
@@ -87,18 +87,18 @@ python -m deep_thinking
 
 ```bash
 # 1. 创建新目录
-mkdir -p .deep-thinking-mcp/sessions
+mkdir -p .Deep-Thinking-MCP/sessions
 
 # 2. 复制会话数据
-cp -r ~/.deep-thinking-mcp/sessions/* .deep-thinking-mcp/sessions/
+cp -r ~/.Deep-Thinking-MCP/sessions/* .Deep-Thinking-MCP/sessions/
 
 # 3. 复制索引文件
-cp ~/.deep-thinking-mcp/sessions/.index.json .deep-thinking-mcp/sessions/
+cp ~/.Deep-Thinking-MCP/sessions/.index.json .Deep-Thinking-MCP/sessions/
 
 # 4. 创建迁移标记
-echo "migration_date: $(date -Iseconds)" > .deep-thinking-mcp/.migration_completed
-echo "source: ~/.deep-thinking-mcp/" >> .deep-thinking-mcp/.migration_completed
-echo "target: ./.deep-thinking-mcp/" >> .deep-thinking-mcp/.migration_completed
+echo "migration_date: $(date -Iseconds)" > .Deep-Thinking-MCP/.migration_completed
+echo "source: ~/.Deep-Thinking-MCP/" >> .Deep-Thinking-MCP/.migration_completed
+echo "target: ./.Deep-Thinking-MCP/" >> .Deep-Thinking-MCP/.migration_completed
 ```
 
 ---
@@ -109,10 +109,10 @@ echo "target: ./.deep-thinking-mcp/" >> .deep-thinking-mcp/.migration_completed
 
 ```bash
 # 检查迁移标记文件
-cat .deep-thinking-mcp/.migration_completed
+cat .Deep-Thinking-MCP/.migration_completed
 
 # 验证会话数据
-ls -la .deep-thinking-mcp/sessions/
+ls -la .Deep-Thinking-MCP/sessions/
 ```
 
 ### 验证数据完整性
@@ -140,13 +140,13 @@ python -m deep_thinking
 
 ```bash
 # 1. 删除新位置的数据
-rm -rf .deep-thinking-mcp
+rm -rf .Deep-Thinking-MCP
 
 # 2. 恢复备份
-cp -r ~/.deep-thinking-mcp/backups/migration_backup_*/* ~/.deep-thinking-mcp/sessions/
+cp -r ~/.Deep-Thinking-MCP/backups/migration_backup_*/* ~/.Deep-Thinking-MCP/sessions/
 
 # 3. 使用旧位置
-export DEEP_THINKING_DATA_DIR=~/.deep-thinking-mcp
+export DEEP_THINKING_DATA_DIR=~/.Deep-Thinking-MCP
 python -m deep_thinking
 ```
 
@@ -162,17 +162,17 @@ python -m deep_thinking
 
 1. 检查迁移是否成功：
    ```bash
-   cat .deep-thinking-mcp/.migration_completed
+   cat .Deep-Thinking-MCP/.migration_completed
    ```
 
 2. 检查会话文件是否存在：
    ```bash
-   ls -la .deep-thinking-mcp/sessions/
+   ls -la .Deep-Thinking-MCP/sessions/
    ```
 
 3. 手动指定旧数据目录：
    ```bash
-   export DEEP_THINKING_DATA_DIR=~/.deep-thinking-mcp
+   export DEEP_THINKING_DATA_DIR=~/.Deep-Thinking-MCP
    ```
 
 ---
@@ -185,7 +185,7 @@ python -m deep_thinking
 
 1. 检查备份是否创建：
    ```bash
-   ls -la ~/.deep-thinking-mcp/backups/
+   ls -la ~/.Deep-Thinking-MCP/backups/
    ```
 
 2. 查看详细错误日志：
@@ -205,12 +205,12 @@ python -m deep_thinking
 
 ```bash
 # 检查目录权限
-ls -la ~/.deep-thinking-mcp/
-ls -la .deep-thinking-mcp/
+ls -la ~/.Deep-Thinking-MCP/
+ls -la .Deep-Thinking-MCP/
 
 # 修改权限
-chmod 755 ~/.deep-thinking-mcp/
-chmod 755 .deep-thinking-mcp/
+chmod 755 ~/.Deep-Thinking-MCP/
+chmod 755 .Deep-Thinking-MCP/
 
 # 使用有权限的目录
 export DEEP_THINKING_DATA_DIR=/tmp/deep-thinking
@@ -232,11 +232,11 @@ export DEEP_THINKING_DATA_DIR=/tmp/deep-thinking
 
 ```bash
 # 项目 A
-export DEEP_THINKING_DATA_DIR=~/.deep-thinking-mcp
+export DEEP_THINKING_DATA_DIR=~/.Deep-Thinking-MCP
 cd /project/a && python -m deep_thinking
 
 # 项目 B
-export DEEP_THINKING_DATA_DIR=~/.deep-thinking-mcp
+export DEEP_THINKING_DATA_DIR=~/.Deep-Thinking-MCP
 cd /project/b && python -m deep_thinking
 ```
 
@@ -250,13 +250,13 @@ cd /project/b && python -m deep_thinking
 
 ```bash
 # 1. 再次确认备份存在
-ls -la ~/.deep-thinking-mcp/backups/
+ls -la ~/.Deep-Thinking-MCP/backups/
 
 # 2. 删除旧数据（可选）
-rm -rf ~/.deep-thinking-mcp/
+rm -rf ~/.Deep-Thinking-MCP/
 
 # 3. 删除备份（可选）
-rm -rf ~/.deep-thinking-mcp/backups/
+rm -rf ~/.Deep-Thinking-MCP/backups/
 ```
 
 ⚠️ **警告**: 删除前请确保新位置数据完整！
@@ -269,15 +269,15 @@ rm -rf ~/.deep-thinking-mcp/backups/
 
 ```bash
 # 定期备份新位置数据
-cp -r .deep-thinking-mcp .deep-thinking-mcp.backup.$(date +%Y%m%d)
+cp -r .Deep-Thinking-MCP .Deep-Thinking-MCP.backup.$(date +%Y%m%d)
 ```
 
 ### 2. 版本控制
 
-确保 `.deep-thinking-mcp/.gitignore` 存在：
+确保 `.Deep-Thinking-MCP/.gitignore` 存在：
 
 ```bash
-cat .deep-thinking-mcp/.gitignore
+cat .Deep-Thinking-MCP/.gitignore
 ```
 
 应包含：
@@ -312,4 +312,4 @@ env:
 如有迁移问题，请：
 1. 查看 [故障排除](#故障排除) 章节
 2. 启用 DEBUG 日志查看详细信息
-3. 提交 [GitHub Issue](https://github.com/your-org/deep-thinking-mcp/issues)
+3. 提交 [GitHub Issue](https://github.com/your-org/Deep-Thinking-MCP/issues)

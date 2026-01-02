@@ -1,6 +1,6 @@
 # Claude Desktop 配置示例
 
-本目录包含 DeepThinking-MCP 与 Claude Desktop 集成的配置示例。
+本目录包含 DeepThinking MCP 与 Claude Desktop 集成的配置示例。
 
 ## 配置文件说明
 
@@ -13,22 +13,22 @@
 
 ## 快速开始
 
-### 安装 DeepThinking-MCP
+### 安装 DeepThinking MCP
 
-首先选择一种方式安装 DeepThinking-MCP：
+首先选择一种方式安装 DeepThinking MCP：
 
 #### 使用 uv（推荐）⚡
 ```bash
 # 安装 uv
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# 安装 DeepThinking-MCP
-uv pip install deep-thinking-mcp
+# 安装 DeepThinking MCP
+uv pip install Deep-Thinking-MCP
 ```
 
 #### 使用 pip
 ```bash
-pip install deep-thinking-mcp
+pip install Deep-Thinking-MCP
 ```
 
 ---
@@ -129,7 +129,7 @@ python -m deep_thinking --mode sse --host 127.0.0.1 --port 8088
 
 ## 环境变量配置
 
-您也可以通过环境变量配置 DeepThinking-MCP：
+您也可以通过环境变量配置 DeepThinking MCP：
 
 ```bash
 # 设置存储目录
@@ -188,7 +188,7 @@ export DEEP_THINKING_LOG_LEVEL="DEBUG"
 
 ### 使用 uv（推荐）⚡
 
-如果您使用 uv 安装了 DeepThinking-MCP：
+如果您使用 uv 安装了 DeepThinking MCP：
 
 ```json
 {
@@ -197,7 +197,7 @@ export DEEP_THINKING_LOG_LEVEL="DEBUG"
       "command": "uv",
       "args": [
         "--directory",
-        "/path/to/deep-thinking-mcp",
+        "/path/to/Deep-Thinking-MCP",
         "run",
         "python",
         "-m",
@@ -225,7 +225,7 @@ export DEEP_THINKING_LOG_LEVEL="DEBUG"
 
 ### 使用虚拟环境
 
-如果您在虚拟环境中安装了 DeepThinking-MCP：
+如果您在虚拟环境中安装了 DeepThinking MCP：
 
 ```json
 {

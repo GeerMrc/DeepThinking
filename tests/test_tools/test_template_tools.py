@@ -97,8 +97,12 @@ class TestTemplateLoader:
         templates_dir.mkdir(parents=True)
 
         # 创建多个模板文件
-        (templates_dir / "template1.json").write_text('{"template_id": "t1", "name": "T1", "description": "", "category": "", "structure": {"steps": []}}')
-        (templates_dir / "template2.json").write_text('{"template_id": "t2", "name": "T2", "description": "", "category": "", "structure": {"steps": []}}')
+        (templates_dir / "template1.json").write_text(
+            '{"template_id": "t1", "name": "T1", "description": "", "category": "", "structure": {"steps": []}}'
+        )
+        (templates_dir / "template2.json").write_text(
+            '{"template_id": "t2", "name": "T2", "description": "", "category": "", "structure": {"steps": []}}'
+        )
 
         loader = TemplateLoader(templates_dir)
         result = loader.list_available_templates()
@@ -181,9 +185,10 @@ class TestApplyTemplateTool:
         mock_manager.create_session.return_value = mock_session
         mock_manager.update_session.return_value = True
 
-        with patch(
-            "deep_thinking.tools.template.get_storage_manager", return_value=mock_manager
-        ), patch("deep_thinking.tools.template.TemplateLoader") as MockLoader:
+        with (
+            patch("deep_thinking.tools.template.get_storage_manager", return_value=mock_manager),
+            patch("deep_thinking.tools.template.TemplateLoader") as MockLoader,
+        ):
             # Mock模板
             mock_template = {
                 "template_id": "test",
@@ -218,18 +223,15 @@ class TestApplyTemplateTool:
         mock_manager.create_session.return_value = mock_session
         mock_manager.update_session.return_value = True
 
-        with patch(
-            "deep_thinking.tools.template.get_storage_manager", return_value=mock_manager
-        ), patch("deep_thinking.tools.template.TemplateLoader") as MockLoader:
+        with (
+            patch("deep_thinking.tools.template.get_storage_manager", return_value=mock_manager),
+            patch("deep_thinking.tools.template.TemplateLoader") as MockLoader,
+        ):
             mock_template = {
                 "template_id": "test",
                 "name": "测试模板",
                 "description": "测试描述",
-                "structure": {
-                    "steps": [
-                        {"step_number": 1, "prompt": "第一步", "type": "regular"}
-                    ]
-                },
+                "structure": {"steps": [{"step_number": 1, "prompt": "第一步", "type": "regular"}]},
             }
             mock_loader_instance = MagicMock()
             mock_loader_instance.load_template.return_value = mock_template
@@ -244,9 +246,10 @@ class TestApplyTemplateTool:
         """测试模板不存在时的错误处理"""
         mock_manager = MagicMock()
 
-        with patch(
-            "deep_thinking.tools.template.get_storage_manager", return_value=mock_manager
-        ), patch("deep_thinking.tools.template.TemplateLoader") as MockLoader:
+        with (
+            patch("deep_thinking.tools.template.get_storage_manager", return_value=mock_manager),
+            patch("deep_thinking.tools.template.TemplateLoader") as MockLoader,
+        ):
             mock_loader_instance = MagicMock()
             mock_loader_instance.load_template.side_effect = FileNotFoundError("模板不存在")
             mock_loader_instance.list_available_templates.return_value = ["t1", "t2"]

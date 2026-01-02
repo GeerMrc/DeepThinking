@@ -57,9 +57,7 @@ class TemplateLoader:
         if not template_file.exists():
             # 尝试搜索所有模板文件
             available = self.list_available_templates()
-            raise FileNotFoundError(
-                f"模板不存在: {template_id}。可用模板: {', '.join(available)}"
-            )
+            raise FileNotFoundError(f"模板不存在: {template_id}。可用模板: {', '.join(available)}")
 
         try:
             with template_file.open("r", encoding="utf-8") as f:
@@ -187,9 +185,7 @@ class TemplateLoader:
             # 验证 type 值
             valid_types = ["regular", "revision", "branch"]
             if step["type"] not in valid_types:
-                raise ValueError(
-                    f"步骤 {i} 的 type 必须是: {', '.join(valid_types)}"
-                )
+                raise ValueError(f"步骤 {i} 的 type 必须是: {', '.join(valid_types)}")
 
 
 __all__ = [

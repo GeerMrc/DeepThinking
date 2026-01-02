@@ -320,7 +320,7 @@ def resume_session(
 
 **会话ID**: {session_id}
 **名称**: {session.name}
-**描述**: {session.description or '(无描述)'}
+**描述**: {session.description or "(无描述)"}
 
 该会话尚未包含任何思考步骤，可以直接开始思考。
 
@@ -338,16 +338,18 @@ def resume_session(
     ]
 
     # 显示最后一个思考步骤
-    result_parts.extend([
-        "---",
-        "### 上一个思考步骤",
-        "",
-        f"**步骤 {last_thought.thought_number}**: {last_thought.content[:100]}"
-        f"{'...' if len(last_thought.content) > 100 else ''}",
-        f"**类型**: {last_thought.type}",
-        f"**时间**: {last_thought.timestamp.strftime('%Y-%m-%d %H:%M:%S')}",
-        "",
-    ])
+    result_parts.extend(
+        [
+            "---",
+            "### 上一个思考步骤",
+            "",
+            f"**步骤 {last_thought.thought_number}**: {last_thought.content[:100]}"
+            f"{'...' if len(last_thought.content) > 100 else ''}",
+            f"**类型**: {last_thought.type}",
+            f"**时间**: {last_thought.timestamp.strftime('%Y-%m-%d %H:%M:%S')}",
+            "",
+        ]
+    )
 
     # 检查是否有total_thoughts历史记录
     if "total_thoughts_history" in session.metadata:
@@ -355,26 +357,30 @@ def resume_session(
         if history:
             last_adjustment = history[-1]
             current_total = last_adjustment["new_total"]
-            result_parts.extend([
-                "### 思考步骤调整历史",
-                "",
-                f"**当前总数**: {current_total}",
-                f"**调整次数**: {len(history)}",
-                "",
-            ])
+            result_parts.extend(
+                [
+                    "### 思考步骤调整历史",
+                    "",
+                    f"**当前总数**: {current_total}",
+                    f"**调整次数**: {len(history)}",
+                    "",
+                ]
+            )
 
     # 继续指导
-    result_parts.extend([
-        "---",
-        "### 继续思考",
-        "",
-        "要继续添加思考步骤，请使用 `sequential_thinking` 工具：",
-        "",
-        f"- 设置 `thoughtNumber` 为 {session.thought_count() + 1}",
-        "- 设置 `session_id` 为当前会话ID",
-        "- 如果需要增加思考步骤总数，设置 `needsMoreThoughts=true`",
-        "",
-    ])
+    result_parts.extend(
+        [
+            "---",
+            "### 继续思考",
+            "",
+            "要继续添加思考步骤，请使用 `sequential_thinking` 工具：",
+            "",
+            f"- 设置 `thoughtNumber` 为 {session.thought_count() + 1}",
+            "- 设置 `session_id` 为当前会话ID",
+            "- 如果需要增加思考步骤总数，设置 `needsMoreThoughts=true`",
+            "",
+        ]
+    )
 
     return "\n".join(result_parts)
 

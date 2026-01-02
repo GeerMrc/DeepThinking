@@ -1,4 +1,4 @@
-# DeepThinking-MCP IDE 配置指南
+# DeepThinking MCP IDE 配置指南
 
 > 版本: 1.0.0
 > 更新日期: 2026-01-02
@@ -10,7 +10,7 @@
 
 ## 概述
 
-DeepThinking-MCP 支持通过 MCP (Model Context Protocol) 协议与各种 IDE 和代码编辑器集成。本文档提供主流 IDE 的快速配置示例。
+DeepThinking MCP 支持通过 MCP (Model Context Protocol) 协议与各种 IDE 和代码编辑器集成。本文档提供主流 IDE 的快速配置示例。
 
 > 💡 **Claude Code 用户**：Claude Code 配置已单独整理为 [完整配置指南](./claude-code-config.md)，包含 CLI 命令行方式、配置文件方式、开发模式配置等详细内容。
 
@@ -209,7 +209,7 @@ DeepThinking-MCP 支持通过 MCP (Model Context Protocol) 协议与各种 IDE �
 
 ## Claude Code (VSCode) 配置
 
-Claude Code 是 Anthropic 官方的 VSCode AI 助手，支持通过 MCP 协议集成 DeepThinking-MCP 服务器。
+Claude Code 是 Anthropic 官方的 VSCode AI 助手，支持通过 MCP 协议集成 DeepThinking MCP 服务器。
 
 📖 **完整配置指南**：详见 [Claude Code 配置完整指南](./claude-code-config.md)
 
@@ -588,8 +588,8 @@ uv pip install -e /path/to/Deep-Thinking-MCP
 
 ```bash
 # 确保数据目录可写
-mkdir -p .deep-thinking-mcp
-chmod 755 .deep-thinking-mcp
+mkdir -p .deepthinking
+chmod 755 .deepthinking
 ```
 
 ---
@@ -627,11 +627,11 @@ chmod 755 .deep-thinking-mcp
 **启动容器**：
 ```bash
 docker run -d \
-  --name deep-thinking-mcp \
+  --name deepthinking \
   -p 8088:8088 \
   -e DEEP_THINKING_API_KEY="your-key" \
-  -v /data:/app/.deep-thinking-mcp \
-  your-registry/deep-thinking-mcp:latest \
+  -v /data:/app/.deepthinking \
+  your-registry/deepthinking:latest \
   python -m deep_thinking --transport sse --host 0.0.0.0
 ```
 

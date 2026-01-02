@@ -149,6 +149,7 @@ class TestGlobalConfig:
     def setup_method(self):
         """每个测试前重置全局配置"""
         import deep_thinking.models.config as config_module
+
         config_module._global_config = None
 
     def test_get_global_config_initializes_from_env(self):

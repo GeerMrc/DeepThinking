@@ -142,7 +142,7 @@ class SessionFormatter:
         lines.append("")
 
         # 时间戳
-        time_str = thought.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+        time_str = thought.timestamp.strftime("%Y-%m-%d %H:%M:%S")
         lines.append(f"<details><summary>🕒 {time_str}</summary>")
         lines.append("")
         lines.append("</details>")
@@ -327,7 +327,7 @@ class SessionFormatter:
 """)
 
         # 标题
-        html_parts.append(f'        <h1>{SessionFormatter._escape_html(session.name)}</h1>')
+        html_parts.append(f"        <h1>{SessionFormatter._escape_html(session.name)}</h1>")
         html_parts.append("")
 
         # 描述
@@ -337,25 +337,25 @@ class SessionFormatter:
             html_parts.append("")
 
         # 会话信息
-        html_parts.append('        <h2>会话信息</h2>')
+        html_parts.append("        <h2>会话信息</h2>")
         html_parts.append('        <div class="session-info">')
         sid = SessionFormatter._escape_html(session.session_id)
-        html_parts.append(f'            <p><strong>会话ID:</strong> <code>{sid}</code></p>')
+        html_parts.append(f"            <p><strong>会话ID:</strong> <code>{sid}</code></p>")
         badge = SessionFormatter._status_badge(session.status).split(" ", 1)[1]
         status_html = f'<span class="status {session.status}">{badge}</span>'
-        html_parts.append(f'            <p><strong>状态:</strong> {status_html}</p>')
+        html_parts.append(f"            <p><strong>状态:</strong> {status_html}</p>")
         created = session.created_at.strftime("%Y-%m-%d %H:%M:%S")
-        html_parts.append(f'            <p><strong>创建时间:</strong> {created}</p>')
+        html_parts.append(f"            <p><strong>创建时间:</strong> {created}</p>")
         updated = session.updated_at.strftime("%Y-%m-%d %H:%M:%S")
-        html_parts.append(f'            <p><strong>更新时间:</strong> {updated}</p>')
+        html_parts.append(f"            <p><strong>更新时间:</strong> {updated}</p>")
         count = session.thought_count()
-        html_parts.append(f'            <p><strong>思考步骤数:</strong> {count}</p>')
-        html_parts.append('        </div>')
+        html_parts.append(f"            <p><strong>思考步骤数:</strong> {count}</p>")
+        html_parts.append("        </div>")
         html_parts.append("")
 
         # 思考步骤
         if session.thoughts:
-            html_parts.append('        <h2>思考步骤</h2>')
+            html_parts.append("        <h2>思考步骤</h2>")
             html_parts.append("")
 
             for thought in session.thoughts:
@@ -364,24 +364,24 @@ class SessionFormatter:
 
         # 元数据
         if session.metadata:
-            html_parts.append('        <h2>元数据</h2>')
+            html_parts.append("        <h2>元数据</h2>")
             html_parts.append('        <div class="metadata">')
             metadata_json = json.dumps(session.metadata, ensure_ascii=False, indent=2)
-            html_parts.append(f'            <pre>{metadata_json}</pre>')
-            html_parts.append('        </div>')
+            html_parts.append(f"            <pre>{metadata_json}</pre>")
+            html_parts.append("        </div>")
             html_parts.append("")
 
         # 页脚
         html_parts.append('        <div class="footer">')
         export_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        html_parts.append(f'            <p>导出时间: {export_time}</p>')
-        html_parts.append('            <p>由 DeepThinking-MCP 生成</p>')
-        html_parts.append('        </div>')
+        html_parts.append(f"            <p>导出时间: {export_time}</p>")
+        html_parts.append("            <p>由 DeepThinking-MCP 生成</p>")
+        html_parts.append("        </div>")
 
         # HTML尾部
-        html_parts.append('    </div>')
-        html_parts.append('</body>')
-        html_parts.append('</html>')
+        html_parts.append("    </div>")
+        html_parts.append("</body>")
+        html_parts.append("</html>")
 
         return "\n".join(html_parts)
 
@@ -398,36 +398,36 @@ class SessionFormatter:
         """
         emoji = SessionFormatter.TYPE_EMOJI.get(thought.type, "💭")
 
-        lines: list[str] = ["        <div class=\"thought\">"]
-        header = f'{emoji} 步骤 {thought.thought_number}'
+        lines: list[str] = ['        <div class="thought">']
+        header = f"{emoji} 步骤 {thought.thought_number}"
         lines.append(f'            <div class="thought-header">{header}')
 
         # 添加类型标签
         if thought.type != "regular":
             type_name = SessionFormatter.TYPE_NAME.get(thought.type, "思考")
             type_span = f'<span class="thought-type {thought.type}">{type_name}</span>'
-            lines.append(f'                {type_span}')
+            lines.append(f"                {type_span}")
 
-        lines.append('            </div>')
+        lines.append("            </div>")
 
         # 添加修订/分支信息
         if thought.type == "revision" and thought.revises_thought:
-            rev_info = f'📝 修订步骤 {thought.revises_thought}'
+            rev_info = f"📝 修订步骤 {thought.revises_thought}"
             lines.append(f'            <p style="color: #e67e22; font-size: 0.9em;">{rev_info}</p>')
         elif thought.type == "branch" and thought.branch_from_thought:
-            branch_info = f'🔀 分支自步骤 {thought.branch_from_thought}'
+            branch_info = f"🔀 分支自步骤 {thought.branch_from_thought}"
             branch_p = f'<p style="color: #27ae60; font-size: 0.9em;">{branch_info}</p>'
-            lines.append(f'            {branch_p}')
+            lines.append(f"            {branch_p}")
 
         # 思考内容
         content = SessionFormatter._escape_html(thought.content)
         lines.append(f'            <div class="thought-content">{content}</div>')
 
         # 时间戳
-        time_str = thought.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+        time_str = thought.timestamp.strftime("%Y-%m-%d %H:%M:%S")
         lines.append(f'            <div class="thought-meta">🕒 {time_str}</div>')
 
-        lines.append('        </div>')
+        lines.append("        </div>")
 
         return "\n".join(lines)
 
@@ -442,12 +442,13 @@ class SessionFormatter:
         Returns:
             转义后的文本
         """
-        return (text
-                .replace("&", "&amp;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
-                .replace('"', "&quot;")
-                .replace("'", "&#x27;"))
+        return (
+            text.replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace('"', "&quot;")
+            .replace("'", "&#x27;")
+        )
 
     @staticmethod
     def to_text(session: ThinkingSession) -> str:
@@ -652,9 +653,12 @@ classDef branch fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;
             Mermaid 格式的流程图代码
         """
         if not session.thoughts:
-            return """graph TD
+            return (
+                """graph TD
     Start["会话暂无思考步骤"]:::regular
-    """ + Visualizer.MERMAID_STYLES
+    """
+                + Visualizer.MERMAID_STYLES
+            )
 
         lines: list[str] = ["graph TD"]
 
@@ -667,11 +671,11 @@ classDef branch fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;
             # 添加节点
             if thought.type == "revision":
                 revises = thought.revises_thought or 0
-                label = f'{node_label}<br/><small>(修订步骤{revises})</small>'
+                label = f"{node_label}<br/><small>(修订步骤{revises})</small>"
                 lines.append(f'    {node_id}["{label}"]:::{node_class}')
             elif thought.type == "branch":
                 branch_from = thought.branch_from_thought or 0
-                label = f'{node_label}<br/><small>(分支自步骤{branch_from})</small>'
+                label = f"{node_label}<br/><small>(分支自步骤{branch_from})</small>"
                 lines.append(f'    {node_id}["{label}"]:::{node_class}')
             else:
                 lines.append(f'    {node_id}["{node_label}"]:::{node_class}')
@@ -756,7 +760,7 @@ classDef branch fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;
         if len(text) > 30:
             text = text[:27] + "..."
         # 替换特殊字符
-        text = text.replace('"', '#quot;')
+        text = text.replace('"', "#quot;")
         text = text.replace("<", "&lt;")
         text = text.replace(">", "&gt;")
         return text

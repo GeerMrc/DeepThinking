@@ -1,7 +1,7 @@
 # PyPI 发布指南
 
 > 📅 版本: 1.0.0
-> 🎯 目的: 指导开发者将 deep-thinking-mcp 发布到 PyPI
+> 🎯 目的: 指导开发者将 Deep-Thinking-MCP 发布到 PyPI
 
 ---
 
@@ -17,10 +17,10 @@
 
 ```bash
 # 检查包名是否可用
-pip search deep-thinking-mcp
+pip search Deep-Thinking-MCP
 
 # 或访问 PyPI 搜索
-# https://pypi.org/search/?q=deep-thinking-mcp
+# https://pypi.org/search/?q=Deep-Thinking-MCP
 ```
 
 **重要提示**: 包名必须是全局唯一的，建议使用前先确认。
@@ -45,7 +45,7 @@ pip install uv
 
 ```toml
 [project]
-name = "deep-thinking-mcp"           # 包名
+name = "Deep-Thinking-MCP"           # 包名
 version = "0.1.0"                      # 版本号（遵循PEP 440）
 description = "高级深度思考MCP服务器"   # 简短描述
 readme = "README.md"                   # README文件
@@ -57,9 +57,9 @@ authors = [
 
 # 关键: 项目URL
 [project.urls]
-Homepage = "https://github.com/your-org/deep-thinking-mcp"
-Repository = "https://github.com/your-org/deep-thinking-mcp"
-Issues = "https://github.com/your-org/deep-thinking-mcp/issues"
+Homepage = "https://github.com/your-org/Deep-Thinking-MCP"
+Repository = "https://github.com/your-org/Deep-Thinking-MCP"
+Issues = "https://github.com/your-org/Deep-Thinking-MCP/issues"
 
 # 关键: 包分类
 [project.optional-dependencies]
@@ -87,7 +87,7 @@ build-backend = "hatchling.build"
 PyPI 会渲染 README.md 作为项目主页，确保：
 
 ```markdown
-# DeepThinking-MCP
+# DeepThinking MCP
 
 一个强大的MCP服务器，提供深度思考能力。
 
@@ -102,7 +102,7 @@ PyPI 会渲染 README.md 作为项目主页，确保：
 ## 安装
 
 ```bash
-pip install deep-thinking-mcp
+pip install Deep-Thinking-MCP
 ```
 
 ## 使用示例
@@ -212,7 +212,7 @@ python -m venv test_env
 source test_env/bin/activate
 
 # 从 TestPyPI 安装
-pip install --index-url https://test.pypi.org/simple/ deep-thinking-mcp
+pip install --index-url https://test.pypi.org/simple/ Deep-Thinking-MCP
 
 # 验证安装
 python -c "import deep_thinking; print('✅ TestPyPI安装成功')"
@@ -251,7 +251,7 @@ password = <your-testpypi-api-token>
 
 1. 登录 PyPI: https://pypi.org/manage/account/token/
 2. 创建新的 API token
-3. 选择范围: "Entire account" 或 "Project: deep-thinking-mcp"
+3. 选择范围: "Entire account" 或 "Project: Deep-Thinking-MCP"
 4. 复制 token（只显示一次！）
 
 #### 上传到 PyPI
@@ -287,7 +287,7 @@ uv publish --repository pypi dist/*
 
 ### 1. 检查 PyPI 页面
 
-访问: https://pypi.org/project/deep-thinking-mcp/
+访问: https://pypi.org/project/Deep-Thinking-MCP/
 
 确认:
 - [ ] 包信息正确显示
@@ -303,7 +303,7 @@ python -m venv verify_env
 source verify_env/bin/activate
 
 # 从 PyPI 安装
-pip install deep-thinking-mcp
+pip install Deep-Thinking-MCP
 
 # 验证功能
 python -c "import deep_thinking; print(deep_thinking.__version__)"
@@ -317,10 +317,10 @@ rm -rf verify_env
 
 ```bash
 # 测试 pip 安装
-pip install deep-thinking-mcp
+pip install Deep-Thinking-MCP
 
 # 测试 uv 安装
-uv pip install deep-thinking-mcp
+uv pip install Deep-Thinking-MCP
 
 # 测试可编辑模式（如果需要）
 pip install -e .
@@ -551,7 +551,7 @@ pip install --upgrade build
 #!/bin/bash
 set -e
 
-echo "🚀 开始发布 deep-thinking-mcp 到 PyPI"
+echo "🚀 开始发布 Deep-Thinking-MCP 到 PyPI"
 
 # 检查是否在正确的分支
 CURRENT_BRANCH=$(git branch --show-current)
@@ -611,7 +611,7 @@ git tag -a "v$VERSION" -m "Release version $VERSION"
 git push origin "v$VERSION"
 
 echo "✅ 发布完成！"
-echo "📦 PyPI: https://pypi.org/project/deep-thinking-mcp/"
+echo "📦 PyPI: https://pypi.org/project/Deep-Thinking-MCP/"
 ```
 
 **使用脚本:**
@@ -650,11 +650,11 @@ chmod +x scripts/publish.sh
 如果遇到问题:
 
 1. 查看 [PyPI FAQ](https://pypi.org/help/)
-2. 搜索 [GitHub Issues](https://github.com/your-org/deep-thinking-mcp/issues)
+2. 搜索 [GitHub Issues](https://github.com/your-org/Deep-Thinking-MCP/issues)
 3. 提交新的 Issue
 
 ---
 
 > ✅ **更新日期**: 2025-12-31
 > 📋 **文档版本**: 1.0.0
-> 🎯 **适用项目**: deep-thinking-mcp
+> 🎯 **适用项目**: Deep-Thinking-MCP
