@@ -36,7 +36,7 @@ class Template(BaseModel):
 
     name: str = Field(..., min_length=1, max_length=100, description="模板名称")
 
-    description: str = Field(default="", max_length=500, description="模板描述")
+    description: str = Field(default="", max_length=2000, description="模板描述")
 
     category: str = Field(
         default="general",
@@ -135,7 +135,7 @@ class TemplateCreate(BaseModel):
 
     name: str = Field(..., min_length=1, max_length=100, description="模板名称")
 
-    description: str = Field(default="", max_length=500, description="模板描述")
+    description: str = Field(default="", max_length=2000, description="模板描述")
 
     category: str = Field(
         default="general",

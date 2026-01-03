@@ -40,7 +40,7 @@ class ThinkingSession(BaseModel):
 
     name: str = Field(..., min_length=1, max_length=100, description="会话名称")
 
-    description: str = Field(default="", max_length=500, description="会话描述")
+    description: str = Field(default="", max_length=2000, description="会话描述")
 
     created_at: datetime = Field(default_factory=datetime.utcnow, description="会话创建时间")
 
@@ -235,7 +235,7 @@ class SessionCreate(BaseModel):
 
     name: str = Field(..., min_length=1, max_length=100, description="会话名称")
 
-    description: str = Field(default="", max_length=500, description="会话描述")
+    description: str = Field(default="", max_length=2000, description="会话描述")
 
     metadata: dict[str, Any] = Field(default_factory=dict, description="元数据")
 

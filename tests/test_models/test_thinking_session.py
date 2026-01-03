@@ -69,7 +69,7 @@ class TestThinkingSession:
         with pytest.raises(ValidationError):
             ThinkingSession(
                 name="会话",
-                description="x" * 501,  # 超过500字符
+                description="x" * 2001,  # 超过2000字符
             )
 
     def test_status_validation(self):
