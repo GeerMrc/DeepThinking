@@ -160,6 +160,346 @@ claude mcp add --transport stdio deep-thinking \
   -- python -m deep_thinking
 ```
 
+### JSON 配置导入方式
+
+除了逐参数配置，Claude Code CLI 还提供了 `claude mcp add-json` 命令，可以直接使用 JSON 配置导入 MCP 服务器。
+
+**优势**：
+- 📦 从现有 JSON 配置快速导入
+- 🔄 适合配置迁移和批量操作
+- 📝 支持从文件或标准输入读取
+- ✅ 自动验证 JSON 格式
+
+**适用场景**：
+- 从 Claude Desktop 或其他 MCP 客户端迁移配置
+- 脚本化批量配置多个服务器
+- 使用版本控制的配置文件
+
+#### 基本用法
+
+**方式1：直接传递 JSON 字符串**
+```bash
+claude mcp add-json deep-thinking '{"command":"python","args":["-m","deep_thinking"]}'
+```
+
+**方式2：使用 heredoc（推荐用于多行配置）**
+```bash
+claude mcp add-json deep-thinking <<'EOF'
+{
+  "command": "python",
+  "args": ["-m", "deep_thinking"],
+  "env": {
+    "DEEP_THINKING_MAX_THOUGHTS": "50"
+  }
+}
+EOF
+```
+
+**方式3：从文件读取**
+```bash
+claude mcp add-json deep-thinking < config.json
+```
+
+**方式4：通过管道传递**
+```bash
+cat existing-config.json | claude mcp add-json deep-thinking
+```
+
+#### STDIO 配置示例
+
+**基础配置**（本地 Python）：
+```bash
+claude mcp add-json deep-thinking <<'EOF'
+{
+  "command": "python",
+  "args": ["-m", "deep_thinking"],
+  "env": {
+    "DEEP_THINKING_MAX_THOUGHTS": "50",
+    "DEEP_THINKING_MIN_THOUGHTS": "3"
+  }
+}
+EOF
+```
+
+**带环境变量的配置**：
+```bash
+claude mcp add-json deep-thinking <<'EOF'
+{
+  "command": "python",
+  "args": ["-m", "deep_thinking", "--transport", "stdio"],
+  "env": {
+    "DEEP_THINKING_MAX_THOUGHTS": "100",
+    "DEEP_THINKING_LOG_LEVEL": "DEBUG",
+    "DEEP_THINKING_DATA_DIR": "./.deep-thinking-data"
+  }
+}
+EOF
+```
+
+**使用 uv 加速**（推荐）：
+```bash
+claude mcp add-json deep-thinking <<'EOF'
+{
+  "command": "uv",
+  "args": [
+    "--directory",
+    "/path/to/Deep-Thinking-MCP",
+    "run",
+    "python",
+    "-m",
+    "deep_thinking"
+  ],
+  "env": {
+    "DEEP_THINKING_MAX_THOUGHTS": "100"
+  }
+}
+EOF
+```
+
+#### 从现有配置迁移
+
+**从 Claude Desktop 迁移**：
+
+Claude Desktop 配置（`~/.claude/desktop_config.json`）：
+```json
+{
+  "mcpServers": {
+    "deep-thinking": {
+      "command": "python",
+      "args": ["-m", "deep_thinking"],
+      "env": {
+        "DEEP_THINKING_MAX_THOUGHTS": "50"
+      }
+    }
+  }
+}
+```
+
+迁移命令：
+```bash
+# 1. 提取单个服务器配置
+jq '.mcpServers.deep-thinking' ~/.claude/desktop_config.json | \
+  claude mcp add-json deep-thinking
+
+# 2. 批量迁移所有服务器
+jq -r '.mcpServers | to_entries[] | "\(.key) \(.value | @json)"' \
+  ~/.claude/desktop_config.json | while read -r name config; do
+  echo "$config" | claude mcp add-json "$name"
+done
+```
+
+**从其他 MCP 客户端迁移**：
+
+如果其他客户端使用相同的 JSON 格式，可以直接使用其配置文件：
+```bash
+claude mcp add-json deep-thinking < /path/to/other-client-config.json
+```
+
+#### 批量配置脚本
+
+**Shell 脚本示例**（批量配置多个服务器）：
+```bash
+#!/bin/bash
+# configure-mcps.sh
+
+# 配置数组（名称:配置文件路径）
+declare -A configs=(
+  ["deep-thinking"]="configs/deep-thinking.json"
+  ["deep-thinking-dev"]="configs/deep-thinking-dev.json"
+)
+
+# 批量添加配置
+for name in "${!configs[@]}"; do
+  config_file="${configs[$name]}"
+  echo "正在配置 $name..."
+  claude mcp add-json "$name" < "$config_file"
+  if [ $? -eq 0 ]; then
+    echo "✅ $name 配置成功"
+  else
+    echo "❌ $name 配置失败"
+  fi
+done
+
+echo "完成！列出所有配置："
+claude mcp list
+```
+
+**Python 脚本示例**（动态生成配置）：
+```python
+#!/usr/bin/env python3
+import json
+import subprocess
+
+# 定义多个服务器配置
+servers = {
+    "deep-thinking-prod": {
+        "command": "python",
+        "args": ["-m", "deep_thinking"],
+        "env": {
+            "DEEP_THINKING_MAX_THOUGHTS": "50",
+            "DEEP_THINKING_LOG_LEVEL": "INFO"
+        }
+    },
+    "deep-thinking-dev": {
+        "command": "uv",
+        "args": [
+            "--directory",
+            "../Deep-Thinking-MCP",
+            "run",
+            "python",
+            "-m",
+            "deep_thinking"
+        ],
+        "env": {
+            "DEEP_THINKING_LOG_LEVEL": "DEBUG",
+            "DEEP_THINKING_MAX_THOUGHTS": "100"
+        }
+    }
+}
+
+# 批量添加配置
+for name, config in servers.items():
+    config_json = json.dumps(config)
+    result = subprocess.run(
+        ["claude", "mcp", "add-json", name],
+        input=config_json,
+        capture_output=True,
+        text=True
+    )
+    if result.returncode == 0:
+        print(f"✅ {name} 配置成功")
+    else:
+        print(f"❌ {name} 配置失败: {result.stderr}")
+```
+
+#### 与配置范围结合
+
+**项目级配置**（团队共享）：
+```bash
+claude mcp add-json deep-thinking --scope project < team-config.json
+```
+
+生成的 `.mcp.json` 文件：
+```json
+{
+  "mcpServers": {
+    "deep-thinking": {
+      "command": "python",
+      "args": ["-m", "deep_thinking"],
+      "env": {
+        "DEEP_THINKING_MAX_THOUGHTS": "50"
+      }
+    }
+  }
+}
+```
+
+**用户级配置**（个人使用）：
+```bash
+claude mcp add-json deep-thinking --scope user < personal-config.json
+```
+
+#### JSON 配置格式规范
+
+**必需字段**：
+- `command` (string): 启动命令
+- `args` (array): 命令参数数组
+
+**可选字段**：
+- `env` (object): 环境变量键值对
+- `cwd` (string): 工作目录
+
+**完整示例**：
+```json
+{
+  "command": "python",
+  "args": ["-m", "deep_thinking"],
+  "cwd": "/path/to/project",
+  "env": {
+    "DEEP_THINKING_MAX_THOUGHTS": "50",
+    "DEEP_THINKING_MIN_THOUGHTS": "3",
+    "DEEP_THINKING_LOG_LEVEL": "INFO",
+    "DEEP_THINKING_DATA_DIR": "./.deep-thinking-data"
+  }
+}
+```
+
+#### 限制和注意事项
+
+**适用范围**：
+- ✅ **STDIO 传输**: 完全支持，这是主要使用场景
+- ❌ **SSE/HTTP 传输**: 不支持，请使用 `claude mcp add --transport sse/http`
+
+**JSON 验证**：
+- 命令会自动验证 JSON 格式
+- 如果 JSON 格式错误，会显示详细的错误信息
+- 缺少必需字段（`command` 或 `args`）会报错
+
+**配置覆盖**：
+- 如果服务器名称已存在，会提示覆盖确认
+- 使用 `--force` 参数可以强制覆盖（如支持）
+
+**环境变量扩展**：
+- JSON 配置中的环境变量会按字面值处理
+- 不支持 shell 风格的变量扩展（如 `${VAR}`）
+- 如需动态环境变量，建议使用 `claude mcp add --env` 方式
+
+**示例对比**：
+
+```bash
+# ❌ JSON 方式不支持环境变量扩展
+claude mcp add-json deep-thinking <<'EOF'
+{
+  "env": {
+    "API_KEY": "${MY_API_KEY}"  # 会被当作字面值 "${MY_API_KEY}"
+  }
+}
+EOF
+
+# ✅ 使用 claude mcp add 方式支持环境变量扩展
+claude mcp add --transport stdio deep-thinking \
+  --env API_KEY=${MY_API_KEY} \
+  -- python -m deep_thinking
+```
+
+#### 故障排除
+
+**问题1：JSON 格式错误**
+```bash
+# 错误示例：缺少引号
+claude mcp add-json deep-thinking '{command: "python"}'
+# 错误信息：Invalid JSON format
+
+# 正确示例
+claude mcp add-json deep-thinking '{"command":"python"}'
+```
+
+**问题2：缺少必需字段**
+```bash
+# 错误示例：缺少 args 字段
+claude mcp add-json deep-thinking '{"command":"python"}'
+# 错误信息：Missing required field: args
+
+# 正确示例
+claude mcp add-json deep-thinking '{"command":"python","args":["-m","deep_thinking"]}'
+```
+
+**问题3：特殊字符转义**
+```bash
+# JSON 中的特殊字符需要正确转义
+claude mcp add-json deep-thinking <<'EOF'
+{
+  "command": "python",
+  "args": ["-m", "deep_thinking"],
+  "env": {
+    "PATH_WITH_SPACES": "/path/with spaces/to/bin"
+  }
+}
+EOF
+```
+
+---
+
 ### 管理命令
 
 配置完成后，可以使用以下命令管理 MCP 服务器：
