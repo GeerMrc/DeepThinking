@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "DeepThinking"
-version = "0.2.1"
+version = "0.2.2"
 description = "Advanced sequential thinking MCP server with session management, templates, and visualization"
 readme = "README.md"
 readme-content-type = "text/markdown"
