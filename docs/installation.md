@@ -95,6 +95,36 @@ uv pip install DeepThinking
 uv pip install --upgrade DeepThinking
 ```
 
+#### 重新安装（强制重装）
+
+如果需要强制重新安装：
+
+```bash
+# 方法1：使用 --force-reinstall 参数
+uv pip install --force-reinstall DeepThinking
+
+# 方法2：先卸载再安装
+uv pip uninstall DeepThinking
+uv pip install DeepThinking
+
+# 方法3：从 wheel 文件强制重装
+uv pip install --force-reinstall dist/DeepThinking-0.2.2-py3-none-any.whl
+```
+
+#### 升级 wheel 包
+
+从本地 wheel 文件升级：
+
+```bash
+# 构建新的 wheel 文件
+uv build
+
+# 强制重新安装（升级）
+uv pip install --force-reinstall dist/DeepThinking-0.2.2-py3-none-any.whl
+```
+
+**注意**：`uv pip install --upgrade` 仅适用于 PyPI 源，对于本地 wheel 文件，需要使用 `--force-reinstall` 参数。
+
 #### 卸载
 
 ```bash
@@ -295,7 +325,77 @@ scp dist/DeepThinking-0.1.0-py3-none-any.whl user@server:/tmp/
 uv pip install /tmp/DeepThinking-0.1.0-py3-none-any.whl
 ```
 
-#### 4.6 卸载 Wheel 安装
+#### 4.6 Wheel 包重新安装和升级
+
+**重新安装 wheel 包**（强制重装）：
+
+```bash
+# 使用 uv 重新安装
+uv pip install --force-reinstall dist/DeepThinking-0.2.2-py3-none-any.whl
+
+# 使用 pip 重新安装
+pip install --force-reinstall dist/DeepThinking-0.2.2-py3-none-any.whl
+
+# 或先卸载再安装
+uv pip uninstall DeepThinking
+uv pip install dist/DeepThinking-0.2.2-py3-none-any.whl
+```
+
+**升级 wheel 包**：
+
+从源码构建新版本后升级：
+
+```bash
+# 1. 重新构建 wheel 文件
+uv build
+# 或
+python -m build
+
+# 2. 强制重新安装（升级）
+uv pip install --force-reinstall dist/DeepThinking-0.2.2-py3-none-any.whl
+```
+
+**Wheel 包版本管理最佳实践**：
+
+```bash
+# 1. 查看当前安装的版本
+uv pip show DeepThinking
+
+# 2. 查看所有 wheel 文件
+ls -lh dist/
+
+# 3. 备份当前版本（可选）
+cp dist/DeepThinking-0.2.2-py3-none-any.whl dist/backup/
+
+# 4. 构建新版本
+uv build
+
+# 5. 升级到新版本
+uv pip install --force-reinstall dist/DeepThinking-0.2.3-py3-none-any.whl
+
+# 6. 验证升级
+python -c "import deep_thinking; print(deep_thinking.__version__)"
+```
+
+**多环境 wheel 包管理**：
+
+```bash
+# 为不同环境构建
+# Python 3.10
+python3.10 -m build
+# Python 3.11
+python3.11 -m build
+# Python 3.12
+python3.12 -m build
+
+# 查看所有构建的 wheel 文件
+ls -lh dist/
+
+# 安装对应环境的 wheel
+uv pip install dist/DeepThinking-0.2.2-py3-none-any.whl
+```
+
+#### 4.7 卸载 Wheel 安装
 
 ```bash
 # 卸载 wheel 安装的包
