@@ -83,7 +83,7 @@ cd Deep-Thinking-MCP
 uv build  # 或 python -m build
 
 # 安装 Wheel 文件（不显示源代码路径）
-uv pip install dist/DeepThinking-0.1.0-py3-none-any.whl
+uv pip install dist/DeepThinking-0.2.0-py3-none-any.whl
 ```
 
 > 📘 **详细安装指南**: 请参阅 [安装与配置文档](docs/installation.md) 获取完整的安装说明，包括开发模式和生产模式Wheel安装的详细对比。
@@ -203,6 +203,57 @@ ruff format src/ tests/
 # Mypy类型检查
 mypy src/deep_thinking/
 ```
+
+## 字段限制说明
+
+为确保系统稳定性和性能，各思考类型字段有相应的长度和数量限制：
+
+### 思考内容字段
+
+| 字段 | 类型 | 限制 | 说明 |
+|------|------|------|------|
+| `content` | str | 1-10000字符 | 主思考内容字段 |
+| `branch_id` | str | 1-50字符 | 分支标识符 |
+
+### 对比思考字段
+
+| 字段 | 类型 | 限制 | 说明 |
+|------|------|------|------|
+| `comparison_items` | list[str] | 最少2个，每项1-500字符 | 比较项应为简短描述 |
+| `comparison_dimensions` | list[str] | 最多10个，每项1-50字符 | 比较维度列表 |
+| `comparison_result` | str | 1-10000字符 | 比较结论，支持详细分析 |
+
+### 逆向思考字段
+
+| 字段 | 类型 | 限制 | 说明 |
+|------|------|------|------|
+| `reverse_target` | str | 1-2000字符 | 反推目标描述 |
+| `reverse_steps` | list[str] | 最多20个，每项1-500字符 | 反推步骤，每步简洁描述 |
+
+### 假设思考字段
+
+| 字段 | 类型 | 限制 | 说明 |
+|------|------|------|------|
+| `hypothetical_condition` | str | 1-2000字符 | 假设条件描述 |
+| `hypothetical_impact` | str | 1-10000字符 | 影响分析，支持详细描述 |
+| `hypothetical_probability` | str | 1-50字符 | 可能性评估 |
+
+### 会话和模板字段
+
+| 字段 | 类型 | 限制 | 说明 |
+|------|------|------|------|
+| `name` | str | 1-100字符 | 会话/模板名称 |
+| `description` | str | 0-2000字符 | 会话/模板描述 |
+
+### 思考配置
+
+| 配置项 | 默认值 | 范围 | 说明 |
+|--------|--------|------|------|
+| `max_thoughts` | 50 | 1-10000 | 最大思考步骤数 |
+| `min_thoughts` | 3 | 1-10000 | 最小思考步骤数 |
+| `thoughts_increment` | 10 | 1-100 | 每次增加的步骤数 |
+
+> 💡 **设计说明**: 限制值基于实际使用场景设定，平衡了灵活性和系统性能。如需调整限制，请确保充分测试。
 
 ## 项目结构
 
