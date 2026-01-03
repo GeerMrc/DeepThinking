@@ -101,6 +101,9 @@ test_install_venv/
 autonomous-coding/
 claude-code-docs/
 
+# 项目计划文档（保留主计划文档）
+!Plan-DeepThinking-MCP.md
+
 # 临时计划文件（使用TASKS.md作为唯一追踪源）
 Plan-*.md
 prompt*.md

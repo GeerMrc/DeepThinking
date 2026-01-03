@@ -1,8 +1,8 @@
 # DeepThinking MCP 架构设计文档
 
 > 项目: DeepThinking MCP
-> 版本: 1.0.0
-> 更新时间: 2026-01-01
+> 版本: 0.2.2
+> 更新时间: 2026-01-03
 
 ---
 
@@ -324,8 +324,8 @@ def update_task_status(
 def get_next_task() -> str:
     """获取下一个待执行任务（按优先级排序）"""
 
-@app.tool(name="get_task_stats")
-def get_task_stats() -> str:
+@app.tool(name="task_statistics")
+def task_statistics() -> str:
     """获取任务统计信息"""
 
 @app.tool(name="link_task_session")

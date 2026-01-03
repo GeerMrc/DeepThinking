@@ -1,11 +1,12 @@
 # DeepThinking MCP API 文档
 
-> 版本: 0.1.0
-> 更新日期: 2026-01-01
+> 版本: 0.2.2
+> 更新日期: 2026-01-03
 >
-> **重要更新** (2026-01-01):
+> **重要更新** (v0.2.2):
+> - 支持6种思考类型：常规💭、修订🔄、分支🌿、对比⚖️、逆向🔙、假设🤔
 > - 同步/异步设计统一：所有MCP工具函数均为同步函数，调用时无需使用 `await`
-> - 代码已改为全同步设计（详见 `docs/ASYNC_SYNC_ANALYSIS.md`）
+> - 代码已改为全同步设计
 > - 示例代码已同步更新，移除了错误的 `await` 关键字
 
 ---
@@ -29,7 +30,7 @@ DeepThinking MCP 是一个基于 Model Context Protocol (MCP) 的深度思考服
 | `list_tasks` | 列出任务 | 任务管理 |
 | `update_task_status` | 更新任务状态 | 任务管理 |
 | `get_next_task` | 获取下一个待执行任务 | 任务管理 |
-| `get_task_stats` | 获取任务统计信息 | 任务管理 |
+| `task_statistics` | 获取任务统计信息 | 任务管理 |
 | `link_task_session` | 关联任务与思考会话 | 任务管理 |
 | `apply_template` | 应用思考模板 | 模板系统 |
 | `list_templates` | 列出可用模板 | 模板系统 |
@@ -94,7 +95,7 @@ DeepThinking MCP 将思考会话数据存储在本地文件系统中。
 
 ### 1.1 sequential_thinking
 
-执行顺序思考步骤，支持常规思考、修订思考和分支思考三种类型。
+执行顺序思考步骤，支持六种思考类型：常规思考💭、修订思考🔄、分支思考🌿、对比思考⚖️、逆向思考🔙、假设思考🤔。
 
 #### 参数
 
@@ -109,6 +110,15 @@ DeepThinking MCP 将思考会话数据存储在本地文件系统中。
 | `revisesThought` | integer\|null | ❌ | null | 修订的思考步骤编号 |
 | `branchFromThought` | integer\|null | ❌ | null | 分支来源思考步骤编号 |
 | `branchId` | string\|null | ❌ | null | 分支ID（格式如 "branch-0-1"） |
+| `comparisonItems` | list[string]\|null | ❌ | null | 对比思考的比较项列表（至少2个，每项1-500字符） |
+| `comparisonDimensions` | list[string]\|null | ❌ | null | 对比思考的比较维度列表（最多10个，每项1-50字符） |
+| `comparisonResult` | string\|null | ❌ | null | 对比思考的比较结论（1-10000字符） |
+| `reverseTarget` | string\|null | ❌ | null | 逆向思考的反推目标描述（1-2000字符） |
+| `reverseSteps` | list[string]\|null | ❌ | null | 逆向思考的反推步骤列表（最多20个，每项1-500字符） |
+| `reverseFrom` | integer\|null | ❌ | null | 逆向思考的反推起点思考编号 |
+| `hypotheticalCondition` | string\|null | ❌ | null | 假设思考的假设条件描述（1-2000字符） |
+| `hypotheticalImpact` | string\|null | ❌ | null | 假设思考的影响分析（1-10000字符） |
+| `hypotheticalProbability` | string\|null | ❌ | null | 假设思考的可能性评估（1-50字符） |
 | `needsMoreThoughts` | boolean | ❌ | false | 是否需要增加总思考步骤数（每次增加DEEP_THINKING_THOUGHTS_INCREMENT步，默认10步，上限DEEP_THINKING_MAX_THOUGHTS，默认50步） |
 
 #### 返回值
@@ -120,9 +130,12 @@ DeepThinking MCP 将思考会话数据存储在本地文件系统中。
 
 #### 思考类型
 
-1. **常规思考 (regular)**: 标准的顺序思考步骤
-2. **修订思考 (revision)**: 修改之前某个思考步骤
-3. **分支思考 (branch)**: 从某个思考步骤创建新的分支
+1. **常规思考 (regular)** 💭: 标准的顺序思考步骤
+2. **修订思考 (revision)** 🔄: 修改之前某个思考步骤
+3. **分支思考 (branch)** 🌿: 从某个思考步骤创建新的分支
+4. **对比思考 (comparison)** ⚖️: 比较多个选项或方案的优劣
+5. **逆向思考 (reverse)** 🔙: 从结论反推前提条件验证
+6. **假设思考 (hypothetical)** 🤔: 探索假设条件下的影响
 
 #### 使用示例
 
@@ -156,6 +169,41 @@ sequential_thinking(
     session_id="my-session",
     branchFromThought=3,
     branchId="branch-0-1"
+)
+
+# 对比思考
+sequential_thinking(
+    thought="经过综合对比，方案A在性能和成本上更优",
+    nextThoughtNeeded=True,
+    thoughtNumber=4,
+    totalThoughts=5,
+    session_id="my-session",
+    comparisonItems=["方案A: 高性能低成本", "方案B: 易维护但成本高", "方案C: 折中方案"],
+    comparisonDimensions=["性能", "成本", "维护性"],
+    comparisonResult="方案A综合得分最高，推荐采用"
+)
+
+# 逆向思考
+sequential_thinking(
+    thought="验证结论：采用微服务架构的前提条件已满足",
+    nextThoughtNeeded=False,
+    thoughtNumber=5,
+    totalThoughts=5,
+    session_id="my-session",
+    reverseTarget="验证'采用微服务架构'结论的前提条件",
+    reverseSteps=["团队规模>20人 ✓", "业务模块边界清晰 ✓", "技术储备充足 ✓"]
+)
+
+# 假设思考
+sequential_thinking(
+    thought="用户量增长10倍将带来显著架构压力",
+    nextThoughtNeeded=True,
+    thoughtNumber=3,
+    totalThoughts=4,
+    session_id="my-session",
+    hypotheticalCondition="如果用户数量从10万增长到100万",
+    hypotheticalImpact="服务器负载增加10倍，需要：1.数据库分库分表 2.引入缓存层 3.增加CDN节点",
+    hypotheticalProbability="可能性：高"
 )
 ```
 
@@ -798,11 +846,23 @@ tree_structure = visualize_session_simple("abc-123", "tree")
 {
   thought_number: number;      // 思考步骤编号
   content: string;             // 思考内容
-  type: "regular" | "revision" | "branch";  // 思考类型
+  type: "regular" | "revision" | "branch" | "comparison" | "reverse" | "hypothetical";  // 思考类型
   is_revision: boolean;        // 是否为修订
   revises_thought: number | null;  // 修订的思考步骤编号
   branch_from_thought: number | null;  // 分支来源
   branch_id: string | null;    // 分支ID
+  // 对比思考字段
+  comparison_items?: string[];  // 比较项列表
+  comparison_dimensions?: string[];  // 比较维度列表
+  comparison_result?: string;  // 比较结论
+  // 逆向思考字段
+  reverse_target?: string;     // 反推目标
+  reverse_steps?: string[];    // 反推步骤
+  reverse_from?: number;       // 反推起点
+  // 假设思考字段
+  hypothetical_condition?: string;  // 假设条件
+  hypothetical_impact?: string;     // 影响分析
+  hypothetical_probability?: string;  // 可能性评估
   timestamp: string;           // 时间戳（ISO 8601）
 }
 ```
@@ -856,6 +916,8 @@ DeepThinking MCP 支持两种传输模式：
 
 | 版本 | 日期 | 变更 |
 |------|------|------|
+| 0.2.2 | 2026-01-03 | 代码质量优化与文档完善，支持6种思考类型 |
+| 0.2.0 | 2026-01-02 | 新增对比、逆向、假设三种思考类型 |
 | 0.1.0 | 2025-12-31 | 初始版本 |
 
 ---
