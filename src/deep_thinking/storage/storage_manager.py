@@ -107,7 +107,7 @@ class StorageManager:
         self,
         name: str,
         description: str = "",
-        metadata: dict | None = None,
+        metadata: dict[str, Any] | None = None,
         session_id: str | None = None,
     ) -> ThinkingSession:
         """

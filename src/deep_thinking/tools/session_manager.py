@@ -5,6 +5,7 @@
 """
 
 import logging
+from typing import Any
 
 from deep_thinking.server import app, get_storage_manager
 
@@ -36,7 +37,7 @@ def create_session(
     # 解析元数据
     import json
 
-    parsed_metadata: dict = {}
+    parsed_metadata: dict[str, Any] = {}
     if metadata:
         try:
             parsed_metadata = json.loads(metadata)

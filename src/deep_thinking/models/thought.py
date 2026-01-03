@@ -6,7 +6,7 @@
 """
 
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -242,7 +242,7 @@ class Thought(BaseModel):
         }
         return type_symbols.get(self.type, "❓")
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """
         转换为字典格式
 
