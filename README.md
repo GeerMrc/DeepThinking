@@ -83,7 +83,7 @@ cd Deep-Thinking-MCP
 uv build  # 或 python -m build
 
 # 安装 Wheel 文件（不显示源代码路径）
-uv pip install dist/DeepThinking-0.2.0-py3-none-any.whl
+uv pip install DeepThinking-0.2.2-py3-none-any.whl
 ```
 
 > 📘 **详细安装指南**: 请参阅 [安装与配置文档](docs/installation.md) 获取完整的安装说明，包括开发模式和生产模式Wheel安装的详细对比。
