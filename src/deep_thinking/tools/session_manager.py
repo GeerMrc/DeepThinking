@@ -4,6 +4,7 @@
 提供思考会话的CRUD操作工具。
 """
 
+import json
 import logging
 from typing import Any
 
@@ -16,7 +17,7 @@ logger = logging.getLogger(__name__)
 def create_session(
     name: str,
     description: str = "",
-    metadata: str | None = None,
+    metadata: dict[str, Any] | str | None = None,
 ) -> str:
     """
     创建新的思考会话
@@ -24,7 +25,7 @@ def create_session(
     Args:
         name: 会话名称
         description: 会话描述（可选）
-        metadata: 元数据JSON字符串（可选）
+        metadata: 元数据，支持dict或JSON字符串格式（可选）
 
     Returns:
         创建的会话信息
@@ -34,15 +35,18 @@ def create_session(
     """
     manager = get_storage_manager()
 
-    # 解析元数据
-    import json
-
+    # 处理元数据：支持dict和str两种格式
     parsed_metadata: dict[str, Any] = {}
-    if metadata:
-        try:
-            parsed_metadata = json.loads(metadata)
-        except json.JSONDecodeError as e:
-            raise ValueError(f"元数据JSON格式错误: {e}") from e
+    if metadata is not None:
+        if isinstance(metadata, dict):
+            # 直接使用dict
+            parsed_metadata = metadata
+        elif isinstance(metadata, str):
+            # 解析JSON字符串
+            try:
+                parsed_metadata = json.loads(metadata)
+            except json.JSONDecodeError as e:
+                raise ValueError(f"元数据JSON格式错误: {e}") from e
 
     # 创建会话
     session = manager.create_session(
