@@ -5,7 +5,7 @@ STDIO传输层测试
 """
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -45,20 +45,16 @@ class TestStdioTransport:
         """测试run_stdio正确处理CancelledError"""
         with patch.object(
             app, "run_stdio_async", new_callable=AsyncMock, side_effect=asyncio.CancelledError
-        ):
-            # 应该抛出CancelledError
-            with pytest.raises(asyncio.CancelledError):
-                await run_stdio(app)
+        ), pytest.raises(asyncio.CancelledError):
+            await run_stdio(app)
 
     @pytest.mark.asyncio
     async def test_run_stdio_handles_generic_exception(self):
         """测试run_stdio正确处理通用异常"""
         with patch.object(
             app, "run_stdio_async", new_callable=AsyncMock, side_effect=RuntimeError("Test error")
-        ):
-            # 应该抛出RuntimeError
-            with pytest.raises(RuntimeError, match="Test error"):
-                await run_stdio(app)
+        ), pytest.raises(RuntimeError, match="Test error"):
+            await run_stdio(app)
 
     def test_stdio_module_logging(self):
         """测试stdio模块有正确的日志配置"""

@@ -3,7 +3,6 @@
 """
 
 import json
-import shutil
 from pathlib import Path
 from unittest import mock
 
@@ -11,7 +10,6 @@ import pytest
 
 from deep_thinking.storage.migration import (
     MIGRATION_MARKER,
-    OLD_DATA_DIR,
     create_migration_backup,
     detect_old_data,
     get_migration_info,

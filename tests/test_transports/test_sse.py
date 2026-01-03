@@ -53,26 +53,26 @@ class TestSSETransport:
         transport = SSETransport(app)
 
         # Mock aiohttp组件
-        with patch("deep_thinking.transports.sse.web.Application") as mock_app_class:
-            with patch("deep_thinking.transports.sse.web.AppRunner") as mock_runner_class:
-                mock_app = MagicMock()
-                mock_app_class.return_value = mock_app
+        with patch("deep_thinking.transports.sse.web.Application") as mock_app_class, \
+             patch("deep_thinking.transports.sse.web.AppRunner") as mock_runner_class, \
+             patch("deep_thinking.transports.sse.web.TCPSite") as mock_site_class:
+            mock_app = MagicMock()
+            mock_app_class.return_value = mock_app
 
-                mock_runner = MagicMock()
-                mock_runner.setup = AsyncMock()
-                mock_runner_class.return_value = mock_runner
+            mock_runner = MagicMock()
+            mock_runner.setup = AsyncMock()
+            mock_runner_class.return_value = mock_runner
 
-                with patch("deep_thinking.transports.sse.web.TCPSite") as mock_site_class:
-                    mock_site = MagicMock()
-                    mock_site.start = AsyncMock()
-                    mock_site_class.return_value = mock_site
+            mock_site = MagicMock()
+            mock_site.start = AsyncMock()
+            mock_site_class.return_value = mock_site
 
-                    # 调用start
-                    await transport.start("localhost", 8000)
+            # 调用start
+            await transport.start("localhost", 8000)
 
-                    # 验证
-                    mock_runner.setup.assert_called_once()
-                    mock_site.start.assert_called_once()
+            # 验证
+            mock_runner.setup.assert_called_once()
+            mock_site.start.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_sse_transport_stop(self):

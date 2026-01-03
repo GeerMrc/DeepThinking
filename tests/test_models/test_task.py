@@ -2,9 +2,6 @@
 任务数据模型单元测试
 """
 
-import pytest
-from pydantic import ValidationError
-
 from deep_thinking.models.task import (
     TaskPriority,
     TaskStatus,
@@ -53,8 +50,6 @@ class TestThinkingTask:
 
     def test_create_task_full(self):
         """测试：创建完整任务"""
-        from datetime import datetime
-
         task = ThinkingTask(
             task_id="test-2",
             title="Full Task",

@@ -5,8 +5,6 @@ Logger模块测试
 import logging
 import sys
 
-import pytest
-
 from deep_thinking.utils.logger import LoggingContext, get_logger, setup_logging
 
 
