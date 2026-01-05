@@ -81,6 +81,23 @@ def sequential_thinking(
     Raises:
         ValueError: 参数验证失败
     """
+    # ===== 输入参数边界验证 =====
+    # 验证 thoughtNumber 范围（必须 >= 1）
+    if thoughtNumber < 1:
+        raise ValueError(
+            f"thoughtNumber 必须大于等于 1，当前值: {thoughtNumber}"
+        )
+
+    # 验证 totalThoughts 范围（必须 >= thoughtNumber）
+    if totalThoughts < thoughtNumber:
+        raise ValueError(
+            f"totalThoughts ({totalThoughts}) 必须大于等于 thoughtNumber ({thoughtNumber})"
+        )
+
+    # 验证 thought 内容非空
+    if not thought or not thought.strip():
+        raise ValueError("thought 内容不能为空")
+
     manager = get_storage_manager()
 
     # 获取或创建会话
@@ -101,6 +118,13 @@ def sequential_thinking(
     config = get_global_config()
     max_thoughts_limit = config.max_thoughts  # 最大思考步骤限制
     thoughts_increment = config.thoughts_increment  # 每次增加的思考步骤数
+
+    # ===== 配置限制验证 =====
+    # 无论 needsMoreThoughts 是否为 True，都验证 totalThoughts 不超过配置限制
+    if totalThoughts > max_thoughts_limit:
+        raise ValueError(
+            f"totalThoughts ({totalThoughts}) 超过最大限制 ({max_thoughts_limit})"
+        )
 
     if needsMoreThoughts:
         # 检查是否超过最大限制

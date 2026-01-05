@@ -5,7 +5,7 @@
 支持常规思考、修订思考、分支思考、对比思考、逆向思考、假设思考六种类型。
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field, model_validator
@@ -111,7 +111,7 @@ class Thought(BaseModel):
         description="假设思考的可能性评估",
     )
 
-    timestamp: datetime = Field(default_factory=datetime.utcnow, description="思考时间戳")
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), description="思考时间戳")
 
     @model_validator(mode="after")
     def validate_type_consistency(self) -> "Thought":

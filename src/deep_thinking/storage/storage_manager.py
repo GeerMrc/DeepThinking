@@ -10,7 +10,7 @@
 
 import logging
 import shutil
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, cast
 
@@ -300,7 +300,7 @@ class StorageManager:
             备份目录路径
         """
         if backup_name is None:
-            backup_name = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+            backup_name = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
 
         backup_dir = self.data_dir / "backups" / backup_name
 

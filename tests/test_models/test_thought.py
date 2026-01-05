@@ -2,7 +2,7 @@
 思考步骤模型单元测试
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pytest
 from pydantic import ValidationError
@@ -149,9 +149,9 @@ class TestThought:
 
     def test_timestamp_default(self):
         """测试时间戳默认值"""
-        before = datetime.utcnow()
+        before = datetime.now(timezone.utc)
         thought = Thought(thought_number=1, content="思考")
-        after = datetime.utcnow()
+        after = datetime.now(timezone.utc)
 
         assert thought.timestamp >= before
         assert thought.timestamp <= after

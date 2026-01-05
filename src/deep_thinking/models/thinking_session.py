@@ -5,7 +5,7 @@
 一个会话包含多个思考步骤，支持会话状态管理和元数据。
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 from uuid import uuid4
 
@@ -42,9 +42,9 @@ class ThinkingSession(BaseModel):
 
     description: str = Field(default="", max_length=2000, description="会话描述")
 
-    created_at: datetime = Field(default_factory=datetime.utcnow, description="会话创建时间")
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), description="会话创建时间")
 
-    updated_at: datetime = Field(default_factory=datetime.utcnow, description="会话最后更新时间")
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), description="会话最后更新时间")
 
     status: str = Field(
         default="active",
@@ -105,7 +105,7 @@ class ThinkingSession(BaseModel):
             thought: 要添加的思考步骤
         """
         self.thoughts.append(thought)
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(timezone.utc)
 
     def remove_thought(self, thought_number: int) -> bool:
         """
@@ -120,7 +120,7 @@ class ThinkingSession(BaseModel):
         for i, thought in enumerate(self.thoughts):
             if thought.thought_number == thought_number:
                 self.thoughts.pop(i)
-                self.updated_at = datetime.utcnow()
+                self.updated_at = datetime.now(timezone.utc)
                 return True
         return False
 
@@ -174,17 +174,17 @@ class ThinkingSession(BaseModel):
     def mark_completed(self) -> None:
         """将会话标记为已完成"""
         self.status = "completed"
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(timezone.utc)
 
     def mark_archived(self) -> None:
         """将会话标记为已归档"""
         self.status = "archived"
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(timezone.utc)
 
     def mark_active(self) -> None:
         """将会话标记为活跃"""
         self.status = "active"
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(timezone.utc)
 
     def to_dict(self) -> dict[str, Any]:
         """
