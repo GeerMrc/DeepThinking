@@ -9,7 +9,7 @@ from deep_thinking.storage.storage_manager import StorageManager
 from deep_thinking.tools import sequential_thinking
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="class")
 class TestSequentialThinkingIntegration:
     """顺序思考工具集成测试"""
 

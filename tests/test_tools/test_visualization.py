@@ -303,10 +303,11 @@ class TestVisualizerToTree:
 # =============================================================================
 
 
+@pytest.mark.asyncio(loop_scope="class")
 class TestVisualizeSessionTool:
     """测试 visualize_session MCP 工具"""
 
-    @pytest.mark.asyncio
+
     async def test_visualize_session_default_mermaid(self, sample_session_data, clean_env):
         """测试默认 Mermaid 格式可视化"""
         thought = Thought(thought_number=1, content="测试", type="regular")
@@ -326,7 +327,7 @@ class TestVisualizeSessionTool:
         assert "```mermaid" in result
         assert "graph TD" in result
 
-    @pytest.mark.asyncio
+
     async def test_visualize_session_ascii_format(self, sample_session_data, clean_env):
         """测试 ASCII 格式可视化"""
         thought = Thought(thought_number=1, content="测试", type="regular")
@@ -343,7 +344,7 @@ class TestVisualizeSessionTool:
 
         assert "ASCII 流程图" in result
 
-    @pytest.mark.asyncio
+
     async def test_visualize_session_tree_format(self, sample_session_data, clean_env):
         """测试树状结构可视化"""
         thought = Thought(thought_number=1, content="测试", type="regular")
@@ -360,7 +361,7 @@ class TestVisualizeSessionTool:
 
         assert "树状结构" in result
 
-    @pytest.mark.asyncio
+
     async def test_visualize_session_not_found(self, clean_env):
         """测试会话不存在时的错误处理"""
         mock_manager = MagicMock()
@@ -374,7 +375,7 @@ class TestVisualizeSessionTool:
         ):
             await visualization.visualize_session("nonexistent-session")
 
-    @pytest.mark.asyncio
+
     async def test_visualize_session_invalid_format(self, sample_session_data, clean_env):
         """测试无效格式时的错误处理"""
         session = ThinkingSession(**sample_session_data)
@@ -396,10 +397,11 @@ class TestVisualizeSessionTool:
 # =============================================================================
 
 
+@pytest.mark.asyncio(loop_scope="class")
 class TestVisualizeSessionSimpleTool:
     """测试 visualize_session_simple MCP 工具"""
 
-    @pytest.mark.asyncio
+
     async def test_visualize_session_simple_mermaid(self, sample_session_data, clean_env):
         """测试简化版 Mermaid 可视化"""
         thought = Thought(thought_number=1, content="测试", type="regular")
@@ -419,7 +421,7 @@ class TestVisualizeSessionSimpleTool:
         assert "graph TD" in result
         assert "思考会话可视化" not in result
 
-    @pytest.mark.asyncio
+
     async def test_visualize_session_simple_ascii(self, sample_session_data, clean_env):
         """测试简化版 ASCII 可视化"""
         thought = Thought(thought_number=1, content="测试", type="regular")
@@ -436,7 +438,7 @@ class TestVisualizeSessionSimpleTool:
 
         assert "步骤 1" in result
 
-    @pytest.mark.asyncio
+
     async def test_visualize_session_simple_tree(self, sample_session_data, clean_env):
         """测试简化版树状结构可视化"""
         thought = Thought(thought_number=1, content="测试", type="regular")

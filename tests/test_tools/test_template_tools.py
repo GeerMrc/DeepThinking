@@ -171,10 +171,11 @@ class TestTemplateLoader:
 # =============================================================================
 
 
+@pytest.mark.asyncio(loop_scope="class")
 class TestApplyTemplateTool:
     """测试 apply_template MCP 工具"""
 
-    @pytest.mark.asyncio
+
     async def test_apply_template_basic(self, clean_env):
         """测试基本模板应用"""
         mock_manager = MagicMock()
@@ -212,7 +213,7 @@ class TestApplyTemplateTool:
         assert "第一步" in result
         assert "第二步" in result
 
-    @pytest.mark.asyncio
+
     async def test_apply_template_with_context(self, clean_env):
         """测试带上下文的模板应用"""
         mock_manager = MagicMock()
@@ -241,7 +242,7 @@ class TestApplyTemplateTool:
 
         assert "我的问题上下文" in result
 
-    @pytest.mark.asyncio
+
     async def test_apply_template_not_found(self, clean_env):
         """测试模板不存在时的错误处理"""
         mock_manager = MagicMock()
@@ -267,7 +268,7 @@ class TestApplyTemplateTool:
 class TestListTemplatesTool:
     """测试 list_templates MCP 工具"""
 
-    @pytest.mark.asyncio
+
     async def test_list_templates_all(self, clean_env):
         """测试列出所有模板"""
         with patch("deep_thinking.tools.template.TemplateLoader") as MockLoader:
@@ -298,7 +299,7 @@ class TestListTemplatesTool:
         assert "problem_solving" in result
         assert "decision_making" in result
 
-    @pytest.mark.asyncio
+
     async def test_list_templates_with_category(self, clean_env):
         """测试按类别过滤模板"""
         with patch("deep_thinking.tools.template.TemplateLoader") as MockLoader:
@@ -319,7 +320,7 @@ class TestListTemplatesTool:
         assert "类别过滤" in result
         assert "决策" in result
 
-    @pytest.mark.asyncio
+
     async def test_list_templates_empty(self, clean_env):
         """测试空模板列表"""
         with patch("deep_thinking.tools.template.TemplateLoader") as MockLoader:

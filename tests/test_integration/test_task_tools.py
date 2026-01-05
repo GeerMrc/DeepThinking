@@ -11,7 +11,7 @@ from deep_thinking.storage.storage_manager import StorageManager
 from deep_thinking.tools import task_manager
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="class")
 class TestTaskManagerIntegration:
     """任务管理工具集成测试"""
 

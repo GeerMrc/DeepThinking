@@ -323,10 +323,10 @@ class TestExportSessionToFile:
 # =============================================================================
 
 
+@pytest.mark.asyncio(loop_scope="class")
 class TestExportSessionTool:
     """测试 export_session MCP 工具"""
 
-    @pytest.mark.asyncio
     async def test_export_session_default_format(self, sample_session_data, temp_dir, clean_env):
         """测试默认格式导出"""
         # Mock 存储管理器
@@ -346,7 +346,7 @@ class TestExportSessionTool:
         assert "测试会话" in result
         assert "markdown" in result
 
-    @pytest.mark.asyncio
+
     async def test_export_session_json_format(self, sample_session_data, temp_dir, clean_env):
         """测试 JSON 格式导出"""
         session = ThinkingSession(**sample_session_data)
@@ -363,7 +363,7 @@ class TestExportSessionTool:
         assert "会话已导出" in result
         assert "json" in result
 
-    @pytest.mark.asyncio
+
     async def test_export_session_custom_path(self, sample_session_data, temp_dir, clean_env):
         """测试自定义输出路径"""
         session = ThinkingSession(**sample_session_data)
@@ -379,7 +379,7 @@ class TestExportSessionTool:
         assert str(output_path) in result
         assert output_path.exists()
 
-    @pytest.mark.asyncio
+
     async def test_export_session_not_found(self, clean_env):
         """测试会话不存在时的错误处理"""
         mock_manager = MagicMock()
@@ -391,7 +391,7 @@ class TestExportSessionTool:
         ):
             await export.export_session("nonexistent-session")
 
-    @pytest.mark.asyncio
+
     async def test_export_session_invalid_format(self, sample_session_data, temp_dir, clean_env):
         """测试无效格式时的错误处理"""
         session = ThinkingSession(**sample_session_data)

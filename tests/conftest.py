@@ -4,7 +4,6 @@ Pytest配置和共享fixtures
 这个文件包含所有测试用例共享的配置和fixtures。
 """
 
-import asyncio
 import logging
 import os
 import sys
@@ -20,7 +19,19 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from mcp.server import FastMCP
 
-from deep_thinking.utils.logger import setup_logging
+# 延迟导入deep_thinking模块以避免CoverageWarning
+_setup_logging = None
+
+
+def _get_setup_logging():
+    """延迟导入setup_logging以避免CoverageWarning"""
+    global _setup_logging
+    if _setup_logging is None:
+        from deep_thinking.utils.logger import setup_logging  # type: ignore[import-untyped]
+
+        _setup_logging = setup_logging
+    return _setup_logging
+
 
 # =============================================================================
 # 测试配置
@@ -47,6 +58,8 @@ def configure_logging_for_tests():
 
     所有测试都会使用这个日志配置
     """
+    # 使用延迟导入的setup_logging
+    setup_logging = _get_setup_logging()
     # 使用stderr输出日志，避免干扰测试输出
     setup_logging("stdio")
     logging.getLogger().setLevel(logging.DEBUG)
@@ -115,18 +128,11 @@ def mock_storage_manager():
 # =============================================================================
 # 异步事件循环fixtures
 # =============================================================================
+#
+# 注意：自定义event_loop fixture已被pytest-asyncio弃用
+# 现在使用@pytest.mark.asyncio(loop_scope="session")来实现session级别事件循环
+# 参考文档：https://pytest-asyncio.readthedocs.io/en/latest/reference.html#pytest-asyncio-event-loop-policy-overrides
 
-
-@pytest.fixture
-def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
-    """
-    事件循环fixture
-
-    为每个测试创建独立的事件循环
-    """
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
 
 
 # =============================================================================
