@@ -165,6 +165,175 @@ class TestTemplateLoader:
         assert any(t["template_id"] == "t1" for t in result)
         assert any(t["template_id"] == "t2" for t in result)
 
+    def test_list_templates_with_invalid_template(self, temp_dir):
+        """测试列出模板时跳过无效模板（异常处理）"""
+        templates_dir = temp_dir / "templates"
+        templates_dir.mkdir(parents=True)
+
+        # 创建有效模板
+        (templates_dir / "valid.json").write_text(
+            '{"template_id": "valid", "name": "有效模板", "description": "", "category": "", "structure": {"steps": []}, "metadata": {}}'
+        )
+        # 创建无效模板（缺少必需字段）
+        (templates_dir / "invalid.json").write_text('{"name": "无效"}', encoding="utf-8")
+
+        loader = TemplateLoader(templates_dir)
+        result = loader.list_templates()
+
+        # 应该只返回有效模板
+        assert len(result) == 1
+        assert result[0]["template_id"] == "valid"
+
+    def test_list_templates_with_nonexistent_dir(self, temp_dir):
+        """测试列出模板时目录不存在（异常处理）"""
+        # 使用不存在的目录
+        templates_dir = temp_dir / "nonexistent"
+        loader = TemplateLoader(templates_dir)
+
+        result = loader.list_templates()
+
+        # 目录不存在时应返回空列表
+        assert result == []
+
+    def test_iter_templates_with_invalid_template(self, temp_dir):
+        """测试迭代模板时跳过无效模板"""
+        templates_dir = temp_dir / "templates"
+        templates_dir.mkdir(parents=True)
+
+        # 创建有效模板
+        (templates_dir / "valid.json").write_text(
+            '{"template_id": "valid", "name": "有效模板", "description": "", "category": "", "structure": {"steps": []}, "metadata": {}}'
+        )
+        # 创建无效模板（格式错误）
+        (templates_dir / "invalid.json").write_text('{invalid json}', encoding="utf-8")
+
+        loader = TemplateLoader(templates_dir)
+        result = list(loader.iter_templates())
+
+        # 应该只返回有效模板
+        assert len(result) == 1
+        assert result[0]["template_id"] == "valid"
+
+    def test_validate_template_missing_structure(self, temp_dir):
+        """测试模板缺少structure字段"""
+        templates_dir = temp_dir / "templates"
+        templates_dir.mkdir(parents=True)
+        template_file = templates_dir / "no_structure.json"
+        template_file.write_text(
+            '{"template_id": "test", "name": "测试", "description": "", "category": ""}',
+            encoding="utf-8",
+        )
+
+        loader = TemplateLoader(templates_dir)
+
+        with pytest.raises(ValueError, match="缺少必需字段.*structure"):
+            loader.load_template("no_structure")
+
+    def test_validate_template_structure_not_dict(self, temp_dir):
+        """测试structure字段不是字典类型"""
+        templates_dir = temp_dir / "templates"
+        templates_dir.mkdir(parents=True)
+        template_file = templates_dir / "bad_structure.json"
+        template_file.write_text(
+            '{"template_id": "test", "name": "测试", "description": "", "category": "", "structure": "not_a_dict"}',
+            encoding="utf-8",
+        )
+
+        loader = TemplateLoader(templates_dir)
+
+        with pytest.raises(ValueError, match="structure.*必须是字典类型"):
+            loader.load_template("bad_structure")
+
+    def test_validate_template_steps_not_list(self, temp_dir):
+        """测试steps字段不是列表类型"""
+        templates_dir = temp_dir / "templates"
+        templates_dir.mkdir(parents=True)
+        template_file = templates_dir / "bad_steps.json"
+        template_file.write_text(
+            '{"template_id": "test", "name": "测试", "description": "", "category": "", "structure": {"steps": "not_a_list"}}',
+            encoding="utf-8",
+        )
+
+        loader = TemplateLoader(templates_dir)
+
+        with pytest.raises(ValueError, match="steps.*必须是列表类型"):
+            loader.load_template("bad_steps")
+
+    def test_validate_template_step_not_dict(self, temp_dir):
+        """测试步骤不是字典类型"""
+        templates_dir = temp_dir / "templates"
+        templates_dir.mkdir(parents=True)
+        template_file = templates_dir / "bad_step.json"
+        template_file.write_text(
+            '{"template_id": "test", "name": "测试", "description": "", "category": "", "structure": {"steps": ["not_a_dict"]}}',
+            encoding="utf-8",
+        )
+
+        loader = TemplateLoader(templates_dir)
+
+        with pytest.raises(ValueError, match="步骤 0.*必须是字典类型"):
+            loader.load_template("bad_step")
+
+    def test_validate_template_step_missing_number(self, temp_dir):
+        """测试步骤缺少step_number字段"""
+        templates_dir = temp_dir / "templates"
+        templates_dir.mkdir(parents=True)
+        template_file = templates_dir / "no_number.json"
+        template_file.write_text(
+            '{"template_id": "test", "name": "测试", "description": "", "category": "", "structure": {"steps": [{"prompt": "测试", "type": "regular"}]}}',
+            encoding="utf-8",
+        )
+
+        loader = TemplateLoader(templates_dir)
+
+        with pytest.raises(ValueError, match="步骤 0.*缺少 step_number"):
+            loader.load_template("no_number")
+
+    def test_validate_template_step_missing_prompt(self, temp_dir):
+        """测试步骤缺少prompt字段"""
+        templates_dir = temp_dir / "templates"
+        templates_dir.mkdir(parents=True)
+        template_file = templates_dir / "no_prompt.json"
+        template_file.write_text(
+            '{"template_id": "test", "name": "测试", "description": "", "category": "", "structure": {"steps": [{"step_number": 1, "type": "regular"}]}}',
+            encoding="utf-8",
+        )
+
+        loader = TemplateLoader(templates_dir)
+
+        with pytest.raises(ValueError, match="步骤 0.*缺少 prompt"):
+            loader.load_template("no_prompt")
+
+    def test_validate_template_step_missing_type(self, temp_dir):
+        """测试步骤缺少type字段"""
+        templates_dir = temp_dir / "templates"
+        templates_dir.mkdir(parents=True)
+        template_file = templates_dir / "no_type.json"
+        template_file.write_text(
+            '{"template_id": "test", "name": "测试", "description": "", "category": "", "structure": {"steps": [{"step_number": 1, "prompt": "测试"}]}}',
+            encoding="utf-8",
+        )
+
+        loader = TemplateLoader(templates_dir)
+
+        with pytest.raises(ValueError, match="步骤 0.*缺少 type"):
+            loader.load_template("no_type")
+
+    def test_validate_template_step_invalid_type(self, temp_dir):
+        """测试步骤type字段值无效"""
+        templates_dir = temp_dir / "templates"
+        templates_dir.mkdir(parents=True)
+        template_file = templates_dir / "invalid_type.json"
+        template_file.write_text(
+            '{"template_id": "test", "name": "测试", "description": "", "category": "", "structure": {"steps": [{"step_number": 1, "prompt": "测试", "type": "invalid_type"}]}}',
+            encoding="utf-8",
+        )
+
+        loader = TemplateLoader(templates_dir)
+
+        with pytest.raises(ValueError, match="步骤 0.*type.*必须是"):
+            loader.load_template("invalid_type")
+
 
 # =============================================================================
 # apply_template MCP 工具测试

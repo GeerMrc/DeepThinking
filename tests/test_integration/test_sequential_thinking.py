@@ -282,3 +282,179 @@ class TestSequentialThinkingIntegration:
         assert session.thoughts[0].hypothetical_condition == "如果用户数量从10万增长到100万"
         assert session.thoughts[0].hypothetical_impact == "服务器负载增加10倍，需要：1.数据库分库分表 2.引入缓存层"
         assert session.thoughts[0].hypothetical_probability == "可能性：高"
+
+
+@pytest.mark.asyncio(loop_scope="class")
+class TestSequentialThinkingBoundary:
+    """顺序思考工具边界测试"""
+
+    @pytest.fixture
+    async def storage_manager(self, tmp_path):
+        """创建存储管理器"""
+        manager = StorageManager(tmp_path)
+        server._storage_manager = manager
+
+        yield manager
+
+        # 清理
+        server._storage_manager = None
+
+    async def test_thought_number_less_than_one(self, storage_manager):
+        """测试thoughtNumber小于1的错误处理"""
+        with pytest.raises(ValueError, match="thoughtNumber 必须大于等于 1"):
+            sequential_thinking.sequential_thinking(
+                thought="测试思考",
+                nextThoughtNeeded=False,
+                thoughtNumber=0,  # 无效值
+                totalThoughts=3,
+                session_id="test-boundary-1",
+            )
+
+    async def test_thought_number_negative(self, storage_manager):
+        """测试thoughtNumber为负数的错误处理"""
+        with pytest.raises(ValueError, match="thoughtNumber 必须大于等于 1"):
+            sequential_thinking.sequential_thinking(
+                thought="测试思考",
+                nextThoughtNeeded=False,
+                thoughtNumber=-1,  # 无效值
+                totalThoughts=3,
+                session_id="test-boundary-2",
+            )
+
+    async def test_total_thoughts_less_than_thought_number(self, storage_manager):
+        """测试totalThoughts小于thoughtNumber的错误处理"""
+        with pytest.raises(ValueError, match="totalThoughts.*必须大于等于.*thoughtNumber"):
+            sequential_thinking.sequential_thinking(
+                thought="测试思考",
+                nextThoughtNeeded=False,
+                thoughtNumber=5,  # thoughtNumber > totalThoughts
+                totalThoughts=3,
+                session_id="test-boundary-3",
+            )
+
+    async def test_empty_thought_content(self, storage_manager):
+        """测试空思考内容的错误处理"""
+        with pytest.raises(ValueError, match="thought 内容不能为空"):
+            sequential_thinking.sequential_thinking(
+                thought="",  # 空内容
+                nextThoughtNeeded=False,
+                thoughtNumber=1,
+                totalThoughts=3,
+                session_id="test-boundary-4",
+            )
+
+    async def test_whitespace_only_thought_content(self, storage_manager):
+        """测试纯空白思考内容的错误处理"""
+        with pytest.raises(ValueError, match="thought 内容不能为空"):
+            sequential_thinking.sequential_thinking(
+                thought="   ",  # 纯空白
+                nextThoughtNeeded=False,
+                thoughtNumber=1,
+                totalThoughts=3,
+                session_id="test-boundary-5",
+            )
+
+    async def test_total_thoughts_exceeds_max_limit(self, storage_manager):
+        """测试totalThoughts超过最大配置限制的错误处理"""
+        with pytest.raises(ValueError, match="totalThoughts.*超过最大限制"):
+            sequential_thinking.sequential_thinking(
+                thought="测试思考",
+                nextThoughtNeeded=False,
+                thoughtNumber=1,
+                totalThoughts=100000,  # 超过默认最大限制50
+                session_id="test-boundary-6",
+            )
+
+    async def test_needs_more_thoughts_at_max_limit(self, storage_manager):
+        """测试needsMoreThoughts在达到最大限制时的行为"""
+        # 创建一个接近最大限制的会话
+        result = sequential_thinking.sequential_thinking(
+            thought="测试思考",
+            nextThoughtNeeded=True,
+            thoughtNumber=50,  # 已经是最大限制
+            totalThoughts=50,
+            needsMoreThoughts=True,
+            session_id="test-boundary-7",
+        )
+
+        # 应该返回警告信息，而不是增加totalThoughts
+        assert "思考步骤 50/50" in result
+        assert "警告：思考步骤数已达上限" in result
+        assert "无法继续增加" in result
+
+    async def test_needs_more_thoughts_normal_increase(self, storage_manager):
+        """测试needsMoreThoughts正常增加totalThoughts"""
+        result = sequential_thinking.sequential_thinking(
+            thought="测试思考",
+            nextThoughtNeeded=True,
+            thoughtNumber=10,
+            totalThoughts=20,
+            needsMoreThoughts=True,
+            session_id="test-boundary-8",
+        )
+
+        # totalThoughts应该增加（从20增加到30）
+        assert "思考步骤 10/30" in result
+        assert "已自动调整为 30" in result or "预计总数: 30" in result
+
+        # 验证会话元数据记录了调整历史
+        session = storage_manager.get_session("test-boundary-8")
+        assert session is not None
+        assert "total_thoughts_history" in session.metadata
+        assert len(session.metadata["total_thoughts_history"]) > 0
+
+    async def test_comparison_thinking_with_empty_items(self, storage_manager):
+        """测试对比思考缺少比较项的错误处理（Pydantic验证）"""
+        with pytest.raises(ValueError, match="List should have at least 2 items"):
+            sequential_thinking.sequential_thinking(
+                thought="对比测试",
+                nextThoughtNeeded=False,
+                thoughtNumber=1,
+                totalThoughts=3,
+                session_id="test-boundary-9",
+                comparisonItems=[],  # 空列表
+                comparisonDimensions=["性能", "成本"],
+                comparisonResult="结论",
+            )
+
+    async def test_comparison_thinking_with_single_item(self, storage_manager):
+        """测试对比思考只有一个比较项的错误处理"""
+        with pytest.raises(ValueError, match="List should have at least 2 items"):
+            sequential_thinking.sequential_thinking(
+                thought="对比测试",
+                nextThoughtNeeded=False,
+                thoughtNumber=1,
+                totalThoughts=3,
+                session_id="test-boundary-10",
+                comparisonItems=["方案A"],  # 只有一个项
+                comparisonDimensions=["性能", "成本"],
+                comparisonResult="结论",
+            )
+
+    async def test_reverse_thinking_invalid_reverse_from(self, storage_manager):
+        """测试逆向思考reverse_from必须小于thought_number"""
+        with pytest.raises(ValueError, match="reverse_from.*必须小于.*thought_number"):
+            sequential_thinking.sequential_thinking(
+                thought="逆向测试",
+                nextThoughtNeeded=False,
+                thoughtNumber=1,
+                totalThoughts=3,
+                session_id="test-boundary-11",
+                reverseFrom=1,  # reverse_from应该<thought_number
+                reverseTarget="反推目标",
+                reverseSteps=["步骤1", "步骤2"],
+            )
+
+    async def test_hypothetical_thinking_with_empty_condition(self, storage_manager):
+        """测试假设思考缺少假设条件的错误处理（Pydantic验证）"""
+        with pytest.raises(ValueError, match="String should have at least 1 character"):
+            sequential_thinking.sequential_thinking(
+                thought="假设测试",
+                nextThoughtNeeded=False,
+                thoughtNumber=1,
+                totalThoughts=3,
+                session_id="test-boundary-12",
+                hypotheticalCondition="",  # 空字符串
+                hypotheticalImpact="影响分析",
+                hypotheticalProbability="高",
+            )
