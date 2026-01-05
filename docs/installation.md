@@ -147,7 +147,7 @@ uv pip uninstall DeepThinking
 
 ```bash
 # 进入项目目录
-cd /path/to/Deep-Thinking-MCP
+cd /path/to/DeepThinking
 
 # 以开发模式安装
 uv pip install -e .
@@ -157,7 +157,7 @@ uv pip install -e .
 
 ```bash
 # 进入项目目录
-cd /path/to/Deep-Thinking-MCP
+cd /path/to/DeepThinking
 
 # 以开发模式安装
 pip install -e .
@@ -167,7 +167,7 @@ pip install -e .
 
 ```bash
 # 1. 进入项目目录
-cd /path/to/Deep-Thinking-MCP
+cd /path/to/DeepThinking
 
 # 2. 创建虚拟环境
 python -m venv .venv
@@ -212,7 +212,7 @@ Wheel 安装方式**复制代码到 site-packages**，不显示源代码路径�
 
 ```bash
 # 进入项目目录
-cd /path/to/Deep-Thinking-MCP
+cd /path/to/DeepThinking
 
 # 使用 uv 构建（推荐）
 uv build
@@ -223,8 +223,8 @@ python -m build
 
 **构建输出**：
 ```
-Built /path/to/Deep-Thinking-MCP/dist/DeepThinking-0.1.0-py3-none-any.whl
-Built /path/to/Deep-Thinking-MCP/dist/DeepThinking-0.1.0.tar.gz
+Built /path/to/DeepThinking/dist/DeepThinking-0.1.0-py3-none-any.whl
+Built /path/to/DeepThinking/dist/DeepThinking-0.1.0.tar.gz
 ```
 
 #### 4.2 安装 Wheel 文件
@@ -235,7 +235,7 @@ Built /path/to/Deep-Thinking-MCP/dist/DeepThinking-0.1.0.tar.gz
 uv pip install dist/DeepThinking-0.1.0-py3-none-any.whl
 
 # 指定完整路径安装
-uv pip install /path/to/Deep-Thinking-MCP/dist/DeepThinking-0.1.0-py3-none-any.whl
+uv pip install /path/to/DeepThinking/dist/DeepThinking-0.1.0-py3-none-any.whl
 ```
 
 **使用 pip 安装**：
@@ -244,7 +244,7 @@ uv pip install /path/to/Deep-Thinking-MCP/dist/DeepThinking-0.1.0-py3-none-any.w
 pip install dist/DeepThinking-0.1.0-py3-none-any.whl
 
 # 指定完整路径安装
-pip install /path/to/Deep-Thinking-MCP/dist/DeepThinking-0.1.0-py3-none-any.whl
+pip install /path/to/DeepThinking/dist/DeepThinking-0.1.0-py3-none-any.whl
 ```
 
 #### 4.3 验证 Wheel 安装
@@ -419,17 +419,17 @@ uv pip uninstall DeepThinking
 pip uninstall DeepThinking
 
 # 清理Python缓存
-find /path/to/Deep-Thinking-MCP -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null
+find /path/to/DeepThinking -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null
 
 # 清理构建文件
-find /path/to/Deep-Thinking-MCP -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null
+find /path/to/DeepThinking -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null
 ```
 
 #### 步骤2: 重新安装
 
 ```bash
 # 重新以开发模式安装
-uv pip install -e /path/to/Deep-Thinking-MCP
+uv pip install -e /path/to/DeepThinking
 
 # 验证安装
 python -m deep_thinking --help
@@ -782,7 +782,7 @@ After=network.target
 [Service]
 Type=simple
 User=your-user
-WorkingDirectory=/path/to/Deep-Thinking-MCP
+WorkingDirectory=/path/to/DeepThinking
 ExecStart=/usr/bin/python3 -m deep_thinking --mode sse --host 0.0.0.0 --port 8088
 Restart=always
 RestartSec=10

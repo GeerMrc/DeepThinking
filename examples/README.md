@@ -197,7 +197,7 @@ export DEEP_THINKING_LOG_LEVEL="DEBUG"
       "command": "uv",
       "args": [
         "--directory",
-        "/path/to/Deep-Thinking-MCP",
+        "/path/to/DeepThinking",
         "run",
         "python",
         "-m",

@@ -5,8 +5,8 @@ SSE传输层测试
 """
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
 import logging
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -639,9 +639,10 @@ class TestSSEHandlerErrorPaths:
     @pytest.mark.asyncio
     async def test_sse_handler_json_decode_error(self, caplog):
         """测试SSE处理器JSON解析失败"""
+        import json
+
         from aiohttp import web
         from aiohttp.test_utils import make_mocked_request
-        import json
 
         transport = SSETransport(app)
 

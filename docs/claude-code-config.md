@@ -58,7 +58,7 @@ claude mcp add --transport stdio deep-thinking \
 ```bash
 claude mcp add --transport stdio deep-thinking \
   --env DEEP_THINKING_MAX_THOUGHTS=100 \
-  -- uv run --directory /path/to/Deep-Thinking-MCP python -m deep_thinking
+  -- uv run --directory /path/to/DeepThinking python -m deep_thinking
 ```
 
 **使用虚拟环境**：
@@ -243,7 +243,7 @@ claude mcp add-json deep-thinking <<'EOF'
   "command": "uv",
   "args": [
     "--directory",
-    "/path/to/Deep-Thinking-MCP",
+    "/path/to/DeepThinking",
     "run",
     "python",
     "-m",
@@ -588,7 +588,7 @@ claude update
 **问题 2：权限被拒绝**
 ```bash
 # macOS/Linux
-chmod +x /path/to/Deep-Thinking-MCP/src/deep_thinking/__main__.py
+chmod +x /path/to/DeepThinking/src/deep_thinking/__main__.py
 
 # 或使用 python -m 方式
 claude mcp add --transport stdio deep-thinking -- python -m deep_thinking
@@ -733,7 +733,7 @@ my-project/
       "command": "uv",
       "args": [
         "--directory",
-        "/path/to/Deep-Thinking-MCP",
+        "/path/to/DeepThinking",
         "run",
         "python",
         "-m",
@@ -872,7 +872,7 @@ VSCode输出面板会显示MCP服务器连接状态：
 
 | 问题 | 解决方案 |
 |------|---------|
-| `ModuleNotFoundError: No module named 'deep_thinking'` | 运行 `pip install -e /path/to/Deep-Thinking-MCP` |
+| `ModuleNotFoundError: No module named 'deep_thinking'` | 运行 `pip install -e /path/to/DeepThinking` |
 | `Permission denied` | 检查数据目录权限，或使用 `--data-dir` 指定其他位置 |
 | `Command not found: uv` | 安装uv：`curl -LsSf https://astral.sh/uv/install.sh \| sh` |
 | 配置不生效 | 确认配置文件位置正确（项目级 vs 用户级） |

@@ -143,7 +143,7 @@ DeepThinking MCP 支持通过 MCP (Model Context Protocol) 协议与各种 IDE �
       "command": "uv",
       "args": [
         "--directory",
-        "/path/to/Deep-Thinking-MCP",
+        "/path/to/DeepThinking",
         "run",
         "python",
         "-m",
@@ -231,7 +231,7 @@ claude mcp add --transport stdio deep-thinking \
 
 # 使用 uv 加速（推荐）
 claude mcp add --transport stdio deep-thinking \
-  -- uv run --directory /path/to/Deep-Thinking-MCP python -m deep_thinking
+  -- uv run --directory /path/to/DeepThinking python -m deep_thinking
 ```
 
 **SSE 远程服务器**：
@@ -280,7 +280,7 @@ claude mcp remove deep-thinking  # 删除服务器
       "command": "uv",
       "args": [
         "--directory",
-        "/path/to/Deep-Thinking-MCP",
+        "/path/to/DeepThinking",
         "run",
         "python",
         "-m",
@@ -402,7 +402,7 @@ Continue.dev 是 VSCode 的 AI 编程助手扩展。
       "command": "uv",
       "args": [
         "--directory",
-        "/path/to/Deep-Thinking-MCP",
+        "/path/to/DeepThinking",
         "run",
         "python",
         "-m",
@@ -578,10 +578,10 @@ Cline 是另一个流行的 VSCode AI 助手。
 
 ```bash
 # 确保 deep_thinking 已安装
-pip install -e /path/to/Deep-Thinking-MCP
+pip install -e /path/to/DeepThinking
 
 # 或使用 uv
-uv pip install -e /path/to/Deep-Thinking-MCP
+uv pip install -e /path/to/DeepThinking
 ```
 
 **问题3: 权限错误**

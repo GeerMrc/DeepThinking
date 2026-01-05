@@ -1,5 +1,5 @@
 """
-DeepThinking-MCP CLI入口
+DeepThinking CLI入口
 
 支持STDIO和SSE双传输模式的命令行接口。
 
@@ -50,11 +50,11 @@ async def server_lifespan(_app: FastMCP) -> AsyncGenerator[None, None]:
     Yields:
         None
     """
-    logger.info("DeepThinking-MCP服务器正在初始化...")
+    logger.info("DeepThinking服务器正在初始化...")
 
     yield
 
-    logger.info("DeepThinking-MCP服务器正在关闭...")
+    logger.info("DeepThinking服务器正在关闭...")
 
 
 def create_server() -> FastMCP:

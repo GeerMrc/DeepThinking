@@ -78,8 +78,8 @@ pip install DeepThinking
 **开发模式（推荐开发使用）**：
 ```bash
 # 克隆仓库
-git clone https://github.com/yourusername/Deep-Thinking-MCP.git
-cd Deep-Thinking-MCP
+git clone https://github.com/GeerMrc/DeepThinking.git
+cd DeepThinking
 
 # 创建虚拟环境
 python -m venv venv
@@ -93,8 +93,8 @@ pip install -e .
 **生产模式（推荐部署使用）**：
 ```bash
 # 克隆仓库
-git clone https://github.com/yourusername/Deep-Thinking-MCP.git
-cd Deep-Thinking-MCP
+git clone https://github.com/GeerMrc/DeepThinking.git
+cd DeepThinking
 
 # 构建 Wheel 文件
 uv build  # 或 python -m build
@@ -163,7 +163,7 @@ DEEP_THINKING_LOG_LEVEL=INFO
     "deep-thinking": {
       "command": "uv",
       "args": [
-        "--directory", "/path/to/Deep-Thinking-MCP",
+        "--directory", "/path/to/DeepThinking",
         "run", "python", "-m", "deep_thinking",
         "--transport", "stdio"
       ]
@@ -351,7 +351,7 @@ mypy src/deep_thinking/
 ## 项目结构
 
 ```
-Deep-Thinking-MCP/
+DeepThinking/
 ├── src/deep_thinking/
 │   ├── __main__.py           # CLI入口
 │   ├── transports/            # 传输层实现
