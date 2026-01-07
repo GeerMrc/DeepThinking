@@ -177,22 +177,22 @@ claude mcp add --transport stdio deep-thinking \
 
 #### 基本用法
 
-**方式1：直接传递 JSON 字符串**
+> ⚠️ **重要提示**：`claude mcp add-json` 命令需要将 JSON 作为单个参数传递。heredoc 方式在某些 shell 中可能无法正确工作。
+
+**方式1：直接传递 JSON 字符串**（推荐）
 ```bash
 claude mcp add-json deep-thinking '{"command":"python","args":["-m","deep_thinking"]}'
 ```
 
-**方式2：使用 heredoc（推荐用于多行配置）**
+**方式2：使用 echo 和管道**（适用于复杂配置）
 ```bash
-claude mcp add-json deep-thinking <<'EOF'
-{
+echo '{
   "command": "python",
   "args": ["-m", "deep_thinking"],
   "env": {
     "DEEP_THINKING_MAX_THOUGHTS": "50"
   }
-}
-EOF
+}' | claude mcp add-json deep-thinking -
 ```
 
 **方式3：从文件读取**
@@ -200,31 +200,41 @@ EOF
 claude mcp add-json deep-thinking < config.json
 ```
 
-**方式4：通过管道传递**
+**方式4：使用 claude mcp add 命令**（最灵活，推荐用于复杂配置）
 ```bash
-cat existing-config.json | claude mcp add-json deep-thinking
+claude mcp add --transport stdio deep-thinking -- python -m deep_thinking
 ```
+
+> 💡 **建议**：对于复杂配置（如多个环境变量），推荐使用 `claude mcp add` 命令，它支持：
+> - Shell 环境变量扩展（`${VAR}`）
+> - 更好的可读性
+> - 逐参数配置
 
 #### STDIO 配置示例
 
 **基础配置**（本地 Python）：
 ```bash
-claude mcp add-json deep-thinking <<'EOF'
-{
-  "command": "python",
-  "args": ["-m", "deep_thinking"],
-  "env": {
-    "DEEP_THINKING_MAX_THOUGHTS": "50",
-    "DEEP_THINKING_MIN_THOUGHTS": "3"
-  }
-}
-EOF
+# 推荐：使用 claude mcp add 命令
+claude mcp add --transport stdio deep-thinking \
+  --env DEEP_THINKING_MAX_THOUGHTS=50 \
+  --env DEEP_THINKING_MIN_THOUGHTS=3 \
+  -- python -m deep_thinking
+
+# 或使用 add-json 直接传递 JSON 字符串
+claude mcp add-json deep-thinking '{"command":"python","args":["-m","deep_thinking"],"env":{"DEEP_THINKING_MAX_THOUGHTS":"50","DEEP_THINKING_MIN_THOUGHTS":"3"}}'
 ```
 
 **带环境变量的配置**：
 ```bash
-claude mcp add-json deep-thinking <<'EOF'
-{
+# 推荐：使用 claude mcp add 命令
+claude mcp add --transport stdio deep-thinking \
+  --env DEEP_THINKING_MAX_THOUGHTS=100 \
+  --env DEEP_THINKING_LOG_LEVEL=DEBUG \
+  --env DEEP_THINKING_DATA_DIR="./.deep-thinking-data" \
+  -- python -m deep_thinking --transport stdio
+
+# 或使用 echo 和管道
+echo '{
   "command": "python",
   "args": ["-m", "deep_thinking", "--transport", "stdio"],
   "env": {
@@ -232,28 +242,18 @@ claude mcp add-json deep-thinking <<'EOF'
     "DEEP_THINKING_LOG_LEVEL": "DEBUG",
     "DEEP_THINKING_DATA_DIR": "./.deep-thinking-data"
   }
-}
-EOF
+}' | claude mcp add-json deep-thinking -
 ```
 
 **使用 uv 加速**（推荐）：
 ```bash
-claude mcp add-json deep-thinking <<'EOF'
-{
-  "command": "uv",
-  "args": [
-    "--directory",
-    "/path/to/DeepThinking",
-    "run",
-    "python",
-    "-m",
-    "deep_thinking"
-  ],
-  "env": {
-    "DEEP_THINKING_MAX_THOUGHTS": "100"
-  }
-}
-EOF
+# 推荐：使用 claude mcp add 命令
+claude mcp add --transport stdio deep-thinking \
+  --env DEEP_THINKING_MAX_THOUGHTS=100 \
+  -- uv run --directory /path/to/DeepThinking python -m deep_thinking
+
+# 或使用 add-json 直接传递 JSON 字符串
+claude mcp add-json deep-thinking '{"command":"uv","args":["--directory","/path/to/DeepThinking","run","python","-m","deep_thinking"],"env":{"DEEP_THINKING_MAX_THOUGHTS":"100"}}'
 ```
 
 #### 从现有配置迁移
@@ -448,13 +448,8 @@ claude mcp add-json deep-thinking --scope user < personal-config.json
 
 ```bash
 # ❌ JSON 方式不支持环境变量扩展
-claude mcp add-json deep-thinking <<'EOF'
-{
-  "env": {
-    "API_KEY": "${MY_API_KEY}"  # 会被当作字面值 "${MY_API_KEY}"
-  }
-}
-EOF
+claude mcp add-json deep-thinking '{"env":{"API_KEY":"${MY_API_KEY}"}}'
+# 会被当作字面值 "${MY_API_KEY}"
 
 # ✅ 使用 claude mcp add 方式支持环境变量扩展
 claude mcp add --transport stdio deep-thinking \
@@ -487,15 +482,12 @@ claude mcp add-json deep-thinking '{"command":"python","args":["-m","deep_thinki
 **问题3：特殊字符转义**
 ```bash
 # JSON 中的特殊字符需要正确转义
-claude mcp add-json deep-thinking <<'EOF'
-{
-  "command": "python",
-  "args": ["-m", "deep_thinking"],
-  "env": {
-    "PATH_WITH_SPACES": "/path/with spaces/to/bin"
-  }
-}
-EOF
+claude mcp add-json deep-thinking '{"command":"python","args":["-m","deep_thinking"],"env":{"PATH_WITH_SPACES":"/path/with spaces/to/bin"}}'
+
+# 或使用 claude mcp add 命令（更简单）
+claude mcp add --transport stdio deep-thinking \
+  --env PATH_WITH_SPACES="/path/with spaces/to/bin" \
+  -- python -m deep_thinking
 ```
 
 ---

@@ -1,8 +1,8 @@
 # DeepThinking MCP 项目任务追踪
 
 > 项目级唯一任务追踪文档
-> 更新时间: 2026-01-03
-> 当前状态: 阶段 16 完成 ✅
+> 更新时间: 2026-01-06
+> 当前状态: 阶段 17 完成 ✅
 > 下一阶段: 待规划
 
 ---
@@ -14,6 +14,60 @@
 - `completed` - 已完成
 - `blocked` - 已阻塞
 - `failed` - 失败
+
+---
+
+## 阶段17: Claude Code CLI 配置文档修复
+
+**状态**: `completed` ✅
+**开始时间**: 2026-01-06
+**完成时间**: 2026-01-06
+
+### 17.1 问题发现
+
+| 任务ID | 任务描述 | 状态 | 负责模块 | 验证方式 |
+|--------|---------|------|----------|---------|
+| 17.1.1 | 发现 heredoc 在 add-json 中不工作 | completed | docs/claude-code-config.md | 用户反馈 |
+| 17.1.2 | 分析 claude mcp add-json 命令格式 | completed | Claude Code CLI | 命令帮助 |
+
+### 17.2 文档修复
+
+| 任务ID | 任务描述 | 状态 | 负责模块 | 验证方式 |
+|--------|---------|------|----------|---------|
+| 17.2.1 | 修复基本用法章节的 heredoc 示例 | completed | docs/claude-code-config.md | 文档审核 |
+| 17.2.2 | 修复 STDIO 配置示例章节 | completed | docs/claude-code-config.md | 文档审核 |
+| 17.2.3 | 修复故障排除章节示例 | completed | docs/claude-code-config.md | 文档审核 |
+| 17.2.4 | 添加 heredoc 问题警告说明 | completed | docs/claude-code-config.md | 文档审核 |
+
+### 17.3 验证测试
+
+| 任务ID | 任务描述 | 状态 | 负责模块 | 验证方式 |
+|--------|---------|------|----------|---------|
+| 17.3.1 | 测试直接传递 JSON 字符串方式 | completed | claude mcp add-json | 配置成功 |
+| 17.3.2 | 验证修复后的文档配置命令 | completed | claude mcp add-json | 配置成功 |
+
+### 17.4 变更内容
+
+- ✅ 移除所有 heredoc 方式的 `claude mcp add-json` 示例
+- ✅ 添加 heredoc 兼容性问题警告说明
+- ✅ 推荐使用 `claude mcp add` 命令作为复杂配置的首选方式
+- ✅ 提供 echo + 管道方式作为复杂 JSON 配置的替代方案
+
+### 17.5 正确的配置方式
+
+**用户正确的配置命令**：
+```bash
+# 方式1：直接传递 JSON 字符串（推荐）
+claude mcp add-json Thinking '{"command":"python","args":["-m","deep_thinking"],"env":{"DEEP_THINKING_MAX_THOUGHTS":"50","DEEP_THINKING_MIN_THOUGHTS":"3","DEEP_THINKING_THOUGHTS_INCREMENT":"10","DEEP_THINKING_LOG_LEVEL":"INFO"}}'
+
+# 方式2：使用 claude mcp add 命令（最灵活）
+claude mcp add --transport stdio Thinking \
+  --env DEEP_THINKING_MAX_THOUGHTS=50 \
+  --env DEEP_THINKING_MIN_THOUGHTS=3 \
+  --env DEEP_THINKING_THOUGHTS_INCREMENT=10 \
+  --env DEEP_THINKING_LOG_LEVEL=INFO \
+  -- python -m deep_thinking
+```
 
 ---
 
