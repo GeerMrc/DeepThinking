@@ -28,17 +28,19 @@ def get_default_data_dir() -> Path:
     获取默认数据存储目录
 
     优先级：
-    1. 环境变量 DEEP_THINKING_DATA_DIR
+    1. 环境变量 DEEP_THINKING_DATA_DIR（支持 ~ 和 $HOME 自动扩展）
     2. 项目本地目录 .deepthinking/
     3. 用户主目录 .deepthinking/ (向后兼容)
 
     Returns:
         数据存储目录路径
     """
-    # 1. 检查环境变量
+    # 1. 检查环境变量（支持路径扩展）
     custom_dir = os.getenv("DEEP_THINKING_DATA_DIR")
     if custom_dir:
-        return Path(custom_dir)
+        # 先扩展环境变量（如 $HOME），再扩展 ~ 符号
+        expanded = os.path.expandvars(custom_dir)
+        return Path(expanded).expanduser()
 
     # 2. 默认使用项目本地目录
     local_dir = Path.cwd() / ".deepthinking"

@@ -800,23 +800,30 @@ my-project/
 > - ✅ **支持的路径格式**：
 >   - 相对路径：`"./.deep-thinking-data"` 或 `".deep-thinking-data"`
 >   - 绝对路径：`"/Users/yourname/.deep-thinking-data"` 或 `"/home/user/.deep-thinking-data"`
+>   - **~ 路径**：`"~/.deep-thinking-data"` - 自动扩展为用户主目录
+>   - **环境变量**：`"$HOME/.deep-thinking-data"` - 自动展开 $HOME 变量
 >
-> - ❌ **不支持的路径格式**（需要手动扩展）：
->   - `~/.deep-thinking-data` - `~` 符号不会被自动扩展
->   - `$HOME/.deep-thinking-data` - `$HOME` 变量不会被自动扩展
+> **使用示例**：
 >
-> **解决方案**：
->
-> 1. **使用绝对路径**（推荐）：
+> 1. **使用 ~ 路径**（推荐）：
 > ```json
 > {
 >   "env": {
->     "DEEP_THINKING_DATA_DIR": "/Users/yourname/.deep-thinking-data"
+>     "DEEP_THINKING_DATA_DIR": "~/.deep-thinking-data"
 >   }
 > }
 > ```
 >
-> 2. **使用相对路径**：
+> 2. **使用环境变量**：
+> ```json
+> {
+>   "env": {
+>     "DEEP_THINKING_DATA_DIR": "$HOME/.deep-thinking-data"
+>   }
+> }
+> ```
+>
+> 3. **使用相对路径**：
 > ```json
 > {
 >   "env": {
@@ -825,7 +832,7 @@ my-project/
 > }
 > ```
 >
-> 3. **使用 claude mcp add 命令**（支持 shell 扩展）：
+> 4. **使用 claude mcp add 命令**（支持 shell 扩展）：
 > ```bash
 > claude mcp add --transport stdio deep-thinking \
 >   --env DEEP_THINKING_DATA_DIR=~/.deep-thinking-data \
