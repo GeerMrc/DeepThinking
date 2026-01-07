@@ -587,7 +587,6 @@ class TestSSEHandlerErrorPaths:
     @pytest.mark.asyncio
     async def test_sse_handler_cancelled_error(self, caplog):
         """测试SSE处理器的CancelledError处理"""
-        from aiohttp import web
         from aiohttp.test_utils import make_mocked_request
 
         transport = SSETransport(app)
@@ -612,7 +611,6 @@ class TestSSEHandlerErrorPaths:
     @pytest.mark.asyncio
     async def test_sse_handler_general_exception(self, caplog):
         """测试SSE处理器的通用Exception处理"""
-        from aiohttp import web
         from aiohttp.test_utils import make_mocked_request
 
         transport = SSETransport(app)
@@ -621,17 +619,16 @@ class TestSSEHandlerErrorPaths:
         request = make_mocked_request("POST", "/sse")
 
         # Mock request.json()抛出通用异常
-        with patch.object(request, "json", side_effect=RuntimeError("JSON parse error")):
-            # Mock StreamResponse
-            with patch("deep_thinking.transports.sse.web.StreamResponse") as mock_response_class:
-                mock_response = MagicMock()
-                mock_response.prepare = AsyncMock()
-                mock_response.write = AsyncMock()
-                mock_response_class.return_value = mock_response
+        with patch.object(request, "json", side_effect=RuntimeError("JSON parse error")), \
+             patch("deep_thinking.transports.sse.web.StreamResponse") as mock_response_class, \
+             pytest.raises((NotImplementedError, Exception)):
+            mock_response = MagicMock()
+            mock_response.prepare = AsyncMock()
+            mock_response.write = AsyncMock()
+            mock_response_class.return_value = mock_response
 
-                # 调用_sse_handler
-                with pytest.raises((NotImplementedError, Exception)):
-                    await transport._sse_handler(request)
+            # 调用_sse_handler
+            await transport._sse_handler(request)
 
         # 验证错误日志被记录
         # 注意：由于异常抛出，可能不会到达except块
@@ -639,9 +636,6 @@ class TestSSEHandlerErrorPaths:
     @pytest.mark.asyncio
     async def test_sse_handler_json_decode_error(self, caplog):
         """测试SSE处理器JSON解析失败"""
-        import json
-
-        from aiohttp import web
         from aiohttp.test_utils import make_mocked_request
 
         transport = SSETransport(app)
@@ -650,18 +644,17 @@ class TestSSEHandlerErrorPaths:
         request = make_mocked_request("POST", "/sse")
 
         # Mock request.json()返回无效数据导致dumps失败
-        with patch.object(request, "json", return_value={"method": "test"}):
-            # Mock json.dumps抛出异常
-            with patch("deep_thinking.transports.sse.json.dumps", side_effect=TypeError("Not serializable")):
-                with patch("deep_thinking.transports.sse.web.StreamResponse") as mock_response_class:
-                    mock_response = MagicMock()
-                    mock_response.prepare = AsyncMock()
-                    mock_response.write = AsyncMock()
-                    mock_response_class.return_value = mock_response
+        with patch.object(request, "json", return_value={"method": "test"}), \
+             patch("deep_thinking.transports.sse.json.dumps", side_effect=TypeError("Not serializable")), \
+             patch("deep_thinking.transports.sse.web.StreamResponse") as mock_response_class, \
+             pytest.raises((NotImplementedError, TypeError)):
+            mock_response = MagicMock()
+            mock_response.prepare = AsyncMock()
+            mock_response.write = AsyncMock()
+            mock_response_class.return_value = mock_response
 
-                    # 调用_sse_handler
-                    with pytest.raises((NotImplementedError, TypeError)):
-                        await transport._sse_handler(request)
+            # 调用_sse_handler
+            await transport._sse_handler(request)
 
     @pytest.mark.asyncio
     async def test_sse_start_with_auth_logging(self, caplog):
@@ -724,7 +717,6 @@ class TestSSEHandlerErrorPaths:
     @pytest.mark.asyncio
     async def test_sse_handler_heartbeat_interrupt(self, caplog):
         """测试SSE心跳被中断"""
-        from aiohttp import web
         from aiohttp.test_utils import make_mocked_request
 
         transport = SSETransport(app)
@@ -739,22 +731,20 @@ class TestSSEHandlerErrorPaths:
                 raise asyncio.CancelledError()
             # 前几次调用成功
 
-        with patch("deep_thinking.transports.sse.web.StreamResponse") as mock_response_class:
+        with patch("deep_thinking.transports.sse.web.StreamResponse") as mock_response_class, \
+             patch("deep_thinking.transports.sse.asyncio.sleep", new=AsyncMock()), \
+             pytest.raises((asyncio.CancelledError, NotImplementedError)):
             mock_response = MagicMock()
             mock_response.prepare = AsyncMock()
             mock_response.write = mock_write_with_cancel
             mock_response_class.return_value = mock_response
 
-            # Mock asyncio.sleep
-            with patch("deep_thinking.transports.sse.asyncio.sleep", new=AsyncMock()):
-                # 调用_sse_handler，应该在心跳循环中被取消
-                with pytest.raises((asyncio.CancelledError, NotImplementedError)):
-                    await transport._sse_handler(request)
+            # 调用_sse_handler，应该在心跳循环中被取消
+            await transport._sse_handler(request)
 
     @pytest.mark.asyncio
     async def test_sse_handler_response_prepare_failure(self, caplog):
         """测试SSE响应prepare失败"""
-        from aiohttp import web
         from aiohttp.test_utils import make_mocked_request
 
         transport = SSETransport(app)

@@ -368,9 +368,9 @@ class TestJsonFileStoreBoundary:
         file_path.write_text('{"data": "value"}', encoding="utf-8")
 
         # Mock open在读取时抛出OSError
-        with patch("builtins.open", side_effect=OSError("Read failed")):
-            with pytest.raises(OSError, match="读取文件失败|Read failed"):
-                store.read("test")
+        with patch("builtins.open", side_effect=OSError("Read failed")), \
+             pytest.raises(OSError, match="读取文件失败|Read failed"):
+            store.read("test")
 
     def test_write_oserror_propagation(self, store, caplog):
         """测试写入时OSError的传播和日志记录"""
@@ -385,8 +385,6 @@ class TestJsonFileStoreBoundary:
     def test_delete_oserror_handling(self, store, caplog):
         """测试删除时的OSError处理"""
         store.write("test", {"data": "value"})
-
-        file_path = store._get_file_path("test")
 
         # Mock file_path.unlink抛出OSError
         with patch.object(Path, "unlink", side_effect=OSError("Delete failed")):

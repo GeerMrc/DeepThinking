@@ -103,6 +103,43 @@ def get_storage_manager() -> StorageManager:
     return _storage_manager
 
 
+def get_server_instructions() -> str:
+    """
+    获取服务器instructions
+
+    从环境变量 DEEP_THINKING_DESCRIPTION 读取自定义描述，
+    如果未设置或为空，则使用默认instructions。
+
+    优先级：
+    1. 环境变量 DEEP_THINKING_DESCRIPTION（去除首尾空格后非空）
+    2. 默认instructions
+
+    Returns:
+        服务器instructions字符串
+
+    Examples:
+        >>> # 环境变量未设置
+        >>> get_server_instructions()
+        '深度思考MCP服务器 - 提供顺序思考、会话管理和状态持久化功能'
+
+        >>> # 环境变量设置为自定义值
+        >>> get_server_instructions()  # DEEP_THINKING_DESCRIPTION="我的服务器"
+        '我的服务器'
+    """
+    custom_description = os.getenv("DEEP_THINKING_DESCRIPTION", "").strip()
+
+    if custom_description:
+        logger.info(f"使用自定义描述: {custom_description}")
+        return custom_description
+
+    # 使用默认值
+    default_instructions = (
+        "深度思考MCP服务器 - 提供顺序思考、会话管理和状态持久化功能"
+    )
+    logger.debug("使用默认instructions")
+    return default_instructions
+
+
 @asynccontextmanager
 async def server_lifespan(_server: FastMCP) -> AsyncGenerator[None, None]:
     """
@@ -155,7 +192,7 @@ async def server_lifespan(_server: FastMCP) -> AsyncGenerator[None, None]:
 # 创建FastMCP服务器实例
 app = FastMCP(
     name="DeepThinking",
-    instructions="深度思考MCP服务器 - 提供顺序思考、会话管理和状态持久化功能",
+    instructions=get_server_instructions(),
     lifespan=server_lifespan,
 )
 
