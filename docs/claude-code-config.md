@@ -659,6 +659,26 @@ my-project/
 }
 ```
 
+**带描述字段的完整配置**：
+```json
+{
+  "mcpServers": {
+    "deep-thinking": {
+      "command": "python",
+      "args": ["-m", "deep_thinking"],
+      "description": "统一的 MCP 工具注册与搜索服务 - 提供顺序思考、会话管理和可视化功能",
+      "env": {
+        "DEEP_THINKING_MAX_THOUGHTS": "50",
+        "DEEP_THINKING_MIN_THOUGHTS": "3",
+        "DEEP_THINKING_LOG_LEVEL": "INFO"
+      }
+    }
+  }
+}
+```
+
+> 💡 **说明**：`description` 字段是可选的，用于在 Claude Code 中显示服务器的描述信息，帮助用户更好地理解每个 MCP 服务器的用途。
+
 ### 开发模式配置（本地源码）
 
 当您正在开发 Deep-Thinking-MCP 本身时，使用开发模式配置：
@@ -773,6 +793,45 @@ my-project/
 }
 ```
 
+> ⚠️ **重要提示 - 环境变量路径扩展**：
+>
+> **关于 `DEEP_THINKING_DATA_DIR` 的特殊说明**：
+>
+> - ✅ **支持的路径格式**：
+>   - 相对路径：`"./.deep-thinking-data"` 或 `".deep-thinking-data"`
+>   - 绝对路径：`"/Users/yourname/.deep-thinking-data"` 或 `"/home/user/.deep-thinking-data"`
+>
+> - ❌ **不支持的路径格式**（需要手动扩展）：
+>   - `~/.deep-thinking-data` - `~` 符号不会被自动扩展
+>   - `$HOME/.deep-thinking-data` - `$HOME` 变量不会被自动扩展
+>
+> **解决方案**：
+>
+> 1. **使用绝对路径**（推荐）：
+> ```json
+> {
+>   "env": {
+>     "DEEP_THINKING_DATA_DIR": "/Users/yourname/.deep-thinking-data"
+>   }
+> }
+> ```
+>
+> 2. **使用相对路径**：
+> ```json
+> {
+>   "env": {
+>     "DEEP_THINKING_DATA_DIR": "./.deep-thinking-data"
+>   }
+> }
+> ```
+>
+> 3. **使用 claude mcp add 命令**（支持 shell 扩展）：
+> ```bash
+> claude mcp add --transport stdio deep-thinking \
+>   --env DEEP_THINKING_DATA_DIR=~/.deep-thinking-data \
+>   -- python -m deep_thinking
+> ```
+
 ### 多项目配置管理
 
 **场景1：同时使用生产和开发版本**
@@ -829,6 +888,80 @@ my-project/
     }
   }
 }
+```
+
+### 安装方式说明
+
+在使用 DeepThinking MCP 之前，需要先安装它。支持以下安装方式：
+
+#### 开发模式安装（推荐用于本地开发）
+
+**使用 pip**：
+```bash
+# 克隆仓库
+git clone https://github.com/GeerMrc/DeepThinking.git
+cd DeepThinking
+
+# 以开发模式安装
+pip install -e .
+```
+
+**使用 uv**（更快）：
+```bash
+# 克隆仓库
+git clone https://github.com/GeerMrc/DeepThinking.git
+cd DeepThinking
+
+# 以开发模式安装
+uv pip install -e .
+```
+
+#### 生产模式安装（推荐用于部署）
+
+**从 PyPI 安装**（已发布版本）：
+```bash
+# 使用 pip
+pip install DeepThinking
+
+# 使用 uv
+uv pip install DeepThinking
+```
+
+**从 wheel 文件安装**：
+```bash
+# 下载 wheel 文件后
+pip install dist/DeepThinking-0.2.2-py3-none-any.whl
+
+# 或使用 uv
+uv pip install dist/DeepThinking-0.2.2-py3-none-any.whl
+```
+
+#### 关于 uvx 的说明
+
+> ⚠️ **重要提示**：`uvx` 命令仅在 PyPI 发布后可用。
+>
+> - ❌ **当前不可用**：`uvx DeepThinking`（尚未发布到 PyPI）
+> - ✅ **替代方案**：使用开发模式安装
+>   ```bash
+>   # 开发模式安装后，可以直接使用
+>   pip install -e .
+>   python -m deep_thinking --help
+>   ```
+
+### 配置方式
+
+安装完成后，使用以下方式配置 DeepThinking MCP：
+
+**方式1：使用 claude mcp add 命令**（推荐）：
+```bash
+claude mcp add --transport stdio deep-thinking \
+  --env DEEP_THINKING_MAX_THOUGHTS=50 \
+  -- python -m deep_thinking
+```
+
+**方式2：使用 claude mcp add-json 命令**：
+```bash
+claude mcp add-json deep-thinking '{"command":"python","args":["-m","deep_thinking"]}'
 ```
 
 ### 验证和调试
