@@ -669,7 +669,7 @@ my-project/
     "deep-thinking": {
       "command": "python",
       "args": ["-m", "deep_thinking"],
-      "description": "统一的 MCP 工具注册与搜索服务 - 提供顺序思考、会话管理和可视化功能",
+      "description": "深度思考MCP服务器 - 高级思维编排引擎，适合处理多步骤、跨工具的复杂任务",
       "env": {
         "DEEP_THINKING_MAX_THOUGHTS": "50",
         "DEEP_THINKING_MIN_THOUGHTS": "3",

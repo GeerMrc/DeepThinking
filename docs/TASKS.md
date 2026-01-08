@@ -2232,25 +2232,25 @@ v0.2.2: 代码质量优化与文档完善
 
 ---
 
-## 阶段17: 代码质量优化 - 输入验证与弃用警告修复
+## 阶段20: 代码质量优化 - 输入验证与弃用警告修复
 
 **状态**: `completed` ✅
 
 **开始时间**: 2026-01-05
 **完成时间**: 2026-01-05
 
-**依赖**: 阶段16 完成
+**依赖**: 阶段19 完成
 
 > **优化目标**: 基于代码分析建议，完善输入参数边界验证，修复datetime弃用警告
 
-### 17.1 输入参数边界验证
+### 20.1 输入参数边界验证
 
 | 任务ID | 任务描述 | 状态 | 验证方式 |
 |--------|---------|------|----------|
-| 17.1.1 | 添加 thoughtNumber >= 1 验证 | completed | 代码审查 |
-| 17.1.2 | 添加 totalThoughts >= thoughtNumber 验证 | completed | 代码审查 |
-| 17.1.3 | 添加 thought 内容非空验证 | completed | 代码审查 |
-| 17.1.4 | 添加配置限制验证（无论 needsMoreThoughts） | completed | 代码审查 |
+| 20.1.1 | 添加 thoughtNumber >= 1 验证 | completed | 代码审查 |
+| 20.1.2 | 添加 totalThoughts >= thoughtNumber 验证 | completed | 代码审查 |
+| 20.1.3 | 添加 thought 内容非空验证 | completed | 代码审查 |
+| 20.1.4 | 添加配置限制验证（无论 needsMoreThoughts） | completed | 代码审查 |
 
 **验证逻辑实现**:
 ```python
@@ -2271,28 +2271,28 @@ if totalThoughts > max_thoughts_limit:
     raise ValueError(f"totalThoughts ({totalThoughts}) 超过最大限制 ({max_thoughts_limit})")
 ```
 
-### 17.2 datetime.utcnow() 弃用警告修复
+### 20.2 datetime.utcnow() 弃用警告修复
 
 | 任务ID | 任务描述 | 状态 | 文件 |
 |--------|---------|------|------|
-| 17.2.1 | 修复 thought.py 中的 datetime.utcnow() | completed | models/thought.py |
-| 17.2.2 | 修复 thinking_session.py 中的 datetime.utcnow() | completed | models/thinking_session.py |
-| 17.2.3 | 修复 storage_manager.py 中的 datetime.utcnow() | completed | storage/storage_manager.py |
-| 17.2.4 | 修复 test_thought.py 中的 datetime.utcnow() | completed | tests/test_models/test_thought.py |
+| 20.2.1 | 修复 thought.py 中的 datetime.utcnow() | completed | models/thought.py |
+| 20.2.2 | 修复 thinking_session.py 中的 datetime.utcnow() | completed | models/thinking_session.py |
+| 20.2.3 | 修复 storage_manager.py 中的 datetime.utcnow() | completed | storage/storage_manager.py |
+| 20.2.4 | 修复 test_thought.py 中的 datetime.utcnow() | completed | tests/test_models/test_thought.py |
 
 **修复内容**:
 - `datetime.utcnow()` → `datetime.now(timezone.utc)`
 - 所有7处使用已全部修复
 - 测试时区兼容性问题已解决
 
-### 17.3 测试验证
+### 20.3 测试验证
 
 | 任务ID | 任务描述 | 状态 | 验证方式 |
 |--------|---------|------|----------|
-| 17.3.1 | 运行完整测试套件 | completed | 398/398 通过 |
-| 17.3.2 | 验证测试覆盖率 | completed | 86.34% |
-| 17.3.3 | 运行 ruff 代码检查 | completed | 0 errors |
-| 17.3.4 | 运行 mypy 类型检查 | completed | 0 errors |
+| 20.3.1 | 运行完整测试套件 | completed | 398/398 通过 |
+| 20.3.2 | 验证测试覆盖率 | completed | 86.34% |
+| 20.3.3 | 运行 ruff 代码检查 | completed | 0 errors |
+| 20.3.4 | 运行 mypy 类型检查 | completed | 0 errors |
 
 **测试结果**:
 - 398个测试全部通过 ✅
@@ -2300,7 +2300,7 @@ if totalThoughts > max_thoughts_limit:
 - ruff检查：All checks passed! ✅
 - mypy检查：Success: no issues found in 29 source files ✅
 
-### 阶段17完成标准检查
+### 阶段20完成标准检查
 
 | 检查项 | 状态 | 检查方式 | 通过标准 | 记录 |
 |--------|------|---------|---------|------|
@@ -2311,7 +2311,7 @@ if totalThoughts > max_thoughts_limit:
 | ruff 检查 | ✅ passed | ruff check | 0 errors | 通过 |
 | mypy 检查 | ✅ passed | mypy | 0 errors | 通过 |
 
-### 阶段17 关键成果
+### 阶段20关键成果
 
 1. **输入参数边界验证**: 添加4项关键验证，提升工具健壮性
 2. **弃用警告修复**: 修复7处 datetime.utcnow() 弃用警告

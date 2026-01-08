@@ -1,6 +1,6 @@
 # DeepThinking MCP 安装与配置指南
 
-> 版本: 0.2.0
+> 版本: 1.0.0
 > 更新日期: 2026-01-02
 
 ---
@@ -624,7 +624,7 @@ python -m deep_thinking --mode sse --host 127.0.0.1 --port 8088
 | 环境变量 | 描述 | 默认值 |
 |---------|------|-------|
 | **服务器配置** | | |
-| `DEEP_THINKING_DESCRIPTION` | 自定义服务器描述（在MCP工具列表中显示） | 深度思考MCP服务器 - 提供顺序思考、会话管理和状态持久化功能 |
+| `DEEP_THINKING_DESCRIPTION` | **可选** | 自定义服务器描述（在MCP工具列表中显示） | 深度思考MCP服务器 - 高级思维编排引擎，适合处理多步骤、跨工具的复杂任务 |
 | **传输配置** | | |
 | `DEEP_THINKING_TRANSPORT` | 传输模式 (stdio/sse) | stdio |
 | `DEEP_THINKING_HOST` | SSE 监听地址 | 127.0.0.1 |
@@ -633,7 +633,7 @@ python -m deep_thinking --mode sse --host 127.0.0.1 --port 8088
 | `DEEP_THINKING_AUTH_TOKEN` | Bearer Token（SSE 认证） | 无 |
 | `DEEP_THINKING_API_KEY` | API Key（SSE 认证） | 无 |
 | **存储配置** | | |
-| `DEEP_THINKING_DATA_DIR` | 数据存储目录 | ./.Deep-Thinking-MCP/ |
+| `DEEP_THINKING_DATA_DIR` | **可选** | 数据存储目录（支持相对路径、绝对路径、~ 路径、环境变量） | `./.deepthinking/` |
 | **思考配置** | | |
 | `DEEP_THINKING_MAX_THOUGHTS` | 最大思考步骤数（推荐 50，支持 1-10000） | 50 |
 | `DEEP_THINKING_MIN_THOUGHTS` | 最小思考步骤数（推荐 3，支持 1-10000） | 3 |

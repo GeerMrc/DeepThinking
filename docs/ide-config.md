@@ -14,6 +14,23 @@ DeepThinking MCP 支持通过 MCP (Model Context Protocol) 协议与各种 IDE �
 
 > 💡 **Claude Code 用户**：Claude Code 配置已单独整理为 [完整配置指南](./claude-code-config.md)，包含 CLI 命令行方式、配置文件方式、开发模式配置等详细内容。
 
+### 环境变量说明
+
+DeepThinking MCP 支持通过环境变量进行配置。所有配置项均为可选，未设置时使用合理的默认值。
+
+| 环境变量 | 是否必选 | 默认值 | 说明 |
+|---------|---------|-------|------|
+| `DEEP_THINKING_DESCRIPTION` | 可选 | "深度思考MCP服务器 - 高级思维编排引擎，适合处理多步骤、跨工具的复杂任务" | 自定义服务器描述（在MCP工具列表中显示） |
+| `DEEP_THINKING_DATA_DIR` | 可选 | `./.deepthinking/` | 数据存储目录（支持相对路径、绝对路径、~ 路径） |
+| `DEEP_THINKING_MAX_THOUGHTS` | 可选 | 50 | 最大思考步骤数（范围：1-10000） |
+| `DEEP_THINKING_MIN_THOUGHTS` | 可选 | 3 | 最小思考步骤数（范围：1-10000） |
+| `DEEP_THINKING_LOG_LEVEL` | 可选 | INFO | 日志级别（DEBUG/INFO/WARNING/ERROR） |
+
+**注意**：
+- 所有环境变量都是可选的
+- 推荐在生产环境中设置 `DEEP_THINKING_DESCRIPTION` 以便于识别
+- 数据目录路径支持自动扩展（`~` 会在运行时展开为用户主目录）
+
 ### 支持的 IDE
 
 | IDE / 编辑器 | 支持状态 | 传输模式 | 推荐度 |
