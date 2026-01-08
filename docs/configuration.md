@@ -24,42 +24,37 @@
 
 | 环境变量 | 默认值 | 描述 |
 |---------|--------|------|
-| `DEEP_THINKING_TRANSPORT` | `stdio` | 传输模式：`stdio`（本地）或 `sse`（远程） |
-
-### SSE模式配置
-
-| 环境变量 | 默认值 | 描述 |
-|---------|--------|------|
-| `DEEP_THINKING_HOST` | `localhost` | SSE服务器监听地址 |
-| `DEEP_THINKING_PORT` | `8000` | SSE服务器监听端口 |
-| `DEEP_THINKING_AUTH_TOKEN` | 未设置 | Bearer Token用于SSE模式认证（可选） |
-| `DEEP_THINKING_API_KEY` | 未设置 | API Key用于SSE模式认证（可选） |
+| `DEEP_THINKING_TRANSPORT` | stdio | 从代码自动提取 |
 
 ### 日志配置
 
 | 环境变量 | 默认值 | 描述 |
 |---------|--------|------|
-| `DEEP_THINKING_LOG_LEVEL` | `INFO` | 日志级别：`DEBUG`、`INFO`、`WARNING`、`ERROR` |
+| `DEEP_THINKING_LOG_LEVEL` | INFO | 从代码自动提取 |
 
 ### 存储配置
 
 | 环境变量 | 默认值 | 描述 |
 |---------|--------|------|
-| `DEEP_THINKING_DATA_DIR` | 未设置 | 数据存储目录路径（默认：`~/.deepthinking/`） |
+| `DEEP_THINKING_DATA_DIR` | 未设置 | 从代码自动提取 |
 
 ### 思考配置
 
 | 环境变量 | 默认值 | 描述 |
 |---------|--------|------|
-| `DEEP_THINKING_MAX_THOUGHTS` | `50` | 最大思考步骤数（支持 1-10000，推荐 50） |
-| `DEEP_THINKING_MIN_THOUGHTS` | `3` | 最小思考步骤数（支持 1-10000，推荐 3） |
-| `DEEP_THINKING_THOUGHTS_INCREMENT` | `10` | 思考步骤增量（支持 1-100，默认 10） |
+| `DEEP_THINKING_MAX_THOUGHTS` | 50 | 从代码自动提取 |
+| `DEEP_THINKING_MIN_THOUGHTS` | 3 | 从代码自动提取 |
+| `DEEP_THINKING_THOUGHTS_INCREMENT` | 10 | 从代码自动提取 |
 
 ### 服务器配置
 
 | 环境变量 | 默认值 | 描述 |
 |---------|--------|------|
-| `DEEP_THINKING_DESCRIPTION` | 未设置 | 自定义服务器描述（在MCP工具列表中显示） |
+| `DEEP_THINKING_HOST` | localhost | 从代码自动提取 |
+| `DEEP_THINKING_AUTH_TOKEN` | 未设置 | 从代码自动提取 |
+| `DEEP_THINKING_API_KEY` | 未设置 | 从代码自动提取 |
+| `DEEP_THINKING_PORT` | 8000 | 从代码自动提取 |
+| `DEEP_THINKING_DESCRIPTION` | 未设置 | 从代码自动提取 |
 
 ## 配置文件位置
 
@@ -222,7 +217,7 @@ DEEP_THINKING_DESCRIPTION="我的 AI 助手服务器"
 
 **说明**：
 - 如果不设置，使用默认描述
-- 默认值：`深度思考MCP服务器 - 提供顺序思考、会话管理和状态持久化功能`
+- 默认值：`深度思考MCP服务器 - 高级思维编排引擎，提供顺序思考,适合处理多步骤、跨工具的复杂任务,会话管理和状态持久化功能`
 
 ### 开发选项
 

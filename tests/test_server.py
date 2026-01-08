@@ -24,7 +24,7 @@ class TestGetServerInstructions:
         ):
             result = get_server_instructions()
 
-        expected = "深度思考MCP服务器 - 提供顺序思考、会话管理和状态持久化功能"
+        expected = "深度思考MCP服务器 - 高级思维编排引擎，提供顺序思考,适合处理多步骤、跨工具的复杂任务,会话管理和状态持久化功能"
         assert result == expected
         assert "使用默认instructions" in caplog.text
 
@@ -52,7 +52,7 @@ class TestGetServerInstructions:
         ):
             result = get_server_instructions()
 
-        expected = "深度思考MCP服务器 - 提供顺序思考、会话管理和状态持久化功能"
+        expected = "深度思考MCP服务器 - 高级思维编排引擎，提供顺序思考,适合处理多步骤、跨工具的复杂任务,会话管理和状态持久化功能"
         assert result == expected
         assert "使用默认instructions" in caplog.text
 
@@ -66,7 +66,7 @@ class TestGetServerInstructions:
         ):
             result = get_server_instructions()
 
-        expected = "深度思考MCP服务器 - 提供顺序思考、会话管理和状态持久化功能"
+        expected = "深度思考MCP服务器 - 高级思维编排引擎，提供顺序思考,适合处理多步骤、跨工具的复杂任务,会话管理和状态持久化功能"
         assert result == expected
 
     def test_trims_whitespace(self, caplog):

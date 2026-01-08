@@ -304,6 +304,38 @@ claude mcp add deepthinking stdio python -m deep_thinking \
 
 ---
 
+## 完整配置快速参考
+
+### 所有支持的环境变量
+
+| 环境变量 | 默认值 | 说明 |
+|---------|--------|------|
+| **传输配置** |
+| `DEEP_THINKING_TRANSPORT` | stdio | 传输模式（stdio/sse） |
+| `DEEP_THINKING_HOST` | localhost | SSE服务器监听地址 |
+| `DEEP_THINKING_PORT` | 8000 | SSE服务器监听端口 |
+| **认证配置** |
+| `DEEP_THINKING_AUTH_TOKEN` | 无 | Bearer Token认证 |
+| `DEEP_THINKING_API_KEY` | 无 | API Key认证 |
+| **服务器配置** |
+| `DEEP_THINKING_DESCRIPTION` | 深度思考MCP服务器 - 高级思维编排引擎，提供顺序思考,适合处理多步骤、跨工具的复杂任务,会话管理和状态持久化功能 | 自定义服务器描述 |
+| **日志配置** |
+| `DEEP_THINKING_LOG_LEVEL` | INFO | 日志级别（DEBUG/INFO/WARNING/ERROR） |
+| **存储配置** |
+| `DEEP_THINKING_DATA_DIR` | ~/.deep-thinking/ | 数据存储目录 |
+| `DEEP_THINKING_BACKUP_COUNT` | 10 | 自动备份保留数量 |
+| **思考配置** |
+| `DEEP_THINKING_MAX_THOUGHTS` | 50 | 最大思考步骤数（1-10000） |
+| `DEEP_THINKING_MIN_THOUGHTS` | 3 | 最小思考步骤数（1-10000） |
+| `DEEP_THINKING_THOUGHTS_INCREMENT` | 10 | 思考步骤增量（1-100） |
+| **开发选项** |
+| `DEEP_THINKING_DEV` | false | 启用开发模式（暂未实现） |
+| `DEEP_THINKING_PROFILE` | false | 启用性能分析（暂未实现） |
+
+> 💡 **提示**：完整的配置说明请参考 [配置参数参考](./configuration.md)
+
+---
+
 ## 相关文档
 
 - [配置参数参考](./configuration.md) - 完整的环境变量配置

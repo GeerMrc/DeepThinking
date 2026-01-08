@@ -11,8 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **docs**: 新增文档索引 (docs/README.md) - 完整的文档导航和快速开始指南
 - **docs**: 新增统一配置指南 (docs/configuration.md) - 所有环境变量的完整参考
 - **scripts**: 新增配置参数文档生成脚本 (scripts/generate_config_docs.py) - 从代码自动生成配置文档
+- **docs**: 在 claude-code-config.md 和 ide-config.md 中添加完整配置快速参考章节
+- **config**: 在 .env.example 中添加 DEEP_THINKING_DESCRIPTION 配置示例
 
 ### Changed
+- **config**: 更新 DEEP_THINKING_DESCRIPTION 默认值描述
+  - 添加"高级思维编排引擎"定位
+  - 添加"适合处理多步骤、跨工具的复杂任务"使用场景
+  - 新默认值："深度思考MCP服务器 - 高级思维编排引擎，提供顺序思考,适合处理多步骤、跨工具的复杂任务,会话管理和状态持久化功能"
 - **docs**: 精简配置文档，消除冗余内容
   - installation.md: 1011行 → 317行 (-69%)
   - claude-code-config.md: 1063行 → 313行 (-71%)
