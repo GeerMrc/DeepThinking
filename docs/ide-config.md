@@ -20,7 +20,7 @@ DeepThinking MCP 支持通过环境变量进行配置。所有配置项均为可
 
 | 环境变量 | 是否必选 | 默认值 | 说明 |
 |---------|---------|-------|------|
-| `DEEP_THINKING_DESCRIPTION` | 可选 | "深度思考MCP服务器 - 高级思维编排引擎，适合处理多步骤、跨工具的复杂任务" | 自定义服务器描述（在MCP工具列表中显示） |
+| `DEEP_THINKING_DESCRIPTION` | 可选 | "深度思考MCP服务器 - 提供顺序思考、会话管理和状态持久化功能" | 自定义服务器描述（在MCP工具列表中显示） |
 | `DEEP_THINKING_DATA_DIR` | 可选 | `~/.deepthinking/` | 数据存储目录（支持相对路径、绝对路径、~ 路径） |
 | `DEEP_THINKING_MAX_THOUGHTS` | 可选 | 50 | 最大思考步骤数（范围：1-10000） |
 | `DEEP_THINKING_MIN_THOUGHTS` | 可选 | 3 | 最小思考步骤数（范围：1-10000） |

@@ -555,7 +555,7 @@ DeepThinking MCP 需要与 Claude Desktop 配合使用。
 首先启动 SSE 服务器：
 
 ```bash
-python -m deep_thinking --mode sse --host 127.0.0.1 --port 8088
+python -m deep_thinking --mode sse --host localhost --port 8000
 ```
 
 然后在配置文件中添加：
@@ -564,7 +564,7 @@ python -m deep_thinking --mode sse --host 127.0.0.1 --port 8088
 {
   "mcpServers": {
     "deep-thinking": {
-      "url": "http://127.0.0.1:8088/sse",
+      "url": "http://localhost:8000/sse",
       "transport": "sse"
     }
   }
@@ -624,10 +624,10 @@ python -m deep_thinking --mode sse --host 127.0.0.1 --port 8088
 | 环境变量 | 描述 | 默认值 |
 |---------|------|-------|
 | **服务器配置** | | |
-| `DEEP_THINKING_DESCRIPTION` | **可选** | 自定义服务器描述（在MCP工具列表中显示） | 深度思考MCP服务器 - 高级思维编排引擎，适合处理多步骤、跨工具的复杂任务 |
+| `DEEP_THINKING_DESCRIPTION` | **可选** | 自定义服务器描述（在MCP工具列表中显示） | 深度思考MCP服务器 - 提供顺序思考、会话管理和状态持久化功能 |
 | **传输配置** | | |
 | `DEEP_THINKING_TRANSPORT` | 传输模式 (stdio/sse) | stdio |
-| `DEEP_THINKING_HOST` | SSE 监听地址 | 127.0.0.1 |
+| `DEEP_THINKING_HOST` | SSE 监听地址 | localhost |
 | `DEEP_THINKING_PORT` | SSE 监听端口 | 8000 |
 | **认证配置** | | |
 | `DEEP_THINKING_AUTH_TOKEN` | Bearer Token（SSE 认证） | 无 |
@@ -759,13 +759,13 @@ python -m deep_thinking --mode stdio
 **启动命令**：
 
 ```bash
-python -m deep_thinking --mode sse --host 0.0.0.0 --port 8088
+python -m deep_thinking --mode sse --host 0.0.0.0 --port 8000
 ```
 
 **访问地址**：
 
-- SSE 端点：`http://localhost:8088/sse`
-- 健康检查：`http://localhost:8088/health`
+- SSE 端点：`http://localhost:8000/sse`
+- 健康检查：`http://localhost:8000/health`
 
 **特点**：
 - 通过 HTTP Server-Sent Events 通信
@@ -785,7 +785,7 @@ After=network.target
 Type=simple
 User=your-user
 WorkingDirectory=/path/to/DeepThinking
-ExecStart=/usr/bin/python3 -m deep_thinking --mode sse --host 0.0.0.0 --port 8088
+ExecStart=/usr/bin/python3 -m deep_thinking --mode sse --host 0.0.0.0 --port 8000
 Restart=always
 RestartSec=10
 
@@ -813,7 +813,7 @@ sudo systemctl status deep-thinking
 #### macOS
 
 ```bash
-# 允许传入连接到端口 8088
+# 允许传入连接到端口 8000
 sudo /usr/libexec/ApplicationFirewall/socketfilterfw --add /usr/bin/python3
 sudo /usr/libexec/ApplicationFirewall/socketfilterfw --unblock /usr/bin/python3
 ```
@@ -821,21 +821,21 @@ sudo /usr/libexec/ApplicationFirewall/socketfilterfw --unblock /usr/bin/python3
 #### Linux (ufw)
 
 ```bash
-sudo ufw allow 8088/tcp
+sudo ufw allow 8000/tcp
 sudo ufw reload
 ```
 
 #### Linux (firewalld)
 
 ```bash
-sudo firewall-cmd --permanent --add-port=8088/tcp
+sudo firewall-cmd --permanent --add-port=8000/tcp
 sudo firewall-cmd --reload
 ```
 
 #### Windows
 
 1. 打开"Windows Defender 防火墙" -> "高级设置"
-2. 创建入站规则，允许端口 8088
+2. 创建入站规则，允许端口 8000
 
 ---
 
@@ -871,7 +871,7 @@ sudo firewall-cmd --reload
 
 **解决方案**：
 
-1. 查找占用进程：`lsof -i :8088`（macOS/Linux）或 `netstat -ano | findstr 8088`（Windows）
+1. 查找占用进程：`lsof -i :8000`（macOS/Linux）或 `netstat -ano | findstr 8000`（Windows）
 2. 终止进程或更换端口：`--port 8089`
 
 ---
@@ -891,7 +891,7 @@ sudo firewall-cmd --reload
 
 **解决方案**：
 
-1. 确认服务已启动：`curl http://localhost:8088/health`
+1. 确认服务已启动：`curl http://localhost:8000/health`
 2. 检查防火墙设置
 3. 确认监听地址：`--host 0.0.0.0` 允许远程访问
 

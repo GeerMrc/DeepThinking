@@ -133,7 +133,7 @@ python -m deep_thinking --transport sse --api-key your-api-key
 # 服务器配置
 # 自定义服务器描述（可选）
 # 用于在MCP工具列表中显示自定义的服务器功能说明
-# 默认描述："深度思考MCP服务器 - 高级思维编排引擎，适合处理多步骤、跨工具的复杂任务"
+# 默认描述："深度思考MCP服务器 - 提供顺序思考、会话管理和状态持久化功能"
 # 如果不设置，将使用上述默认值
 DEEP_THINKING_DESCRIPTION=我的AI助手服务器
 
