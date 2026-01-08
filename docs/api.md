@@ -46,9 +46,9 @@ DeepThinking MCP 是一个基于 Model Context Protocol (MCP) 的深度思考服
 
 DeepThinking MCP 将思考会话数据存储在本地文件系统中。
 
-**默认存储路径（项目本地）**:
+**默认存储路径（用户主目录）**:
 ```
-./.Deep-Thinking-MCP/
+~/.deepthinking/
 ├── sessions/           # 会话数据目录
 │   ├── .index.json    # 会话索引文件
 │   └── *.json         # 各个会话的数据文件
@@ -70,11 +70,11 @@ DeepThinking MCP 将思考会话数据存储在本地文件系统中。
    python -m deep_thinking --data-dir /custom/path
    ```
 
-3. **默认值**: 项目本地目录 `.Deep-Thinking-MCP/`
+3. **默认值**: 用户主目录 `~/.deepthinking/`
 
 ### 数据迁移
 
-**自动迁移**: 从旧版本（`~/.Deep-Thinking-MCP/`）升级时，系统会：
+**自动迁移**: 从旧版本（`./.deepthinking/`）升级时，系统会：
 - 检测旧数据目录
 - 自动创建备份
 - 迁移数据到新位置
@@ -408,7 +408,7 @@ resume_session("my-session-id")
 
 ## 3. 任务管理工具
 
-任务管理工具提供任务清单管理功能，支持优先级驱动的任务执行。
+任务管理工具提供任务清单管理功能。
 
 ### 3.1 create_task
 
@@ -524,7 +524,7 @@ update_task_status("task-123", "failed")
 
 ### 3.4 get_next_task
 
-获取下一个待执行任务（按优先级排序）。
+获取下一个待执行任务。
 
 #### 参数
 
@@ -536,7 +536,6 @@ update_task_status("task-123", "failed")
 - 任务ID
 - 标题
 - 描述
-- 优先级
 - 创建时间
 
 如果没有待执行任务，返回提示信息。
@@ -547,13 +546,6 @@ update_task_status("task-123", "failed")
 # 获取下一个待执行任务
 next_task = get_next_task()
 ```
-
-#### 优先级排序
-
-- P0 任务优先
-- P1 任务次之
-- P2 任务最后
-- 同优先级按创建时间排序
 
 ---
 
@@ -570,7 +562,6 @@ next_task = get_next_task()
 返回任务统计信息：
 - 总任务数
 - 状态分布（各状态任务数）
-- 优先级分布（各优先级任务数）
 
 #### 使用示例
 
