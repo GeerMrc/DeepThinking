@@ -10,7 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, cast
 
-from deep_thinking.models.task import TaskPriority, TaskStatus, ThinkingTask
+from deep_thinking.models.task import TaskStatus, ThinkingTask
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +75,6 @@ class TaskListStore:
         index[task_id] = {
             "title": task.title,
             "status": task.status.value,
-            "priority": task.priority.value,
             "updated_at": task.updated_at.isoformat(),
         }
         self._write_index(index)
@@ -91,7 +90,6 @@ class TaskListStore:
         self,
         title: str,
         description: str = "",
-        priority: TaskPriority = TaskPriority.P2,
         task_id: str | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> ThinkingTask:
@@ -101,7 +99,6 @@ class TaskListStore:
         Args:
             title: 任务标题
             description: 任务描述
-            priority: 任务优先级
             task_id: 任务ID（可选，不提供则自动生成UUID）
             metadata: 元数据
 
@@ -117,7 +114,6 @@ class TaskListStore:
             task_id=task_id,
             title=title,
             description=description,
-            priority=priority,
             metadata=metadata or {},
         )
 
@@ -150,7 +146,6 @@ class TaskListStore:
 
             # 转换枚举类型
             data["status"] = TaskStatus(data["status"])
-            data["priority"] = TaskPriority(data["priority"])
             data["created_at"] = datetime.fromisoformat(data["created_at"])
             data["updated_at"] = datetime.fromisoformat(data["updated_at"])
 
@@ -220,7 +215,6 @@ class TaskListStore:
     def list_tasks(
         self,
         status: TaskStatus | None = None,
-        priority: TaskPriority | None = None,
         limit: int = 100,
     ) -> list[ThinkingTask]:
         """
@@ -228,7 +222,6 @@ class TaskListStore:
 
         Args:
             status: 过滤状态
-            priority: 过滤优先级
             limit: 最大返回数量
 
         Returns:
@@ -244,21 +237,14 @@ class TaskListStore:
             task_info = index[task_id]
             if status and TaskStatus(task_info["status"]) != status:
                 continue
-            if priority and TaskPriority(task_info["priority"]) != priority:
-                continue
 
             # 获取完整任务数据
             task = self.get_task(task_id)
             if task:
                 tasks.append(task)
 
-        # 按优先级和更新时间排序
-        tasks.sort(
-            key=lambda t: (
-                -t.get_priority_weight(),  # 优先级权重降序
-                t.updated_at,  # 更新时间升序
-            )
-        )
+        # 按更新时间排序
+        tasks.sort(key=lambda t: t.updated_at)
 
         return tasks
 
@@ -309,17 +295,13 @@ class TaskListStore:
 
         # 统计各状态的任务数量
         status_counts = {status.value: 0 for status in TaskStatus}
-        priority_counts = {priority.value: 0 for priority in TaskPriority}
 
         for task_info in index.values():
             status = task_info.get("status", "pending")
-            priority = task_info.get("priority", "P2")
             status_counts[status] = status_counts.get(status, 0) + 1
-            priority_counts[priority] = priority_counts.get(priority, 0) + 1
 
         return {
             "total_tasks": len(index),
             "status_counts": status_counts,
-            "priority_counts": priority_counts,
             "data_dir": str(self.data_dir),
         }

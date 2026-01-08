@@ -30,7 +30,6 @@ class TestTaskManagerIntegration:
         result = task_manager.create_task(
             title="测试任务",
             description="这是一个测试任务",
-            priority="P1",
         )
 
         assert "任务已创建" in result
@@ -46,9 +45,9 @@ class TestTaskManagerIntegration:
     async def test_list_tasks(self, storage_manager):
         """测试列出任务"""
         # 创建多个任务
-        task_manager.create_task(title="任务1", priority="P0")
-        task_manager.create_task(title="任务2", priority="P1")
-        task_manager.create_task(title="任务3", priority="P2")
+        task_manager.create_task(title="任务1")
+        task_manager.create_task(title="任务2")
+        task_manager.create_task(title="任务3")
 
         # 列出所有任务
         result = task_manager.list_tasks()
@@ -96,21 +95,20 @@ class TestTaskManagerIntegration:
 
     async def test_get_next_task(self, storage_manager):
         """测试获取下一个待执行任务"""
-        # 创建不同优先级的任务
-        task_manager.create_task(title="低优先级", priority="P2")
-        task_manager.create_task(title="高优先级", priority="P0")
-        task_manager.create_task(title="中优先级", priority="P1")
+        # 创建多个任务
+        task_manager.create_task(title="任务1")
+        task_manager.create_task(title="任务2")
+        task_manager.create_task(title="任务3")
 
-        # 获取下一个任务（应该是P0高优先级）
+        # 获取下一个任务
         result = task_manager.get_next_task()
         assert "下一个待执行任务" in result
-        assert "高优先级" in result
 
     async def test_get_task_stats(self, storage_manager):
         """测试获取任务统计"""
         # 创建多个任务
-        task_manager.create_task(title="任务1", priority="P0")
-        task_manager.create_task(title="任务2", priority="P1")
+        task_manager.create_task(title="任务1")
+        task_manager.create_task(title="任务2")
 
         # 获取统计信息
         result = task_manager.get_task_stats()
@@ -136,12 +134,6 @@ class TestTaskManagerIntegration:
         assert "任务已关联到思考会话" in link_result
         assert task_id in link_result
         assert session_id in link_result
-
-    async def test_invalid_priority(self, storage_manager):
-        """测试无效的优先级"""
-        result = task_manager.create_task(title="测试", priority="P9")
-        assert "错误" in result
-        assert "无效的优先级" in result
 
     async def test_update_nonexistent_task(self, storage_manager):
         """测试更新不存在的任务"""

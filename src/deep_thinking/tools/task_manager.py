@@ -6,7 +6,7 @@
 
 import logging
 
-from deep_thinking.models.task import TaskPriority, TaskStatus
+from deep_thinking.models.task import TaskStatus
 from deep_thinking.server import app, get_storage_manager
 from deep_thinking.storage.task_list_store import TaskListStore
 
@@ -36,7 +36,6 @@ def _get_task_store() -> TaskListStore:
 def create_task(
     title: str,
     description: str = "",
-    priority: str = "P2",
     task_id: str | None = None,
 ) -> str:
     """
@@ -45,7 +44,6 @@ def create_task(
     Args:
         title: 任务标题
         description: 任务描述（可选）
-        priority: 任务优先级（P0/P1/P2，默认P2）
         task_id: 任务ID（可选，不提供则自动生成）
 
     Returns:
@@ -53,17 +51,10 @@ def create_task(
     """
     task_store = _get_task_store()
 
-    # 转换优先级
-    try:
-        task_priority = TaskPriority(priority)
-    except ValueError:
-        return f"错误: 无效的优先级 '{priority}'，必须为 P0、P1 或 P2"
-
     # 创建任务
     task = task_store.create_task(
         title=title,
         description=description,
-        priority=task_priority,
         task_id=task_id,
     )
 
@@ -72,18 +63,16 @@ def create_task(
         f"✅ 任务已创建\n"
         f"ID: {task.task_id}\n"
         f"标题: {task.title}\n"
-        f"优先级: {task.priority.value}\n"
         f"状态: {task.status.value}"
     )
 
 
 @app.tool(
     name="list_tasks",
-    description="列出任务，支持按状态和优先级过滤",
+    description="列出任务，支持按状态过滤",
 )
 def list_tasks(
     status: str | None = None,
-    priority: str | None = None,
     limit: int = 100,
 ) -> str:
     """
@@ -91,7 +80,6 @@ def list_tasks(
 
     Args:
         status: 过滤状态（pending/in_progress/completed/failed/blocked）
-        priority: 过滤优先级（P0/P1/P2）
         limit: 最大返回数量（默认100）
 
     Returns:
@@ -101,12 +89,10 @@ def list_tasks(
 
     # 转换过滤参数
     task_status = TaskStatus(status) if status else None
-    task_priority = TaskPriority(priority) if priority else None
 
     # 获取任务列表
     tasks = task_store.list_tasks(
         status=task_status,
-        priority=task_priority,
         limit=limit,
     )
 
@@ -125,7 +111,7 @@ def list_tasks(
         }.get(task.status, "❓")
 
         lines.append(
-            f"{status_icon} [{task.priority.value}] {task.title}\n"
+            f"{status_icon} {task.title}\n"
             f"   ID: {task.task_id}\n"
             f"   状态: {task.status.value}\n"
             f"   更新: {task.updated_at.strftime('%Y-%m-%d %H:%M')}\n"
@@ -179,13 +165,13 @@ def update_task_status(
 
 @app.tool(
     name="get_next_task",
-    description="获取下一个待执行任务（按优先级排序）",
+    description="获取下一个待执行任务",
 )
 def get_next_task() -> str:
     """
     获取下一个待执行任务
 
-    按优先级排序，返回第一个状态为 pending 的任务。
+    返回第一个状态为 pending 的任务。
 
     Returns:
         下一个待执行任务信息，如果没有则返回提示
@@ -203,7 +189,6 @@ def get_next_task() -> str:
         f"ID: {task.task_id}\n"
         f"标题: {task.title}\n"
         f"描述: {task.description or '(无描述)'}\n"
-        f"优先级: {task.priority.value}\n"
         f"创建: {task.created_at.strftime('%Y-%m-%d %H:%M')}"
     )
 
@@ -268,10 +253,6 @@ def get_task_stats() -> str:
 
     for status, count in stats["status_counts"].items():
         lines.append(f"  - {status}: {count}")
-
-    lines.append("\n优先级分布:")
-    for priority, count in stats["priority_counts"].items():
-        lines.append(f"  - {priority}: {count}")
 
     return "\n".join(lines)
 

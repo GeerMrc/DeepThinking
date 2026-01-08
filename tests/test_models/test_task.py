@@ -3,7 +3,6 @@
 """
 
 from deep_thinking.models.task import (
-    TaskPriority,
     TaskStatus,
     ThinkingTask,
 )
@@ -21,16 +20,6 @@ class TestTaskStatus:
         assert TaskStatus.BLOCKED.value == "blocked"
 
 
-class TestTaskPriority:
-    """测试任务优先级枚举"""
-
-    def test_priority_values(self):
-        """测试：优先级枚举值正确"""
-        assert TaskPriority.P0.value == "P0"
-        assert TaskPriority.P1.value == "P1"
-        assert TaskPriority.P2.value == "P2"
-
-
 class TestThinkingTask:
     """测试思考任务模型"""
 
@@ -45,7 +34,6 @@ class TestThinkingTask:
         assert task.title == "Test Task"
         assert task.description == ""
         assert task.status == TaskStatus.PENDING
-        assert task.priority == TaskPriority.P2
         assert task.session_id is None
 
     def test_create_task_full(self):
@@ -55,7 +43,6 @@ class TestThinkingTask:
             title="Full Task",
             description="Task Description",
             status=TaskStatus.IN_PROGRESS,
-            priority=TaskPriority.P0,
             session_id="session-123",
             metadata={"key": "value"},
         )
@@ -64,7 +51,6 @@ class TestThinkingTask:
         assert task.title == "Full Task"
         assert task.description == "Task Description"
         assert task.status == TaskStatus.IN_PROGRESS
-        assert task.priority == TaskPriority.P0
         assert task.session_id == "session-123"
         assert task.metadata == {"key": "value"}
 
@@ -80,7 +66,6 @@ class TestThinkingTask:
         assert data["task_id"] == "test-3"
         assert data["title"] == "Dict Test"
         assert data["status"] == "pending"
-        assert data["priority"] == "P2"
         assert "created_at" in data
         assert "updated_at" in data
 
@@ -167,20 +152,3 @@ class TestThinkingTask:
 
         assert task_pending.is_completed() is False
         assert task_completed.is_completed() is True
-
-    def test_get_priority_weight(self):
-        """测试：获取优先级权重"""
-        task_p0 = ThinkingTask(task_id="test-15", title="P0", priority=TaskPriority.P0)
-        task_p1 = ThinkingTask(task_id="test-16", title="P1", priority=TaskPriority.P1)
-        task_p2 = ThinkingTask(task_id="test-17", title="P2", priority=TaskPriority.P2)
-
-        assert task_p0.get_priority_weight() == 100
-        assert task_p1.get_priority_weight() == 50
-        assert task_p2.get_priority_weight() == 10
-
-        # 验证排序：P0 > P1 > P2
-        assert (
-            task_p0.get_priority_weight()
-            > task_p1.get_priority_weight()
-            > task_p2.get_priority_weight()
-        )

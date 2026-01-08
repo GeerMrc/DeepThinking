@@ -21,22 +21,6 @@ class TaskStatus(str, Enum):
     BLOCKED = "blocked"
 
 
-class TaskPriority(str, Enum):
-    """任务优先级枚举"""
-
-    P0 = "P0"  # 高优先级（紧急重要）
-    P1 = "P1"  # 中优先级（重要）
-    P2 = "P2"  # 低优先级（普通）
-
-
-# 优先级排序权重
-PRIORITY_WEIGHT = {
-    TaskPriority.P0: 100,
-    TaskPriority.P1: 50,
-    TaskPriority.P2: 10,
-}
-
-
 class ThinkingTask(BaseModel):
     """
     思考任务模型
@@ -48,7 +32,6 @@ class ThinkingTask(BaseModel):
         title: 任务标题
         description: 任务详细描述
         status: 任务状态
-        priority: 任务优先级
         session_id: 关联的思考会话ID（可选）
         created_at: 创建时间
         updated_at: 最后更新时间
@@ -59,7 +42,6 @@ class ThinkingTask(BaseModel):
     title: str
     description: str = ""
     status: TaskStatus = TaskStatus.PENDING
-    priority: TaskPriority = TaskPriority.P2
     session_id: str | None = None
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
@@ -77,7 +59,6 @@ class ThinkingTask(BaseModel):
             "title": self.title,
             "description": self.description,
             "status": self.status.value,
-            "priority": self.priority.value,
             "session_id": self.session_id,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
@@ -95,7 +76,6 @@ class ThinkingTask(BaseModel):
             "task_id": self.task_id,
             "title": self.title,
             "status": self.status.value,
-            "priority": self.priority.value,
             "session_id": self.session_id,
             "updated_at": self.updated_at.isoformat(),
         }
@@ -151,12 +131,3 @@ class ThinkingTask(BaseModel):
             如果任务状态为 completed 返回 True
         """
         return self.status == TaskStatus.COMPLETED
-
-    def get_priority_weight(self) -> int:
-        """
-        获取优先级权重值
-
-        Returns:
-            优先级对应的权重值（用于排序）
-        """
-        return PRIORITY_WEIGHT.get(self.priority, 0)

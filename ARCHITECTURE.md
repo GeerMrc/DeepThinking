@@ -292,7 +292,7 @@ def resume_session(session_id: str) -> str:
 
 #### 任务管理工具 (task_manager.py)
 
-**职责**: 提供任务清单管理功能，支持优先级驱动的任务执行
+**职责**: 提供任务清单管理功能，支持任务状态跟踪和执行
 
 **工具列表**:
 ```python
@@ -300,7 +300,6 @@ def resume_session(session_id: str) -> str:
 def create_task(
     title: str,
     description: str = "",
-    priority: str = "P2",
     task_id: str | None = None,
 ) -> str:
     """创建新任务"""
@@ -308,10 +307,9 @@ def create_task(
 @app.tool(name="list_tasks")
 def list_tasks(
     status: str | None = None,
-    priority: str | None = None,
     limit: int = 100,
 ) -> str:
-    """列出任务，支持按状态和优先级过滤"""
+    """列出任务，支持按状态过滤"""
 
 @app.tool(name="update_task_status")
 def update_task_status(
@@ -322,7 +320,7 @@ def update_task_status(
 
 @app.tool(name="get_next_task")
 def get_next_task() -> str:
-    """获取下一个待执行任务（按优先级排序）"""
+    """获取下一个待执行任务"""
 
 @app.tool(name="task_statistics")
 def task_statistics() -> str:
@@ -335,11 +333,6 @@ def link_task_session(
 ) -> str:
     """关联任务与思考会话"""
 ```
-
-**优先级机制**:
-- P0: 最高优先级，立即处理
-- P1: 高优先级，尽快处理
-- P2: 普通优先级，按计划处理
 
 **状态管理**:
 - pending: 待执行
@@ -567,12 +560,6 @@ class TaskStatus(str, Enum):
     FAILED = "failed"
     BLOCKED = "blocked"
 
-class TaskPriority(str, Enum):
-    """任务优先级枚举"""
-    P0 = "P0"  # 最高优先级
-    P1 = "P1"  # 高优先级
-    P2 = "P2"  # 普通优先级
-
 class ThinkingTask(BaseModel):
     """任务清单模型"""
     task_id: str = Field(..., description="任务唯一标识")
@@ -581,10 +568,6 @@ class ThinkingTask(BaseModel):
     status: TaskStatus = Field(
         default=TaskStatus.PENDING,
         description="任务状态"
-    )
-    priority: TaskPriority = Field(
-        default=TaskPriority.P2,
-        description="任务优先级"
     )
     linked_session_id: str | None = Field(
         default=None,

@@ -420,7 +420,6 @@ resume_session("my-session-id")
 |-------|------|-----|-------|------|
 | `title` | string | ✅ | - | 任务标题 |
 | `description` | string | ❌ | "" | 任务描述 |
-| `priority` | string | ❌ | "P2" | 任务优先级（P0/P1/P2） |
 | `task_id` | string\|null | ❌ | null | 任务ID（不提供则自动生成） |
 
 #### 返回值
@@ -428,51 +427,41 @@ resume_session("my-session-id")
 返回创建的任务信息：
 - 任务ID
 - 标题
-- 优先级
 - 状态
 
 #### 使用示例
 
 ```python
-# 创建高优先级任务
+# 创建任务
 create_task(
     title="修复登录bug",
-    description="用户无法正常登录",
-    priority="P0"
+    description="用户无法正常登录"
 )
 
-# 创建中等优先级任务
+# 创建任务（带描述）
 create_task(
     title="优化数据库查询",
-    priority="P1"
+    description="提升查询性能，减少响应时间"
 )
 ```
-
-#### 优先级说明
-
-- `P0`: 最高优先级，立即处理
-- `P1`: 高优先级，尽快处理
-- `P2`: 普通优先级，按计划处理
 
 ---
 
 ### 3.2 list_tasks
 
-列出任务，支持按状态和优先级过滤。
+列出任务，支持按状态过滤。
 
 #### 参数
 
 | 参数名 | 类型 | 必需 | 默认值 | 描述 |
 |-------|------|-----|-------|------|
 | `status` | string\|null | ❌ | null | 过滤状态（pending/in_progress/completed/failed/blocked） |
-| `priority` | string\|null | ❌ | null | 过滤优先级（P0/P1/P2） |
 | `limit` | integer | ❌ | 100 | 最大返回数量 |
 
 #### 返回值
 
 返回任务列表，每个任务包含：
 - 状态图标
-- 优先级
 - 标题
 - 任务ID
 - 状态
@@ -484,8 +473,8 @@ create_task(
 # 列出所有任务
 list_tasks()
 
-# 只列出待执行的高优先级任务
-list_tasks(status="pending", priority="P0")
+# 只列出待执行的任务
+list_tasks(status="pending")
 
 # 列出进行中的任务
 list_tasks(status="in_progress")
