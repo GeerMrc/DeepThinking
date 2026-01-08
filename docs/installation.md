@@ -1,6 +1,6 @@
 # DeepThinking MCP 安装与配置指南
 
-> 版本: 1.0.0
+> 版本: 0.2.2
 > 更新日期: 2026-01-02
 
 ---
@@ -502,12 +502,12 @@ DeepThinking MCP 服务器
 用法: python -m deep_thinking [OPTIONS]
 
 选项:
-  --mode TEXT       传输模式: stdio 或 sse (默认: stdio)
-  --host TEXT       SSE 模式监听地址 (默认: 127.0.0.1)
-  --port INTEGER    SSE 模式监听端口 (默认: 8088)
-  --storage-dir TEXT 数据存储目录 (默认: ~/.deep-thinking/)
-  --log-level TEXT  日志级别: DEBUG/INFO/WARNING/ERROR (默认: INFO)
-  --help            显示帮助信息
+  --transport TEXT      传输模式: stdio 或 sse (默认: stdio)
+  --host TEXT          SSE 模式监听地址 (默认: localhost)
+  --port INTEGER       SSE 模式监听端口 (默认: 8000)
+  --data-dir TEXT      数据存储目录 (默认: ~/.deepthinking/)
+  --log-level TEXT     日志级别: DEBUG/INFO/WARNING/ERROR (默认: INFO)
+  --help               显示帮助信息
 ```
 
 ---
@@ -633,7 +633,7 @@ python -m deep_thinking --mode sse --host 127.0.0.1 --port 8088
 | `DEEP_THINKING_AUTH_TOKEN` | Bearer Token（SSE 认证） | 无 |
 | `DEEP_THINKING_API_KEY` | API Key（SSE 认证） | 无 |
 | **存储配置** | | |
-| `DEEP_THINKING_DATA_DIR` | **可选** | 数据存储目录（支持相对路径、绝对路径、~ 路径、环境变量） | `./.deepthinking/` |
+| `DEEP_THINKING_DATA_DIR` | **可选** | 数据存储目录（支持相对路径、绝对路径、~ 路径、环境变量） | `~/.deepthinking/` |
 | **思考配置** | | |
 | `DEEP_THINKING_MAX_THOUGHTS` | 最大思考步骤数（推荐 50，支持 1-10000） | 50 |
 | `DEEP_THINKING_MIN_THOUGHTS` | 最小思考步骤数（推荐 3，支持 1-10000） | 3 |
@@ -673,10 +673,10 @@ set DEEP_THINKING_LOG_LEVEL=DEBUG
 
 ### 存储目录结构
 
-**默认存储目录：项目本地** `./.deepthinking/`
+**默认存储目录：用户主目录** `~/.deepthinking/`
 
 ```
-./.deepthinking/
+~/.deepthinking/
 ├── sessions/              # 会话数据
 │   ├── .index.json       # 会话索引文件
 │   └── *.json            # 各会话文件
@@ -684,17 +684,17 @@ set DEEP_THINKING_LOG_LEVEL=DEBUG
 └── .gitignore            # 防止数据提交到版本控制
 ```
 
-**旧版本存储目录（向后兼容）**: `~/.deepthinking/`
+**旧版本存储目录（向后兼容）**: `./.deepthinking/`（项目本地目录）
 
 ### 存储路径优先级
 
 1. **环境变量** `DEEP_THINKING_DATA_DIR`
 2. **CLI参数** `--data-dir`
-3. **默认值** 项目本地目录 `.deepthinking/`
+3. **默认值** 用户主目录 `~/.deepthinking/`
 
 ### 数据迁移
 
-从旧版本（`~/.deepthinking/`）升级时，系统会自动：
+从旧版本（`./.deepthinking/`）升级时，系统会自动：
 - 检测旧数据目录
 - 创建自动备份
 - 迁移数据到新位置

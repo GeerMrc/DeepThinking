@@ -147,7 +147,7 @@ DEEP_THINKING_AUTH_TOKEN=your-secret-token
 DEEP_THINKING_API_KEY=your-api-key
 
 # 存储配置
-DEEP_THINKING_DATA_DIR=./.deepthinking
+DEEP_THINKING_DATA_DIR=~/.deepthinking
 
 # 思考配置
 DEEP_THINKING_MAX_THOUGHTS=50           # 最大思考步骤数（推荐 50，支持 1-10000）
@@ -158,7 +158,7 @@ DEEP_THINKING_THOUGHTS_INCREMENT=10     # 思考步骤增量（默认 10，支�
 DEEP_THINKING_LOG_LEVEL=INFO
 ```
 
-**数据存储**: 默认存储在项目本地目录 `.deepthinking/`，包含会话数据和索引文件。详见[数据迁移指南](docs/MIGRATION.md)。
+**数据存储**: 默认存储在用户主目录 `~/.deepthinking/`，包含会话数据和索引文件。详见[数据迁移指南](docs/MIGRATION.md)。
 
 ## Claude Desktop配置
 
