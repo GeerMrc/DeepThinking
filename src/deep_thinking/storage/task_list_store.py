@@ -252,7 +252,7 @@ class TaskListStore:
         """
         获取下一个待执行任务
 
-        按优先级排序，返回第一个状态为 pending 的任务。
+        返回第一个状态为 pending 的任务。
 
         Returns:
             下一个待执行任务，如果没有则返回None

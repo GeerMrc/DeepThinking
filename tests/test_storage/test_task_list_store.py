@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from deep_thinking.models.task import TaskPriority, TaskStatus, ThinkingTask
+from deep_thinking.models.task import TaskStatus, ThinkingTask
 from deep_thinking.storage.task_list_store import TaskListStore
 
 
@@ -30,13 +30,11 @@ class TestTaskListStore:
         task = temp_task_store.create_task(
             title="Test Task",
             description="Test Description",
-            priority=TaskPriority.P1,
         )
 
         assert task.task_id.startswith("task-")
         assert task.title == "Test Task"
         assert task.description == "Test Description"
-        assert task.priority == TaskPriority.P1
         assert task.status == TaskStatus.PENDING
 
     def test_create_task_with_id(self, temp_task_store: TaskListStore):
@@ -110,17 +108,13 @@ class TestTaskListStore:
 
     def test_list_tasks(self, temp_task_store: TaskListStore):
         """测试：列出任务"""
-        temp_task_store.create_task(title="Task 1", priority=TaskPriority.P0)
-        temp_task_store.create_task(title="Task 2", priority=TaskPriority.P2)
-        temp_task_store.create_task(title="Task 3", priority=TaskPriority.P1)
+        temp_task_store.create_task(title="Task 1")
+        temp_task_store.create_task(title="Task 2")
+        temp_task_store.create_task(title="Task 3")
 
         tasks = temp_task_store.list_tasks()
 
         assert len(tasks) == 3
-        # 验证按优先级排序：P0 > P1 > P2
-        assert tasks[0].title == "Task 1"
-        assert tasks[1].title == "Task 3"
-        assert tasks[2].title == "Task 2"
 
     def test_list_tasks_with_status_filter(self, temp_task_store: TaskListStore):
         """测试：按状态过滤任务"""
@@ -138,27 +132,15 @@ class TestTaskListStore:
         assert len(pending_tasks) == 1
         assert pending_tasks[0].title == "Pending Task"
 
-    def test_list_tasks_with_priority_filter(self, temp_task_store: TaskListStore):
-        """测试：按优先级过滤任务"""
-        temp_task_store.create_task(title="P0 Task", priority=TaskPriority.P0)
-        temp_task_store.create_task(title="P1 Task", priority=TaskPriority.P1)
-
-        p0_tasks = temp_task_store.list_tasks(priority=TaskPriority.P0)
-
-        assert len(p0_tasks) == 1
-        assert p0_tasks[0].title == "P0 Task"
-
     def test_get_next_task(self, temp_task_store: TaskListStore):
         """测试：获取下一个待执行任务"""
-        temp_task_store.create_task(title="Low Priority", priority=TaskPriority.P2)
-        temp_task_store.create_task(title="High Priority", priority=TaskPriority.P0)
-        temp_task_store.create_task(title="Medium Priority", priority=TaskPriority.P1)
+        temp_task_store.create_task(title="Task 1")
+        temp_task_store.create_task(title="Task 2")
+        temp_task_store.create_task(title="Task 3")
 
         next_task = temp_task_store.get_next_task()
 
         assert next_task is not None
-        # 应该返回最高优先级的待执行任务
-        assert next_task.title == "High Priority"
 
     def test_get_next_task_no_pending(self, temp_task_store: TaskListStore):
         """测试：没有待执行任务"""
@@ -190,12 +172,11 @@ class TestTaskListStore:
 
     def test_get_stats(self, temp_task_store: TaskListStore):
         """测试：获取统计信息"""
-        temp_task_store.create_task(title="Task 1", priority=TaskPriority.P0)
-        temp_task_store.create_task(title="Task 2", priority=TaskPriority.P1)
+        temp_task_store.create_task(title="Task 1")
+        temp_task_store.create_task(title="Task 2")
 
         stats = temp_task_store.get_stats()
 
         assert stats["total_tasks"] == 2
         assert stats["status_counts"]["pending"] == 2
-        assert stats["priority_counts"]["P0"] == 1
-        assert stats["priority_counts"]["P1"] == 1
+

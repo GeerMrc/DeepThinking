@@ -133,7 +133,7 @@ def parse_args() -> argparse.Namespace:
         "--data-dir",
         type=str,
         default=os.getenv("DEEP_THINKING_DATA_DIR"),
-        help="数据存储目录路径（默认: ./.deepthinking/）",
+        help="数据存储目录路径（默认: ~/.deepthinking/）",
     )
 
     # 日志级别

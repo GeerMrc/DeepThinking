@@ -29,8 +29,8 @@ def get_default_data_dir() -> Path:
 
     优先级：
     1. 环境变量 DEEP_THINKING_DATA_DIR（支持 ~ 和 $HOME 自动扩展）
-    2. 项目本地目录 .deepthinking/
-    3. 用户主目录 .deepthinking/ (向后兼容)
+    2. 用户主目录 ~/.deepthinking/
+    3. 项目本地目录 ./.deepthinking/ (向后兼容旧版本)
 
     Returns:
         数据存储目录路径
@@ -42,17 +42,17 @@ def get_default_data_dir() -> Path:
         expanded = os.path.expandvars(custom_dir)
         return Path(expanded).expanduser()
 
-    # 2. 默认使用项目本地目录
+    # 2. 默认使用用户主目录
+    home_dir = Path.home() / ".deepthinking"
+
+    # 3. 向后兼容：如果主目录不存在但项目本地目录存在，使用项目本地目录
     local_dir = Path.cwd() / ".deepthinking"
+    if not home_dir.exists() and local_dir.exists():
+        logger.info(f"检测到旧数据目录: {local_dir}")
+        logger.info("建议迁移数据到用户主目录")
+        return local_dir
 
-    # 3. 向后兼容：如果本地目录不存在但旧目录存在，使用旧目录
-    old_dir = Path.home() / ".deepthinking"
-    if not local_dir.exists() and old_dir.exists():
-        logger.info(f"检测到旧数据目录: {old_dir}")
-        logger.info("建议迁移数据到项目本地目录")
-        return old_dir
-
-    return local_dir
+    return home_dir
 
 
 def ensure_gitignore(data_dir: Path) -> None:

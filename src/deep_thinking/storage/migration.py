@@ -1,7 +1,7 @@
 """
 数据迁移模块
 
-提供从旧存储位置（~/.deepthinking/）迁移到新位置（./.deepthinking/）的功能。
+提供从旧存储位置（./.deepthinking/）迁移到新位置（~/.deepthinking/）的功能。
 """
 
 import logging
@@ -12,8 +12,18 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 
+def get_old_data_dir() -> Path:
+    """
+    获取旧数据目录位置（项目本地目录）
+
+    Returns:
+        旧数据目录路径
+    """
+    return Path.cwd() / ".deepthinking"
+
+
 # 旧数据目录位置
-OLD_DATA_DIR = Path.home() / ".deepthinking"
+OLD_DATA_DIR = get_old_data_dir()
 
 # 迁移状态文件
 MIGRATION_MARKER = ".migration_completed"
