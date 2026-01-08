@@ -8,6 +8,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+## [0.2.3] - 2026-01-08
+
+### Added
+- 项目质量审核和文档优化
+- 版本号统一管理
+
+### Changed
+- 更新所有文档版本号至 0.2.3
+- 更新 README.md 中的 wheel 安装示例版本号
+
+### Fixed
+- 修复 src/deep_thinking/__init__.py 版本号不一致问题（从 0.2.0 更新为 0.2.3）
+- 修复 docs/user_guide.md 版本号过时问题（从 0.1.0 更新为 0.2.3）
+- 修复 docs/sse-guide.md 版本号过时问题（从 0.1.0 更新为 0.2.3）
+- 修复 docs/ide-config.md 版本号不一致问题（从 1.0.0 更新为 0.2.3）
+
+### Documentation
+- 更新用户指南版本号（0.1.0 → 0.2.3）
+- 更新SSE配置指南版本号（0.1.0 → 0.2.3）
+- 更新所有文档版本信息至 0.2.3
+
+---
+
+## [Unreleased]
+
+### Added
 - **docs**: 新增文档索引 (docs/README.md) - 完整的文档导航和快速开始指南
 - **docs**: 新增统一配置指南 (docs/configuration.md) - 所有环境变量的完整参考
 - **scripts**: 新增配置参数文档生成脚本 (scripts/generate_config_docs.py) - 从代码自动生成配置文档

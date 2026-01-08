@@ -1,7 +1,7 @@
 # DeepThinking MCP CLI对话测试指南
 
-> 版本: v0.2.2
-> 更新时间: 2026-01-03
+> 版本: v0.2.3
+> 更新时间: 2026-01-08
 > 测试环境: Claude Code CLI
 
 本文档提供在Claude Code CLI环境中，通过对话交互测试DeepThinking MCP所有功能的完整指南。

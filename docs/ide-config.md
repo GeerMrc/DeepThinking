@@ -1,6 +1,6 @@
 # DeepThinking MCP IDE 配置指南
 
-> 版本: 1.0.0
+> 版本: 0.2.3
 > 更新日期: 2026-01-08
 > 适用对象: Claude Desktop、Cursor、Continue.dev 等 MCP 客户端用户
 
