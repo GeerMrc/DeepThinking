@@ -48,6 +48,7 @@ claude mcp add --transport stdio deep-thinking -- python -m deep_thinking
 **带环境变量的配置**：
 ```bash
 claude mcp add --transport stdio deep-thinking \
+  --env DEEP_THINKING_DESCRIPTION="我的AI助手服务器" \
   --env DEEP_THINKING_MAX_THOUGHTS=50 \
   --env DEEP_THINKING_MIN_THOUGHTS=3 \
   --env DEEP_THINKING_LOG_LEVEL=INFO \
@@ -132,6 +133,7 @@ claude mcp add --transport stdio deep-thinking-local --scope local -- python -m 
 # 适用场景：团队共享、项目特定工具
 claude mcp add --transport stdio deep-thinking \
   --scope project \
+  --env DEEP_THINKING_DESCRIPTION="项目AI助手 - 专用工具" \
   --env DEEP_THINKING_MAX_THOUGHTS=50 \
   -- python -m deep_thinking
 ```
@@ -216,6 +218,7 @@ claude mcp add --transport stdio deep-thinking -- python -m deep_thinking
 ```bash
 # 推荐：使用 claude mcp add 命令
 claude mcp add --transport stdio deep-thinking \
+  --env DEEP_THINKING_DESCRIPTION="我的AI助手" \
   --env DEEP_THINKING_MAX_THOUGHTS=50 \
   --env DEEP_THINKING_MIN_THOUGHTS=3 \
   -- python -m deep_thinking

@@ -623,6 +623,8 @@ python -m deep_thinking --mode sse --host 127.0.0.1 --port 8088
 
 | 环境变量 | 描述 | 默认值 |
 |---------|------|-------|
+| **服务器配置** | | |
+| `DEEP_THINKING_DESCRIPTION` | 自定义服务器描述（在MCP工具列表中显示） | 深度思考MCP服务器 - 提供顺序思考、会话管理和状态持久化功能 |
 | **传输配置** | | |
 | `DEEP_THINKING_TRANSPORT` | 传输模式 (stdio/sse) | stdio |
 | `DEEP_THINKING_HOST` | SSE 监听地址 | 127.0.0.1 |
