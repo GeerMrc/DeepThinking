@@ -8,13 +8,27 @@
 
 ## 📖 文档
 
-- **[API 文档](docs/api.md)** - 完整的MCP工具API参考
-- **[用户指南](docs/user_guide.md)** - 详细的使用说明和示例
-- **[安装与配置](docs/installation.md)** - 安装步骤和配置指南
-- **[Claude Code 配置指南](docs/claude-code-config.md)** - Claude Code CLI 完整配置（CLI 命令 + 配置文件）
+### 快速导航
+
+- **[文档索引](docs/README.md)** - 📚 完整的文档导航和快速开始指南
+- **[配置参数参考](docs/configuration.md)** - ⚙️ 所有环境变量的完整参考
+
+### 安装与配置
+
+- **[安装指南](docs/installation.md)** - 安装步骤和配置指南
 - **[IDE 配置示例](docs/ide-config.md)** - Claude Desktop/Cursor/Continue.dev 等配置
+- **[Claude Code 配置指南](docs/claude-code-config.md)** - Claude Code CLI 完整配置
 - **[SSE 配置指南](docs/sse-guide.md)** - SSE远程模式详细配置
+
+### 使用指南
+
+- **[用户指南](docs/user_guide.md)** - 详细的使用说明和示例
+- **[API 文档](docs/api.md)** - 完整的MCP工具API参考
+
+### 技术文档
+
 - **[架构设计](ARCHITECTURE.md)** - 系统架构和技术设计
+- **[数据迁移指南](docs/MIGRATION.md)** - 数据迁移和备份说明
 
 ## 项目概述
 
