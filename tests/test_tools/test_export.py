@@ -323,7 +323,7 @@ class TestExportSessionToFile:
 # =============================================================================
 
 
-@pytest.mark.asyncio(loop_scope="class")
+@pytest.mark.asyncio
 class TestExportSessionTool:
     """测试 export_session MCP 工具"""
 

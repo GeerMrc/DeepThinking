@@ -303,7 +303,7 @@ class TestVisualizerToTree:
 # =============================================================================
 
 
-@pytest.mark.asyncio(loop_scope="class")
+@pytest.mark.asyncio
 class TestVisualizeSessionTool:
     """测试 visualize_session MCP 工具"""
 
@@ -397,7 +397,7 @@ class TestVisualizeSessionTool:
 # =============================================================================
 
 
-@pytest.mark.asyncio(loop_scope="class")
+@pytest.mark.asyncio
 class TestVisualizeSessionSimpleTool:
     """测试 visualize_session_simple MCP 工具"""
 

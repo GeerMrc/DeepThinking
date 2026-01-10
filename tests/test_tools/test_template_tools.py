@@ -340,7 +340,7 @@ class TestTemplateLoader:
 # =============================================================================
 
 
-@pytest.mark.asyncio(loop_scope="class")
+@pytest.mark.asyncio
 class TestApplyTemplateTool:
     """测试 apply_template MCP 工具"""
 

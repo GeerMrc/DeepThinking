@@ -109,3 +109,6 @@ Plan-*.md
 prompt*.md
 *开发计划.md
 *深度分析.md
+.release_notes.md
+STAGE*_QUALITY_REPORT.md
+双Agent迭代开发深度分析.md

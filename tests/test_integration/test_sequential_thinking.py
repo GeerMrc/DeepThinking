@@ -9,7 +9,7 @@ from deep_thinking.storage.storage_manager import StorageManager
 from deep_thinking.tools import sequential_thinking
 
 
-@pytest.mark.asyncio(loop_scope="class")
+@pytest.mark.asyncio
 class TestSequentialThinkingIntegration:
     """顺序思考工具集成测试"""
 
@@ -284,7 +284,7 @@ class TestSequentialThinkingIntegration:
         assert session.thoughts[0].hypothetical_probability == "可能性：高"
 
 
-@pytest.mark.asyncio(loop_scope="class")
+@pytest.mark.asyncio
 class TestSequentialThinkingBoundary:
     """顺序思考工具边界测试"""
 
