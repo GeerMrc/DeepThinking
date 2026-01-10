@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-## [0.2.3] - 2026-01-08
+## [0.2.3] - 2026-01-10
 
 ### Added
 - 项目质量审核和文档优化
@@ -24,6 +24,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 docs/user_guide.md 版本号过时问题（从 0.1.0 更新为 0.2.3）
 - 修复 docs/sse-guide.md 版本号过时问题（从 0.1.0 更新为 0.2.3）
 - 修复 docs/ide-config.md 版本号不一致问题（从 1.0.0 更新为 0.2.3）
+- 修复 pytest-asyncio 事件循环冲突（MultipleEventLoopsRequestedError）
+  - 移除8个测试类的 `loop_scope="class"` 装饰器参数
+  - 使用默认函数作用域事件循环
+  - 452个测试全部通过
+
+### Changed
+- 清理项目临时文件和目录（约193MB）
+  - 删除 Python 字节码缓存（__pycache__、*.pyc）
+  - 删除测试缓存（.pytest_cache、.mypy_cache）
+  - 删除测试虚拟环境（test_install_venv、test_env）
+  - 删除非核心目录（autonomous-coding、claude-code-docs）
+  - 删除临时文档文件
+- 更新 .gitignore 文件，添加临时文件过滤规则
 
 ### Documentation
 - 更新用户指南版本号（0.1.0 → 0.2.3）
