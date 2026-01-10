@@ -84,9 +84,7 @@ def sequential_thinking(
     # ===== 输入参数边界验证 =====
     # 验证 thoughtNumber 范围（必须 >= 1）
     if thoughtNumber < 1:
-        raise ValueError(
-            f"thoughtNumber 必须大于等于 1，当前值: {thoughtNumber}"
-        )
+        raise ValueError(f"thoughtNumber 必须大于等于 1，当前值: {thoughtNumber}")
 
     # 验证 totalThoughts 范围（必须 >= thoughtNumber）
     if totalThoughts < thoughtNumber:
@@ -122,9 +120,7 @@ def sequential_thinking(
     # ===== 配置限制验证 =====
     # 无论 needsMoreThoughts 是否为 True，都验证 totalThoughts 不超过配置限制
     if totalThoughts > max_thoughts_limit:
-        raise ValueError(
-            f"totalThoughts ({totalThoughts}) 超过最大限制 ({max_thoughts_limit})"
-        )
+        raise ValueError(f"totalThoughts ({totalThoughts}) 超过最大限制 ({max_thoughts_limit})")
 
     if needsMoreThoughts:
         # 检查是否超过最大限制
@@ -170,7 +166,9 @@ def sequential_thinking(
 
     # 确定思考类型
     # 优先级: Revision > Branch > Comparison > Reverse > Hypothetical > Regular
-    thought_type: Literal["regular", "revision", "branch", "comparison", "reverse", "hypothetical"] = "regular"
+    thought_type: Literal[
+        "regular", "revision", "branch", "comparison", "reverse", "hypothetical"
+    ] = "regular"
 
     if isRevision:
         thought_type = "revision"

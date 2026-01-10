@@ -1,0 +1,75 @@
+# PyPI 自动发布工作流
+# 当创建以 'v' 开头的 tag 时自动触发（如 v1.0.0）
+
+name: Publish to PyPI
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+  # 允许手动触发
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: 构建并发布到 PyPI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 安装 uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: 安装依赖
+        run: |
+          uv pip install --system build twine
+
+      - name: 运行测试
+        run: |
+          uv pip install --system ".[dev]"
+          pytest --cov=deep_thinking --cov-report=xml --cov-report=term
+
+      - name: 代码质量检查
+        run: |
+          uv pip install --system ruff mypy
+          ruff check src/ tests/
+          ruff format --check src/ tests/
+          mypy src/deep_thinking/
+
+      - name: 构建分发包
+        run: |
+          python -m build
+
+      - name: 检查分发包
+        run: |
+          twine check dist/*
+
+      - name: 发布到 PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          twine upload dist/*
+
+      - name: 创建 GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

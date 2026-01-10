@@ -28,13 +28,32 @@
 
 ## 安装方法
 
-> ⚠️ **重要提示**: Deep-Thinking-MCP 目前**未发布到 PyPI**。
->
-> **可用安装方式**：
-> - **开发模式**：从源码以可编辑模式安装（推荐用于开发测试）
-> - **Wheel 文件**：从源码构建后安装（推荐用于生产环境）
+### 从 PyPI 安装 ⭐ （推荐）
 
-### 开发模式安装 ⭐ （开发环境推荐）
+使用 PyPI 安装最新稳定版本。
+
+**使用 pip 安装**：
+```bash
+pip install DeepThinking
+```
+
+**使用 uv 安装**（更快）：
+```bash
+uv pip install DeepThinking
+```
+
+**验证安装**：
+```bash
+# 查看版本号
+python -c "import deep_thinking; print(deep_thinking.__version__)"
+
+# 查看帮助信息
+python -m deep_thinking --help
+```
+
+---
+
+### 开发模式安装 （开发环境推荐）
 
 直接从源代码以可编辑模式安装。
 

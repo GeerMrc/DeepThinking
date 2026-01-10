@@ -64,12 +64,18 @@ class TestParseArgs:
 
     def test_parse_args_invalid_transport(self):
         """测试无效的传输模式"""
-        with patch("sys.argv", ["deep-thinking", "--transport", "invalid"]), pytest.raises(SystemExit):
+        with (
+            patch("sys.argv", ["deep-thinking", "--transport", "invalid"]),
+            pytest.raises(SystemExit),
+        ):
             parse_args()
 
     def test_parse_args_invalid_log_level(self):
         """测试无效的日志级别"""
-        with patch("sys.argv", ["deep-thinking", "--log-level", "INVALID"]), pytest.raises(SystemExit):
+        with (
+            patch("sys.argv", ["deep-thinking", "--log-level", "INVALID"]),
+            pytest.raises(SystemExit),
+        ):
             parse_args()
 
 
@@ -104,8 +110,10 @@ class TestMainAsync:
     @pytest.mark.asyncio
     async def test_main_async_stdio_transport(self):
         """测试STDIO传输模式"""
-        with patch("deep_thinking.__main__.run_stdio", new_callable=AsyncMock) as mock_run_stdio, \
-             patch("sys.argv", ["deep-thinking", "--transport", "stdio"]):
+        with (
+            patch("deep_thinking.__main__.run_stdio", new_callable=AsyncMock) as mock_run_stdio,
+            patch("sys.argv", ["deep-thinking", "--transport", "stdio"]),
+        ):
             return_code = await main_async()
 
             # 验证返回成功
@@ -116,8 +124,10 @@ class TestMainAsync:
     @pytest.mark.asyncio
     async def test_main_async_sse_transport(self):
         """测试SSE传输模式"""
-        with patch("deep_thinking.__main__.run_sse", new_callable=AsyncMock) as mock_run_sse, \
-             patch("sys.argv", ["deep-thinking", "--transport", "sse"]):
+        with (
+            patch("deep_thinking.__main__.run_sse", new_callable=AsyncMock) as mock_run_sse,
+            patch("sys.argv", ["deep-thinking", "--transport", "sse"]),
+        ):
             return_code = await main_async()
 
             # 验证返回成功
@@ -154,8 +164,10 @@ class TestMainAsync:
     @pytest.mark.asyncio
     async def test_main_async_sse_with_auth(self):
         """测试SSE模式带认证"""
-        with patch("deep_thinking.__main__.run_sse", new_callable=AsyncMock) as mock_run_sse, \
-             patch("sys.argv", ["deep-thinking", "--transport", "sse", "--auth-token", "token"]):
+        with (
+            patch("deep_thinking.__main__.run_sse", new_callable=AsyncMock) as mock_run_sse,
+            patch("sys.argv", ["deep-thinking", "--transport", "sse", "--auth-token", "token"]),
+        ):
             return_code = await main_async()
 
             # 验证返回成功
@@ -170,8 +182,13 @@ class TestMainAsync:
     @pytest.mark.asyncio
     async def test_main_async_sse_with_host_port(self):
         """测试SSE模式带主机端口"""
-        with patch("deep_thinking.__main__.run_sse", new_callable=AsyncMock) as mock_run_sse, \
-             patch("sys.argv", ["deep-thinking", "--transport", "sse", "--host", "0.0.0.0", "--port", "9000"]):
+        with (
+            patch("deep_thinking.__main__.run_sse", new_callable=AsyncMock) as mock_run_sse,
+            patch(
+                "sys.argv",
+                ["deep-thinking", "--transport", "sse", "--host", "0.0.0.0", "--port", "9000"],
+            ),
+        ):
             return_code = await main_async()
 
             # 验证返回成功
@@ -206,51 +223,66 @@ class TestEnvironmentVariables:
 
     def test_transport_from_env(self):
         """测试从环境变量读取传输模式"""
-        with patch.dict("os.environ", {"DEEP_THINKING_TRANSPORT": "sse"}), \
-             patch("sys.argv", ["deep-thinking"]):
+        with (
+            patch.dict("os.environ", {"DEEP_THINKING_TRANSPORT": "sse"}),
+            patch("sys.argv", ["deep-thinking"]),
+        ):
             args = parse_args()
             assert args.transport == "sse"
 
     def test_host_from_env(self):
         """测试从环境变量读取主机"""
-        with patch.dict("os.environ", {"DEEP_THINKING_HOST": "0.0.0.0"}), \
-             patch("sys.argv", ["deep-thinking"]):
+        with (
+            patch.dict("os.environ", {"DEEP_THINKING_HOST": "0.0.0.0"}),
+            patch("sys.argv", ["deep-thinking"]),
+        ):
             args = parse_args()
             assert args.host == "0.0.0.0"
 
     def test_port_from_env(self):
         """测试从环境变量读取端口"""
-        with patch.dict("os.environ", {"DEEP_THINKING_PORT": "9000"}), \
-             patch("sys.argv", ["deep-thinking"]):
+        with (
+            patch.dict("os.environ", {"DEEP_THINKING_PORT": "9000"}),
+            patch("sys.argv", ["deep-thinking"]),
+        ):
             args = parse_args()
             assert args.port == 9000
 
     def test_auth_token_from_env(self):
         """测试从环境变量读取认证token"""
-        with patch.dict("os.environ", {"DEEP_THINKING_AUTH_TOKEN": "env-token"}), \
-             patch("sys.argv", ["deep-thinking"]):
+        with (
+            patch.dict("os.environ", {"DEEP_THINKING_AUTH_TOKEN": "env-token"}),
+            patch("sys.argv", ["deep-thinking"]),
+        ):
             args = parse_args()
             assert args.auth_token == "env-token"
 
     def test_api_key_from_env(self):
         """测试从环境变量读取API key"""
-        with patch.dict("os.environ", {"DEEP_THINKING_API_KEY": "env-key"}), \
-             patch("sys.argv", ["deep-thinking"]):
+        with (
+            patch.dict("os.environ", {"DEEP_THINKING_API_KEY": "env-key"}),
+            patch("sys.argv", ["deep-thinking"]),
+        ):
             args = parse_args()
             assert args.api_key == "env-key"
 
     def test_log_level_from_env(self):
         """测试从环境变量读取日志级别"""
-        with patch.dict("os.environ", {"DEEP_THINKING_LOG_LEVEL": "DEBUG"}), \
-             patch("sys.argv", ["deep-thinking"]):
+        with (
+            patch.dict("os.environ", {"DEEP_THINKING_LOG_LEVEL": "DEBUG"}),
+            patch("sys.argv", ["deep-thinking"]),
+        ):
             args = parse_args()
             assert args.log_level == "DEBUG"
 
     def test_cli_args_override_env(self):
         """测试CLI参数覆盖环境变量"""
-        with patch.dict(
-            "os.environ", {"DEEP_THINKING_TRANSPORT": "sse", "DEEP_THINKING_PORT": "9000"}
-        ), patch("sys.argv", ["deep-thinking", "--port", "8080"]):
+        with (
+            patch.dict(
+                "os.environ", {"DEEP_THINKING_TRANSPORT": "sse", "DEEP_THINKING_PORT": "9000"}
+            ),
+            patch("sys.argv", ["deep-thinking", "--port", "8080"]),
+        ):
             args = parse_args()
             # 环境变量设置传输模式
             assert args.transport == "sse"

@@ -179,4 +179,3 @@ class TestTaskListStore:
 
         assert stats["total_tasks"] == 2
         assert stats["status_counts"]["pending"] == 2
-

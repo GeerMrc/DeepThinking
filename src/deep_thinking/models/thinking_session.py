@@ -42,9 +42,13 @@ class ThinkingSession(BaseModel):
 
     description: str = Field(default="", max_length=2000, description="会话描述")
 
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), description="会话创建时间")
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc), description="会话创建时间"
+    )
 
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), description="会话最后更新时间")
+    updated_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc), description="会话最后更新时间"
+    )
 
     status: str = Field(
         default="active",

@@ -13,20 +13,20 @@
 **方式1：使用 pip 安装**（推荐）
 
 ```bash
-pip install deep-thinking-mcp
+pip install DeepThinking
 ```
 
 **方式2：使用 uv 安装**
 
 ```bash
-uv pip install deep-thinking-mcp
+uv pip install DeepThinking
 ```
 
 **方式3：开发模式安装**
 
 ```bash
-git clone https://github.com/your-repo/Deep-Thinking-MCP.git
-cd Deep-Thinking-MCP
+git clone https://github.com/GeerMrc/DeepThinking.git
+cd DeepThinking
 pip install -e .
 ```
 

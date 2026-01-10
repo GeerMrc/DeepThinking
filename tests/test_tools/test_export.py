@@ -346,7 +346,6 @@ class TestExportSessionTool:
         assert "测试会话" in result
         assert "markdown" in result
 
-
     async def test_export_session_json_format(self, sample_session_data, temp_dir, clean_env):
         """测试 JSON 格式导出"""
         session = ThinkingSession(**sample_session_data)
@@ -363,7 +362,6 @@ class TestExportSessionTool:
         assert "会话已导出" in result
         assert "json" in result
 
-
     async def test_export_session_custom_path(self, sample_session_data, temp_dir, clean_env):
         """测试自定义输出路径"""
         session = ThinkingSession(**sample_session_data)
@@ -379,7 +377,6 @@ class TestExportSessionTool:
         assert str(output_path) in result
         assert output_path.exists()
 
-
     async def test_export_session_not_found(self, clean_env):
         """测试会话不存在时的错误处理"""
         mock_manager = MagicMock()
@@ -390,7 +387,6 @@ class TestExportSessionTool:
             pytest.raises(ValueError, match="会话不存在"),
         ):
             await export.export_session("nonexistent-session")
-
 
     async def test_export_session_invalid_format(self, sample_session_data, temp_dir, clean_env):
         """测试无效格式时的错误处理"""

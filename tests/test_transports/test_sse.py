@@ -54,9 +54,11 @@ class TestSSETransport:
         transport = SSETransport(app)
 
         # Mock aiohttp组件
-        with patch("deep_thinking.transports.sse.web.Application") as mock_app_class, \
-             patch("deep_thinking.transports.sse.web.AppRunner") as mock_runner_class, \
-             patch("deep_thinking.transports.sse.web.TCPSite") as mock_site_class:
+        with (
+            patch("deep_thinking.transports.sse.web.Application") as mock_app_class,
+            patch("deep_thinking.transports.sse.web.AppRunner") as mock_runner_class,
+            patch("deep_thinking.transports.sse.web.TCPSite") as mock_site_class,
+        ):
             mock_app = MagicMock()
             mock_app_class.return_value = mock_app
 
@@ -619,9 +621,11 @@ class TestSSEHandlerErrorPaths:
         request = make_mocked_request("POST", "/sse")
 
         # Mock request.json()抛出通用异常
-        with patch.object(request, "json", side_effect=RuntimeError("JSON parse error")), \
-             patch("deep_thinking.transports.sse.web.StreamResponse") as mock_response_class, \
-             pytest.raises((NotImplementedError, Exception)):
+        with (
+            patch.object(request, "json", side_effect=RuntimeError("JSON parse error")),
+            patch("deep_thinking.transports.sse.web.StreamResponse") as mock_response_class,
+            pytest.raises((NotImplementedError, Exception)),
+        ):
             mock_response = MagicMock()
             mock_response.prepare = AsyncMock()
             mock_response.write = AsyncMock()
@@ -644,10 +648,14 @@ class TestSSEHandlerErrorPaths:
         request = make_mocked_request("POST", "/sse")
 
         # Mock request.json()返回无效数据导致dumps失败
-        with patch.object(request, "json", return_value={"method": "test"}), \
-             patch("deep_thinking.transports.sse.json.dumps", side_effect=TypeError("Not serializable")), \
-             patch("deep_thinking.transports.sse.web.StreamResponse") as mock_response_class, \
-             pytest.raises((NotImplementedError, TypeError)):
+        with (
+            patch.object(request, "json", return_value={"method": "test"}),
+            patch(
+                "deep_thinking.transports.sse.json.dumps", side_effect=TypeError("Not serializable")
+            ),
+            patch("deep_thinking.transports.sse.web.StreamResponse") as mock_response_class,
+            pytest.raises((NotImplementedError, TypeError)),
+        ):
             mock_response = MagicMock()
             mock_response.prepare = AsyncMock()
             mock_response.write = AsyncMock()
@@ -662,10 +670,11 @@ class TestSSEHandlerErrorPaths:
         transport = SSETransport(app, auth_token="test-token")
 
         # Mock aiohttp组件
-        with patch("deep_thinking.transports.sse.web.Application") as mock_app_class, \
-             patch("deep_thinking.transports.sse.web.AppRunner") as mock_runner_class, \
-             patch("deep_thinking.transports.sse.web.TCPSite") as mock_site_class:
-
+        with (
+            patch("deep_thinking.transports.sse.web.Application") as mock_app_class,
+            patch("deep_thinking.transports.sse.web.AppRunner") as mock_runner_class,
+            patch("deep_thinking.transports.sse.web.TCPSite") as mock_site_class,
+        ):
             mock_app = MagicMock()
             mock_app_class.return_value = mock_app
 
@@ -691,10 +700,11 @@ class TestSSEHandlerErrorPaths:
         transport = SSETransport(app)
 
         # Mock aiohttp组件
-        with patch("deep_thinking.transports.sse.web.Application") as mock_app_class, \
-             patch("deep_thinking.transports.sse.web.AppRunner") as mock_runner_class, \
-             patch("deep_thinking.transports.sse.web.TCPSite") as mock_site_class:
-
+        with (
+            patch("deep_thinking.transports.sse.web.Application") as mock_app_class,
+            patch("deep_thinking.transports.sse.web.AppRunner") as mock_runner_class,
+            patch("deep_thinking.transports.sse.web.TCPSite") as mock_site_class,
+        ):
             mock_app = MagicMock()
             mock_app_class.return_value = mock_app
 
@@ -731,9 +741,11 @@ class TestSSEHandlerErrorPaths:
                 raise asyncio.CancelledError()
             # 前几次调用成功
 
-        with patch("deep_thinking.transports.sse.web.StreamResponse") as mock_response_class, \
-             patch("deep_thinking.transports.sse.asyncio.sleep", new=AsyncMock()), \
-             pytest.raises((asyncio.CancelledError, NotImplementedError)):
+        with (
+            patch("deep_thinking.transports.sse.web.StreamResponse") as mock_response_class,
+            patch("deep_thinking.transports.sse.asyncio.sleep", new=AsyncMock()),
+            pytest.raises((asyncio.CancelledError, NotImplementedError)),
+        ):
             mock_response = MagicMock()
             mock_response.prepare = AsyncMock()
             mock_response.write = mock_write_with_cancel

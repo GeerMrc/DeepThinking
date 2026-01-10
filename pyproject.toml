@@ -11,10 +11,10 @@ readme-content-type = "text/markdown"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [
-    { name = "Maric", email = "maric@example.com" }
+    { name = "Maric", email = "maricgeer@gmail.com" }
 ]
 maintainers = [
-    { name = "Maric", email = "maric@example.com" }
+    { name = "Maric", email = "maricgeer@gmail.com" }
 ]
 keywords = [
     "mcp",

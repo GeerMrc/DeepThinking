@@ -133,9 +133,7 @@ def get_server_instructions() -> str:
         return custom_description
 
     # 使用默认值
-    default_instructions = (
-        "深度思考MCP服务器 - 高级思维编排引擎，提供顺序思考,适合处理多步骤、跨工具的复杂任务,会话管理和状态持久化功能"
-    )
+    default_instructions = "深度思考MCP服务器 - 高级思维编排引擎，提供顺序思考,适合处理多步骤、跨工具的复杂任务,会话管理和状态持久化功能"
     logger.debug("使用默认instructions")
     return default_instructions
 

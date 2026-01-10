@@ -40,6 +40,12 @@ env/
 .env
 .env.local
 
+# PyPI 配置和 Token（安全敏感）
+.pypirc
+*.token
+*.pypi
+PYPI_TOKEN*
+
 # 测试和覆盖率
 .pytest_cache/
 .coverage

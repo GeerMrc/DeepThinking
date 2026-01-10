@@ -368,8 +368,10 @@ class TestJsonFileStoreBoundary:
         file_path.write_text('{"data": "value"}', encoding="utf-8")
 
         # Mock open在读取时抛出OSError
-        with patch("builtins.open", side_effect=OSError("Read failed")), \
-             pytest.raises(OSError, match="读取文件失败|Read failed"):
+        with (
+            patch("builtins.open", side_effect=OSError("Read failed")),
+            pytest.raises(OSError, match="读取文件失败|Read failed"),
+        ):
             store.read("test")
 
     def test_write_oserror_propagation(self, store, caplog):
@@ -422,7 +424,7 @@ class TestJsonFileStoreBoundary:
         backup_paths = []
         for i in range(3):
             backup_path = store._get_backup_path(f"backup{i}")
-            backup_path.write_text('{}', encoding="utf-8")
+            backup_path.write_text("{}", encoding="utf-8")
             old_time = time.time() - (40 * 86400)
             os.utime(backup_path, (old_time, old_time))
             backup_paths.append(backup_path)
@@ -449,7 +451,7 @@ class TestJsonFileStoreBoundary:
         """测试清理备份后的日志记录"""
         # 创建旧备份文件
         backup_path = store._get_backup_path("old")
-        backup_path.write_text('{}', encoding="utf-8")
+        backup_path.write_text("{}", encoding="utf-8")
         old_time = time.time() - (40 * 86400)
         os.utime(backup_path, (old_time, old_time))
 
@@ -473,7 +475,7 @@ class TestJsonFileStoreBoundary:
 
         # 手动在备份目录创建文件
         backup_file = store.backup_dir / "backup.json"
-        backup_file.write_text('{}', encoding="utf-8")
+        backup_file.write_text("{}", encoding="utf-8")
 
         # 列出键名
         keys = store.list_keys()

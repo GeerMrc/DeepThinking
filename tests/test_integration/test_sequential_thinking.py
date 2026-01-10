@@ -195,7 +195,7 @@ class TestSequentialThinkingIntegration:
             comparisonItems=[
                 "MySQL: 成熟稳定，社区活跃",
                 "PostgreSQL: 功能丰富，扩展性强",
-                "MongoDB: 灵活文档存储"
+                "MongoDB: 灵活文档存储",
             ],
             comparisonDimensions=["性能", "可靠性", "成本"],
             comparisonResult="PostgreSQL在功能和扩展性上最优",
@@ -230,7 +230,7 @@ class TestSequentialThinkingIntegration:
             reverseSteps=[
                 "前提1: 团队规模超过20人",
                 "前提2: 业务模块边界清晰",
-                "验证结果: 前提3不成立"
+                "验证结果: 前提3不成立",
             ],
         )
 
@@ -280,7 +280,10 @@ class TestSequentialThinkingIntegration:
         assert session.thought_count() == 1
         assert session.thoughts[0].type == "hypothetical"
         assert session.thoughts[0].hypothetical_condition == "如果用户数量从10万增长到100万"
-        assert session.thoughts[0].hypothetical_impact == "服务器负载增加10倍，需要：1.数据库分库分表 2.引入缓存层"
+        assert (
+            session.thoughts[0].hypothetical_impact
+            == "服务器负载增加10倍，需要：1.数据库分库分表 2.引入缓存层"
+        )
         assert session.thoughts[0].hypothetical_probability == "可能性：高"
 
 

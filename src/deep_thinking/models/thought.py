@@ -35,9 +35,7 @@ class Thought(BaseModel):
 
     content: str = Field(..., min_length=1, max_length=10000, description="思考内容，1-10000个字符")
 
-    type: ThoughtType = Field(
-        default="regular", description="思考类型"
-    )
+    type: ThoughtType = Field(default="regular", description="思考类型")
 
     is_revision: bool = Field(default=False, description="是否为修订思考")
 
@@ -111,7 +109,9 @@ class Thought(BaseModel):
         description="假设思考的可能性评估",
     )
 
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), description="思考时间戳")
+    timestamp: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc), description="思考时间戳"
+    )
 
     @model_validator(mode="after")
     def validate_type_consistency(self) -> "Thought":
@@ -190,13 +190,22 @@ class Thought(BaseModel):
 
         elif self.type == "hypothetical":
             # 假设思考必须指定hypothetical_condition
-            if self.hypothetical_condition is None or not 1 <= len(self.hypothetical_condition) <= 2000:
+            if (
+                self.hypothetical_condition is None
+                or not 1 <= len(self.hypothetical_condition) <= 2000
+            ):
                 raise ValueError("hypothetical类型必须指定hypothetical_condition(1-2000字符)")
             # hypothetical_impact长度1-10000字符
-            if self.hypothetical_impact is not None and not 1 <= len(self.hypothetical_impact) <= 10000:
+            if (
+                self.hypothetical_impact is not None
+                and not 1 <= len(self.hypothetical_impact) <= 10000
+            ):
                 raise ValueError("hypothetical_impact必须在1-10000字符之间")
             # hypothetical_probability长度1-50字符
-            if self.hypothetical_probability is not None and not 1 <= len(self.hypothetical_probability) <= 50:
+            if (
+                self.hypothetical_probability is not None
+                and not 1 <= len(self.hypothetical_probability) <= 50
+            ):
                 raise ValueError("hypothetical_probability必须在1-50字符之间")
 
         return self
@@ -266,9 +275,7 @@ class ThoughtCreate(BaseModel):
 
     content: str = Field(..., min_length=1, max_length=10000, description="思考内容")
 
-    type: ThoughtType = Field(
-        default="regular", description="思考类型"
-    )
+    type: ThoughtType = Field(default="regular", description="思考类型")
 
     is_revision: bool = Field(default=False, description="是否为修订思考")
 
@@ -390,22 +397,38 @@ class ThoughtUpdate(BaseModel):
     branch_id: str | None = Field(None, min_length=1, max_length=50, description="分支标识符")
 
     # Comparison类型字段
-    comparison_items: list[str] | None = Field(None, min_length=2, description="对比思考的比较项列表")
+    comparison_items: list[str] | None = Field(
+        None, min_length=2, description="对比思考的比较项列表"
+    )
 
-    comparison_dimensions: list[str] | None = Field(None, max_length=10, description="对比思考的比较维度列表")
+    comparison_dimensions: list[str] | None = Field(
+        None, max_length=10, description="对比思考的比较维度列表"
+    )
 
-    comparison_result: str | None = Field(None, min_length=1, max_length=10000, description="对比思考的比较结论")
+    comparison_result: str | None = Field(
+        None, min_length=1, max_length=10000, description="对比思考的比较结论"
+    )
 
     # Reverse类型字段
     reverse_from: int | None = Field(None, ge=1, description="逆向思考的反推起点思考编号")
 
-    reverse_target: str | None = Field(None, min_length=1, max_length=2000, description="逆向思考的反推目标描述")
+    reverse_target: str | None = Field(
+        None, min_length=1, max_length=2000, description="逆向思考的反推目标描述"
+    )
 
-    reverse_steps: list[str] | None = Field(None, max_length=20, description="逆向思考的反推步骤列表")
+    reverse_steps: list[str] | None = Field(
+        None, max_length=20, description="逆向思考的反推步骤列表"
+    )
 
     # Hypothetical类型字段
-    hypothetical_condition: str | None = Field(None, min_length=1, max_length=2000, description="假设思考的假设条件描述")
+    hypothetical_condition: str | None = Field(
+        None, min_length=1, max_length=2000, description="假设思考的假设条件描述"
+    )
 
-    hypothetical_impact: str | None = Field(None, min_length=1, max_length=10000, description="假设思考的影响分析")
+    hypothetical_impact: str | None = Field(
+        None, min_length=1, max_length=10000, description="假设思考的影响分析"
+    )
 
-    hypothetical_probability: str | None = Field(None, min_length=1, max_length=50, description="假设思考的可能性评估")
+    hypothetical_probability: str | None = Field(
+        None, min_length=1, max_length=50, description="假设思考的可能性评估"
+    )

@@ -59,9 +59,7 @@ class ThinkingConfig(BaseModel):
         """
         max_thoughts = info.data.get("max_thoughts")
         if max_thoughts is not None and v > max_thoughts:
-            raise ValueError(
-                f"min_thoughts ({v}) 不能大于 max_thoughts ({max_thoughts})"
-            )
+            raise ValueError(f"min_thoughts ({v}) 不能大于 max_thoughts ({max_thoughts})")
         return v
 
     @field_validator("thoughts_increment")

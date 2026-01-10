@@ -161,7 +161,9 @@ class TestGetDefaultDataDir:
 
         # 设置一个临时的 HOME 环境变量用于测试
         test_home = "/tmp/test_home"
-        with patch.dict(os.environ, {"HOME": test_home, "DEEP_THINKING_DATA_DIR": "$HOME/.deep-thinking-data"}):
+        with patch.dict(
+            os.environ, {"HOME": test_home, "DEEP_THINKING_DATA_DIR": "$HOME/.deep-thinking-data"}
+        ):
             result = get_default_data_dir()
             # 应该扩展 $HOME
             assert str(result) == "/tmp/test_home/.deep-thinking-data"
@@ -206,8 +208,7 @@ class TestGetDefaultDataDir:
 
         test_home = "/tmp/test_home"
         with patch.dict(
-            os.environ,
-            {"HOME": test_home, "DEEP_THINKING_DATA_DIR": "~/.deep-$HOME-data"}
+            os.environ, {"HOME": test_home, "DEEP_THINKING_DATA_DIR": "~/.deep-$HOME-data"}
         ):
             result = get_default_data_dir()
             # ~ 应该被扩展

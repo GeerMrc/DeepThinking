@@ -253,12 +253,9 @@ class TestThoughtComparison:
             thought_number=1,
             content="比较两种数据库方案",
             type="comparison",
-            comparison_items=[
-                "MySQL: 成熟稳定，社区活跃",
-                "PostgreSQL: 功能丰富，扩展性强"
-            ],
+            comparison_items=["MySQL: 成熟稳定，社区活跃", "PostgreSQL: 功能丰富，扩展性强"],
             comparison_dimensions=["性能", "可靠性", "成本"],
-            comparison_result="PostgreSQL在功能和扩展性上更优"
+            comparison_result="PostgreSQL在功能和扩展性上更优",
         )
         assert thought.type == "comparison"
         assert thought.is_comparison_thought() is True
@@ -395,8 +392,8 @@ class TestThoughtReverse:
             reverse_steps=[
                 "前提1: 团队规模超过20人",
                 "前提2: 业务模块边界清晰",
-                "前提3: 具备分布式运维能力"
-            ]
+                "前提3: 具备分布式运维能力",
+            ],
         )
         assert thought.type == "reverse"
         assert thought.is_reverse_thought() is True
