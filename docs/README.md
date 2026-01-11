@@ -65,6 +65,7 @@ python -m deep_thinking --help
 |------|------|---------|
 | [安装指南](./installation.md) | 详细的安装和配置说明 | 新用户 |
 | [配置参数参考](./configuration.md) | 所有环境变量的完整参考 | 高级用户 |
+| [Claude Code配置](./claude-code-config.md) | Claude Code (VSCode) 完整配置指南 | IDE用户 |
 | [IDE集成配置](./ide-config.md) | 各种IDE的集成配置示例 | IDE用户 |
 | [SSE配置指南](./sse-guide.md) | SSE模式远程部署指南 | 运维人员 |
 | [数据迁移指南](./MIGRATION.md) | 数据迁移和备份说明 | 升级用户 |
@@ -89,10 +90,11 @@ python -m deep_thinking --help
 
 | 文档 | 描述 | 适合人群 |
 |------|------|---------|
+| [任务追踪](./TASKS.md) | 项目任务总揽和快速导航 | 贡献者 |
 | [开发流程规范](./DEVELOPMENT_WORKFLOW.md) | 标准化的开发流程规范 | 贡献者 |
 | [开发标准](./DEVELOPMENT_STANDARDS.md) | 代码规范和质量标准 | 贡献者 |
 | [测试指南](./TESTING.md) | 测试规范和覆盖率要求 | 贡献者 |
-| [发布指南](./PUBLISHING.md) | PyPI发布流程和规范 | 维护者 |
+| [发布指南](./RELEASE.md) | PyPI发布流程和自动化配置 | 维护者 |
 
 ---
 
@@ -180,7 +182,7 @@ python -m deep_thinking --help
 | MCP工具数量 | 17个 |
 | 环境变量数量 | 11个 |
 | 代码覆盖率 | 89.36% |
-| 文档总数 | 22个 |
+| 文档总数 | 27个（含归档4个） |
 
 ---
 
@@ -205,6 +207,11 @@ python -m deep_thinking --help
 
 ## 📝 文档更新记录
 
+- **2026-01-11**: 文档结构优化
+  - 删除冗余文档 `PUBLISHING.md`，整合到 `RELEASE.md`
+  - 更新 `RELEASE.md` 添加 GitHub Actions 自动发布详细说明
+  - 更新文档索引，添加 `TASKS.md` 和 `claude-code-config.md`
+  - 更新项目统计信息
 - **2026-01-08**: v0.2.3 版本文档更新，项目质量审核和版本统一
 - **2026-01-02**: v0.2.0 版本文档更新
 - **2026-01-01**: v0.1.0 首次发布

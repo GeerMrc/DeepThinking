@@ -84,7 +84,74 @@ brew install gh  # macOS
 
 ## 发布方式
 
-### 方式一：使用 Makefile（推荐）
+### 方式一：GitHub Actions 自动发布（推荐）⭐
+
+#### 工作原理
+
+GitHub Actions 会在推送 `v*` 格式的 tag 时自动触发发布流程：
+
+```
+推送 tag → 运行测试 → 代码检查 → 构建包 → 发布 PyPI → 创建 Release
+```
+
+#### 配置说明
+
+| 配置项 | 是否每个项目需要 | 说明 |
+|--------|-----------------|------|
+| `.github/workflows/publish.yml` | ✅ 是 | 每个项目需要自己的工作流文件 |
+| GitHub Secret `PYPI_API_TOKEN` | ✅ 是 | **每个仓库单独配置**（仓库级别隔离） |
+| 全局 Token | ❌ 否 | 本地发布时使用，与 GitHub Actions 无关 |
+
+> **重要提示**：GitHub Secret 是**仓库级别**的隔离，不是全局的！每个项目仓库需要单独配置 Secret。
+
+#### 配置步骤
+
+**1. 复制工作流文件到新项目**
+
+```bash
+# 复制 GitHub Actions 配置
+cp -r /path/to/DeepThinking/.github/workflows /path/to/new-project/.github/
+```
+
+**2. 配置 GitHub Secret**
+
+```bash
+# 方法A：使用脚本自动配置（推荐）
+cd /path/to/new-project
+make setup-github TOKEN=pypi-AgEIcHlwaS5vcmcC...
+
+# 方法B：手动配置
+# 1. 访问仓库 Settings → Secrets and variables → Actions
+# 2. 点击 "New repository secret"
+# 3. Name: PYPI_API_TOKEN
+# 4. Value: 你的 PyPI Token
+```
+
+#### 发布流程
+
+```bash
+# 1. 更新版本号
+vim pyproject.toml  # version = "0.2.4"
+
+# 2. 更新 CHANGELOG.md
+vim CHANGELOG.md
+
+# 3. 提交更改
+git add -A
+git commit -m "chore: prepare for release v0.2.4"
+
+# 4. 创建 tag 并推送（触发自动发布）
+git tag v0.2.4
+git push origin v0.2.4
+```
+
+#### 查看发布状态
+
+- **GitHub Actions**：访问仓库的 Actions 标签页
+- **自动创建 GitHub Release**：发布成功后会自动创建
+- **PyPI 包**：自动发布到 https://pypi.org/project/DeepThinking/
+
+### 方式二：Makefile 本地发布
 
 **前提**：已运行 `make setup-token` 配置全局 Token
 
@@ -98,27 +165,6 @@ make build          # 构建分发包
 make verify         # 验证分发包
 make publish        # 发布到 PyPI（无需输入 Token）
 ```
-
-### 方式二：使用 GitHub Actions（自动化）
-
-**前提**：已运行 `make setup-github` 配置 GitHub Secret
-
-```bash
-# 1. 更新版本号
-vim pyproject.toml
-
-# 2. 提交更改
-git add -A
-git commit -m "chore: release v0.2.3"
-
-# 3. 创建 tag 并推送（自动触发发布）
-git tag v0.2.3
-git push origin v0.2.3
-```
-
-**查看发布状态**：
-- GitHub Actions 页面查看发布进度
-- 发布成功后自动创建 GitHub Release
 
 ### 方式三：手动发布
 
@@ -224,7 +270,14 @@ gh secret remove PYPI_API_TOKEN --repo your-username/your-repo
 
 ## 未来项目复用
 
-### 首次配置（仅一次）
+### 配置概述
+
+| 配置类型 | 配置范围 | 配置频率 | 说明 |
+|---------|---------|---------|------|
+| **全局 PyPI Token** | 机器级别 | 每台机器一次 | 用于本地发布，所有项目通用 |
+| **GitHub Secret** | 仓库级别 | 每个项目一次 | 用于 GitHub Actions 自动发布 |
+
+### 全局 Token 配置（每台机器一次）
 
 ```bash
 # 配置全局 PyPI Token（所有项目通用）
