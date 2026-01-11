@@ -9,6 +9,15 @@
 - [发布方式](#发布方式)
 - [安全注意事项](#安全注意事项)
 - [未来项目复用](#未来项目复用)
+- [发布检查清单](#发布检查清单)
+- [版本管理](#版本管理)
+- [Makefile 命令参考](#makefile-命令参考)
+- [环境变量配置](#环境变量配置)
+- [常见问题](#常见问题)
+- [发布后验证](#发布后验证)
+- [常见报错及处理](#常见报错及处理)
+- [回滚](#回滚)
+- [相关链接](#相关链接)
 
 ---
 
@@ -449,6 +458,8 @@ repository = https://test.pypi.org/legacy/
 
 ## 常见问题
 
+> 💡 **提示**: 本章节提供快速解决方案。如需详细的错误分析和排查步骤，请参考[常见报错及处理](#常见报错及处理)章节。
+
 ### 1. 认证失败 (403 Forbidden)
 
 **错误信息**：`HTTPError: 403 Forbidden`
@@ -495,17 +506,374 @@ cat ~/.pypirc
 
 ## 发布后验证
 
-发布成功后验证：
+发布成功后，使用以下方法验证包是否正确发布到 PyPI：
+
+### 方法一：使用 pip 验证
+
+#### 基础验证
 
 ```bash
-# 1. 从 PyPI 安装
-pip install DeepThinking
+# 1. 清除本地缓存（确保获取最新版本）
+pip cache purge
 
-# 2. 验证版本
+# 2. 查看远程包信息
+pip index versions DeepThinking
+
+# 3. 安装指定版本验证
+pip install DeepThinking==0.2.3
+
+# 4. 验证安装的版本
 python -c "import deep_thinking; print(deep_thinking.__version__)"
+```
+
+#### 完整验证流程
+
+```bash
+# 1. 创建临时虚拟环境
+python -m venv test_install_venv
+source test_install_venv/bin/activate  # Windows: test_install_venv\Scripts\activate
+
+# 2. 安装包
+pip install DeepThinking==0.2.3
 
 # 3. 运行基本功能测试
 python -m deep_thinking --help
+
+# 4. 检查安装的文件
+pip show -f DeepThinking
+
+# 5. 清理测试环境
+deactivate
+rm -rf test_install_venv
+```
+
+### 方法二：使用 uv pip 验证
+
+#### 快速验证
+
+```bash
+# 1. 查看 PyPI 上的可用版本
+uv pip index versions DeepThinking
+
+# 2. 安装并验证
+uv pip install DeepThinking==0.2.3
+python -c "import deep_thinking; print(deep_thinking.__version__)"
+```
+
+#### 完整验证流程
+
+```bash
+# 1. 创建临时虚拟环境
+uv venv test_uv_venv
+source test_uv_venv/bin/activate
+
+# 2. 安装包
+uv pip install DeepThinking==0.2.3
+
+# 3. 验证安装
+uv pip show DeepThinking
+python -c "import deep_thinking; print(deep_thinking.__version__)"
+
+# 4. 运行功能测试
+python -m deep_thinking --help
+
+# 5. 清理
+deactivate
+rm -rf test_uv_venv
+```
+
+### 方法三：PyPI 网页验证
+
+访问 PyPI 项目页面验证：
+
+- **包主页**: https://pypi.org/project/DeepThinking/
+- **版本历史**: https://pypi.org/project/DeepThinking/#history
+- **文件下载**: https://pypi.org/project/DeepThinking/#files
+
+验证项目：
+
+- [ ] 版本号正确显示
+- [ ] 发布时间正确
+- [ ] 文件完整性（wheel + tar.gz）
+- [ ] 包描述正确
+
+### 版本号获取方法
+
+#### 命令行方式
+
+```bash
+# 方法1: 使用 import
+python -c "import deep_thinking; print(deep_thinking.__version__)"
+
+# 方法2: 使用 pip show
+pip show DeepThinking | grep Version
+
+# 方法3: 使用 uv pip show
+uv pip show DeepThinking | grep Version
+```
+
+#### Python 代码方式
+
+```python
+import deep_thinking
+print(f"DeepThinking 版本: {deep_thinking.__version__}")
+
+# 或者使用 importlib.metadata
+from importlib.metadata import version
+print(f"版本: {version('DeepThinking')}")
+```
+
+---
+
+## 常见报错及处理
+
+### 发布阶段报错
+
+#### 1. 403 Forbidden - 认证失败
+
+**错误信息**：
+
+```
+HTTPError: 403 Forbidden from https://upload.pypi.org/legacy/
+Invalid or nonexistent authentication information
+```
+
+**原因分析**：
+
+- API Token 格式错误
+- Token 已过期或被撤销
+- 使用了错误的用户名（应使用 `__token__`）
+
+**解决方案**：
+
+```bash
+# 1. 验证 Token 格式
+echo $PYPI_API_TOKEN
+# 应输出: pypi-xxxxx...
+
+# 2. 检查 ~/.pypirc 配置
+cat ~/.pypirc
+# 确认 username = __token__
+
+# 3. 重新配置 Token
+make setup-token TOKEN=pypi-xxx...
+
+# 4. 如果使用 GitHub Actions，检查 Secret
+gh secret list --repo your-org/your-repo
+```
+
+#### 2. 400 Bad Request - 文件已存在
+
+**错误信息**：
+
+```
+HTTPError: 400 Bad Request from https://upload.pypi.org/legacy/
+File already exists
+```
+
+**原因分析**：
+
+- 尝试发布已存在的版本号
+- dist/ 目录中有旧版本残留
+
+**解决方案**：
+
+```bash
+# 1. 清理构建目录
+make clean
+# 或手动删除
+rm -rf dist/ build/ *.egg-info
+
+# 2. 确认版本号是否需要更新
+grep version pyproject.toml
+
+# 3. 重新构建
+python -m build
+
+# 4. 如果确实需要覆盖，联系 PyPI 支持撤销旧版本
+```
+
+#### 3. 构建失败 - 权限错误
+
+**错误信息**：
+
+```
+PermissionError: [Errno 13] Permission denied
+```
+
+**解决方案**：
+
+```bash
+# 1. 清理缓存
+rm -rf dist/ build/ *.egg-info
+
+# 2. 检查文件权限
+ls -la
+
+# 3. 使用 sudo（不推荐）或修复权限
+chmod -R u+w .
+```
+
+### 验证阶段报错
+
+#### 1. 版本号不匹配
+
+**错误现象**：
+
+```bash
+$ python -c "import deep_thinking; print(deep_thinking.__version__)"
+0.2.2  # 但发布的是 0.2.3
+```
+
+**原因分析**：
+
+- 本地安装的是旧版本
+- PyPI 缓存未更新
+- 代码中的 `__version__` 未更新
+
+**解决方案**：
+
+```bash
+# 1. 清除 pip 缓存
+pip cache purge
+
+# 2. 卸载旧版本
+pip uninstall DeepThinking -y
+
+# 3. 强制重新安装
+pip install DeepThinking==0.2.3 --no-cache-dir
+
+# 4. 如果代码版本号未更新，检查源码
+grep -r "__version__" src/deep_thinking/__init__.py
+```
+
+#### 2. 包无法导入
+
+**错误信息**：
+
+```
+ModuleNotFoundError: No module named 'deep_thinking'
+```
+
+**解决方案**：
+
+```bash
+# 1. 确认包已安装
+pip list | grep DeepThinking
+
+# 2. 检查 Python 环境
+which python
+python --version
+
+# 3. 重新安装
+pip install DeepThinking==0.2.3 --force-reinstall
+```
+
+#### 3. 依赖冲突
+
+**错误信息**：
+
+```
+ERROR: pip's dependency resolver does not currently take into account...
+```
+
+**解决方案**：
+
+```bash
+# 1. 使用虚拟环境
+python -m venv clean_env
+source clean_env/bin/activate
+pip install DeepThinking==0.2.3
+
+# 2. 或使用 uv（更好的依赖解析）
+uv venv clean_env
+source clean_env/bin/activate
+uv pip install DeepThinking==0.2.3
+```
+
+### 安装阶段报错
+
+#### 1. 网络超时
+
+**错误信息**：
+
+```
+ERROR: Could not find a version that satisfies the requirement...
+No matching distribution found for DeepThinking
+```
+
+**解决方案**：
+
+```bash
+# 1. 检查网络连接
+ping pypi.org
+
+# 2. 使用国内镜像（临时）
+pip install DeepThinking==0.2.3 -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+# 3. 配置永久镜像（可选）
+pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
+#### 2. SSL 证书错误
+
+**错误信息**：
+
+```
+SSL: CERTIFICATE_VERIFY_FAILED
+```
+
+**解决方案**：
+
+```bash
+# 1. 更新 pip
+python -m pip install --upgrade pip
+
+# 2. 信任 PyPI（不推荐，仅用于调试）
+pip install DeepThinking --trusted-host pypi.org --trusted-host files.pythonhosted.org
+
+# 3. 检查系统证书
+# macOS
+brew install ca-certificates
+```
+
+#### 3. 平台不兼容
+
+**错误信息**：
+
+```
+ERROR: Could not find a version that satisfies the requirement DeepThinking
+```
+
+**解决方案**：
+
+```bash
+# 1. 检查可用版本
+pip index versions DeepThinking
+
+# 2. 检查平台支持
+python -c "import platform; print(f'{platform.system()} {platform.machine()}')"
+
+# 3. 如果没有预编译 wheel，从源码安装
+pip install DeepThinking==0.2.3 --no-binary=DeepThinking
+```
+
+### 快速诊断命令
+
+```bash
+# 一键诊断发布状态
+echo "=== PyPI 版本检查 ==="
+curl -s https://pypi.org/pypi/DeepThinking/json 2>/dev/null | grep -o '"version":"[^"]*"'
+
+echo -e "\n=== 本地版本检查 ==="
+python -c "import deep_thinking; print(f'本地版本: {deep_thinking.__version__}')" 2>/dev/null || echo "未安装"
+
+echo -e "\n=== pip 检查 ==="
+pip show DeepThinking 2>/dev/null || echo "未通过 pip 安装"
+
+echo -e "\n=== 环境检查 ==="
+python --version
+which python
 ```
 
 ---
