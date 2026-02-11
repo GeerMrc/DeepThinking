@@ -210,98 +210,19 @@ DEEP_THINKING_LOG_LEVEL=INFO
 
 ## Claude Code 配置
 
-Claude Code CLI 提供了多种配置方式，支持快速配置和 JSON 导入。
+> 📘 **详细配置指南**: 请参阅 [Claude Code 配置指南](docs/claude-code-config.md) 获取完整的配置说明。
 
-### 快速配置（使用 `claude mcp add`）
-
-**STDIO 模式**（本地）：
+**快速开始**：
 ```bash
 # 基础配置
 claude mcp add --transport stdio deep-thinking -- python -m deep_thinking
 
-# 带环境变量
-claude mcp add --transport stdio deep-thinking \
-  --env DEEP_THINKING_MAX_THOUGHTS=50 \
-  --env DEEP_THINKING_LOG_LEVEL=DEBUG \
-  -- python -m deep_thinking
-```
-
-### JSON 配置导入（使用 `claude mcp add-json`）
-
-**单行 JSON 配置（推荐）**：
-```bash
-# 基础配置
+# JSON 配置方式
 claude mcp add-json "deep-thinking" '{"command":"python","args":["-m","deep_thinking"]}' --scope user
 
-# 带环境变量（单行）
-claude mcp add-json "deep-thinking" '{"command":"python","args":["-m","deep_thinking"],"env":{"DEEP_THINKING_MAX_THOUGHTS":"50","DEEP_THINKING_MIN_THOUGHTS":"3","DEEP_THINKING_LOG_LEVEL":"INFO"}}' --scope user
+# 查看配置
+claude mcp list
 ```
-
-**多行 JSON 配置（带环境变量）**：
-```bash
-claude mcp add-json "deep-thinking" '{
-  "command": "python",
-  "args": ["-m", "deep_thinking"],
-  "env": {
-    "DEEP_THINKING_MAX_THOUGHTS": "50",
-    "DEEP_THINKING_MIN_THOUGHTS": "3",
-    "DEEP_THINKING_LOG_LEVEL": "INFO"
-  }
-}' --scope user
-```
-
-**从文件导入**：
-```bash
-# 先创建配置文件
-cat > config.json << 'EOF'
-{
-  "command": "python",
-  "args": ["-m", "deep_thinking"],
-  "env": {
-    "DEEP_THINKING_MAX_THOUGHTS": "50",
-    "DEEP_THINKING_MIN_THOUGHTS": "3"
-  }
-}
-EOF
-
-# 从文件导入配置
-claude mcp add-json "deep-thinking" -s user -f config.json
-```
-
-### 配置范围说明
-
-Claude Code 支持三种配置范围，决定了配置的存储位置和共享范围：
-
-| 范围 | 存储位置 | 适用场景 | 命令示例 |
-|------|---------|---------|---------|
-| **local** | 项目用户设置 | 个人开发、实验配置 | `--scope local`（默认） |
-| **project** | `.mcp.json` | 团队共享、项目特定 | `--scope project` |
-| **user** | 全局配置 | 跨项目使用 | `--scope user` |
-
-**项目级配置示例**（团队共享）：
-```bash
-claude mcp add --transport stdio deep-thinking \
-  --scope project \
-  --env DEEP_THINKING_MAX_THOUGHTS=50 \
-  -- python -m deep_thinking
-```
-
-生成的 `.mcp.json` 文件：
-```json
-{
-  "mcpServers": {
-    "deep-thinking": {
-      "command": "python",
-      "args": ["-m", "deep_thinking"],
-      "env": {
-        "DEEP_THINKING_MAX_THOUGHTS": "50"
-      }
-    }
-  }
-}
-```
-
-> 📘 **详细配置指南**: 请参阅 [Claude Code 配置指南](docs/claude-code-config.md) 获取完整的配置说明，包括 CLI 命令、JSON 导入、配置范围和故障排除。
 
 ---
 
