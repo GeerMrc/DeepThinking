@@ -37,28 +37,43 @@ claude mcp add deepthinking-remote sse python -m deep_thinking --transport sse
 
 ### 方式2：JSON 配置命令（add-json）
 
-使用 `claude mcp add-json` 命令直接通过 JSON 配置添加 MCP 服务器：
+使用 `claude mcp add-json` 命令直接通过 JSON 配置添加 MCP 服务器。
 
-**基础配置（推荐用户级）**：
-```bash
-# 基础配置
-claude mcp add-json "deepthinking" '{"command":"python","args":["-m","deep_thinking"]}' --scope user
-
-# 带环境变量（单行）
-claude mcp add-json "deepthinking" '{"command":"python","args":["-m","deep_thinking"],"env":{"DEEP_THINKING_MAX_THOUGHTS":"50","DEEP_THINKING_LOG_LEVEL":"INFO"}}' --scope user
-```
-
-**带环境变量的多行配置**：
+**STDIO 模式（本地）- 完整参数配置**：
 ```bash
 claude mcp add-json "deepthinking" '{
   "command": "python",
   "args": ["-m", "deep_thinking"],
   "env": {
+    "DEEP_THINKING_LOG_LEVEL": "INFO",
+    "DEEP_THINKING_DATA_DIR": "~/.deepthinking",
     "DEEP_THINKING_MAX_THOUGHTS": "50",
     "DEEP_THINKING_MIN_THOUGHTS": "3",
     "DEEP_THINKING_THOUGHTS_INCREMENT": "10",
+    "DEEP_THINKING_BACKUP_COUNT": "10",
+    "DEEP_THINKING_DESCRIPTION": "深度思考MCP服务器",
+    "DEEP_THINKING_DEV": "false",
+    "DEEP_THINKING_PROFILE": "false"
+  }
+}' --scope user
+```
+
+**SSE 模式（远程）- 完整参数配置**：
+```bash
+claude mcp add-json "deepthinking-remote" '{
+  "command": "python",
+  "args": ["-m", "deep_thinking", "--transport", "sse"],
+  "env": {
     "DEEP_THINKING_LOG_LEVEL": "INFO",
-    "DEEP_THINKING_DATA_DIR": "~/.deepthinking"
+    "DEEP_THINKING_DATA_DIR": "~/.deepthinking",
+    "DEEP_THINKING_MAX_THOUGHTS": "50",
+    "DEEP_THINKING_MIN_THOUGHTS": "3",
+    "DEEP_THINKING_THOUGHTS_INCREMENT": "10",
+    "DEEP_THINKING_BACKUP_COUNT": "10",
+    "DEEP_THINKING_DESCRIPTION": "深度思考MCP服务器",
+    "DEEP_THINKING_HOST": "localhost",
+    "DEEP_THINKING_PORT": "8000",
+    "DEEP_THINKING_AUTH_TOKEN": "your-secret-token"
   }
 }' --scope user
 ```
@@ -67,6 +82,24 @@ claude mcp add-json "deepthinking" '{
 - `--scope user`：全局配置，所有项目共享（推荐）
 - `--scope project`：项目级配置，写入 `.mcp.json`
 - `--scope local`：本地配置，默认选项
+
+**参数分类说明**：
+
+| 参数 | STDIO | SSE | 说明 |
+|------|-------|-----|------|
+| `DEEP_THINKING_LOG_LEVEL` | ✓ | ✓ | 日志级别 |
+| `DEEP_THINKING_DATA_DIR` | ✓ | ✓ | 数据存储目录 |
+| `DEEP_THINKING_MAX_THOUGHTS` | ✓ | ✓ | 最大思考步骤数 |
+| `DEEP_THINKING_MIN_THOUGHTS` | ✓ | ✓ | 最小思考步骤数 |
+| `DEEP_THINKING_THOUGHTS_INCREMENT` | ✓ | ✓ | 思考步骤增量 |
+| `DEEP_THINKING_BACKUP_COUNT` | ✓ | ✓ | 自动备份保留数量 |
+| `DEEP_THINKING_DESCRIPTION` | ✓ | ✓ | 自定义服务器描述 |
+| `DEEP_THINKING_DEV` | ✓ | ✓ | 开发模式 |
+| `DEEP_THINKING_PROFILE` | ✓ | ✓ | 性能分析 |
+| `DEEP_THINKING_HOST` | - | ✓ | SSE服务器监听地址 |
+| `DEEP_THINKING_PORT` | - | ✓ | SSE服务器监听端口 |
+| `DEEP_THINKING_AUTH_TOKEN` | - | ✓ | Bearer Token认证 |
+| `DEEP_THINKING_API_KEY` | - | ✓ | API Key认证 |
 
 ### 方式3：配置文件
 

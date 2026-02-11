@@ -217,8 +217,40 @@ DEEP_THINKING_LOG_LEVEL=INFO
 # 基础配置
 claude mcp add --transport stdio deep-thinking -- python -m deep_thinking
 
-# JSON 配置方式
-claude mcp add-json "deep-thinking" '{"command":"python","args":["-m","deep_thinking"]}' --scope user
+# JSON 配置方式（STDIO 模式 - 完整参数）
+claude mcp add-json "deep-thinking" '{
+  "command": "python",
+  "args": ["-m", "deep_thinking"],
+  "env": {
+    "DEEP_THINKING_LOG_LEVEL": "INFO",
+    "DEEP_THINKING_DATA_DIR": "~/.deepthinking",
+    "DEEP_THINKING_MAX_THOUGHTS": "50",
+    "DEEP_THINKING_MIN_THOUGHTS": "3",
+    "DEEP_THINKING_THOUGHTS_INCREMENT": "10",
+    "DEEP_THINKING_BACKUP_COUNT": "10",
+    "DEEP_THINKING_DESCRIPTION": "深度思考MCP服务器",
+    "DEEP_THINKING_DEV": "false",
+    "DEEP_THINKING_PROFILE": "false"
+  }
+}' --scope user
+
+# JSON 配置方式（SSE 远程模式 - 完整参数）
+claude mcp add-json "deep-thinking-remote" '{
+  "command": "python",
+  "args": ["-m", "deep_thinking", "--transport", "sse"],
+  "env": {
+    "DEEP_THINKING_LOG_LEVEL": "INFO",
+    "DEEP_THINKING_DATA_DIR": "~/.deepthinking",
+    "DEEP_THINKING_MAX_THOUGHTS": "50",
+    "DEEP_THINKING_MIN_THOUGHTS": "3",
+    "DEEP_THINKING_THOUGHTS_INCREMENT": "10",
+    "DEEP_THINKING_BACKUP_COUNT": "10",
+    "DEEP_THINKING_DESCRIPTION": "深度思考MCP服务器",
+    "DEEP_THINKING_HOST": "localhost",
+    "DEEP_THINKING_PORT": "8000",
+    "DEEP_THINKING_AUTH_TOKEN": "your-secret-token"
+  }
+}' --scope user
 
 # 查看配置
 claude mcp list

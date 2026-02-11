@@ -92,13 +92,38 @@ DeepThinking MCP 支持通过 MCP (Model Context Protocol) 协议与各种 IDE �
 # 快速配置
 claude mcp add-json "deepthinking" '{"command":"python","args":["-m","deep_thinking"]}' --scope user
 
-# 完整配置
+# STDIO 模式完整配置
 claude mcp add-json "deepthinking" '{
   "command": "python",
   "args": ["-m", "deep_thinking"],
   "env": {
     "DEEP_THINKING_LOG_LEVEL": "INFO",
-    "DEEP_THINKING_MAX_THOUGHTS": "50"
+    "DEEP_THINKING_DATA_DIR": "~/.deepthinking",
+    "DEEP_THINKING_MAX_THOUGHTS": "50",
+    "DEEP_THINKING_MIN_THOUGHTS": "3",
+    "DEEP_THINKING_THOUGHTS_INCREMENT": "10",
+    "DEEP_THINKING_BACKUP_COUNT": "10",
+    "DEEP_THINKING_DESCRIPTION": "深度思考MCP服务器",
+    "DEEP_THINKING_DEV": "false",
+    "DEEP_THINKING_PROFILE": "false"
+  }
+}' --scope user
+
+# SSE 模式完整配置
+claude mcp add-json "deepthinking-remote" '{
+  "command": "python",
+  "args": ["-m", "deep_thinking", "--transport", "sse"],
+  "env": {
+    "DEEP_THINKING_LOG_LEVEL": "INFO",
+    "DEEP_THINKING_DATA_DIR": "~/.deepthinking",
+    "DEEP_THINKING_MAX_THOUGHTS": "50",
+    "DEEP_THINKING_MIN_THOUGHTS": "3",
+    "DEEP_THINKING_THOUGHTS_INCREMENT": "10",
+    "DEEP_THINKING_BACKUP_COUNT": "10",
+    "DEEP_THINKING_DESCRIPTION": "深度思考MCP服务器",
+    "DEEP_THINKING_HOST": "localhost",
+    "DEEP_THINKING_PORT": "8000",
+    "DEEP_THINKING_AUTH_TOKEN": "your-secret-token"
   }
 }' --scope user
 ```
