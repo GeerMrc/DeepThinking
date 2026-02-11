@@ -35,7 +35,40 @@ claude mcp add deepthinking stdio python -m deep_thinking \
 claude mcp add deepthinking-remote sse python -m deep_thinking --transport sse
 ```
 
-### 方式2：配置文件
+### 方式2：JSON 配置命令（add-json）
+
+使用 `claude mcp add-json` 命令直接通过 JSON 配置添加 MCP 服务器：
+
+**基础配置（推荐用户级）**：
+```bash
+# 基础配置
+claude mcp add-json "deepthinking" '{"command":"python","args":["-m","deep_thinking"]}' --scope user
+
+# 带环境变量（单行）
+claude mcp add-json "deepthinking" '{"command":"python","args":["-m","deep_thinking"],"env":{"DEEP_THINKING_MAX_THOUGHTS":"50","DEEP_THINKING_LOG_LEVEL":"INFO"}}' --scope user
+```
+
+**带环境变量的多行配置**：
+```bash
+claude mcp add-json "deepthinking" '{
+  "command": "python",
+  "args": ["-m", "deep_thinking"],
+  "env": {
+    "DEEP_THINKING_MAX_THOUGHTS": "50",
+    "DEEP_THINKING_MIN_THOUGHTS": "3",
+    "DEEP_THINKING_THOUGHTS_INCREMENT": "10",
+    "DEEP_THINKING_LOG_LEVEL": "INFO",
+    "DEEP_THINKING_DATA_DIR": "~/.deepthinking"
+  }
+}' --scope user
+```
+
+**配置范围说明**：
+- `--scope user`：全局配置，所有项目共享（推荐）
+- `--scope project`：项目级配置，写入 `.mcp.json`
+- `--scope local`：本地配置，默认选项
+
+### 方式3：配置文件
 
 编辑 `~/.claude/settings.json`：
 

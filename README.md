@@ -228,9 +228,32 @@ claude mcp add --transport stdio deep-thinking \
 
 ### JSON 配置导入（使用 `claude mcp add-json`）
 
-**从 JSON 配置导入**：
+**单行 JSON 配置（推荐）**：
 ```bash
-claude mcp add-json deep-thinking <<'EOF'
+# 基础配置
+claude mcp add-json "deep-thinking" '{"command":"python","args":["-m","deep_thinking"]}' --scope user
+
+# 带环境变量（单行）
+claude mcp add-json "deep-thinking" '{"command":"python","args":["-m","deep_thinking"],"env":{"DEEP_THINKING_MAX_THOUGHTS":"50","DEEP_THINKING_MIN_THOUGHTS":"3","DEEP_THINKING_LOG_LEVEL":"INFO"}}' --scope user
+```
+
+**多行 JSON 配置（带环境变量）**：
+```bash
+claude mcp add-json "deep-thinking" '{
+  "command": "python",
+  "args": ["-m", "deep_thinking"],
+  "env": {
+    "DEEP_THINKING_MAX_THOUGHTS": "50",
+    "DEEP_THINKING_MIN_THOUGHTS": "3",
+    "DEEP_THINKING_LOG_LEVEL": "INFO"
+  }
+}' --scope user
+```
+
+**从文件导入**：
+```bash
+# 先创建配置文件
+cat > config.json << 'EOF'
 {
   "command": "python",
   "args": ["-m", "deep_thinking"],
@@ -240,11 +263,9 @@ claude mcp add-json deep-thinking <<'EOF'
   }
 }
 EOF
-```
 
-**从文件导入**：
-```bash
-claude mcp add-json deep-thinking < config.json
+# 从文件导入配置
+claude mcp add-json "deep-thinking" -s user -f config.json
 ```
 
 ### 配置范围说明

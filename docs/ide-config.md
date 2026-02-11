@@ -86,7 +86,24 @@ DeepThinking MCP 支持通过 MCP (Model Context Protocol) 协议与各种 IDE �
 
 > 💡 **详细配置**：请参考 [Claude Code 配置完整指南](./claude-code-config.md)
 
-### 快速开始
+### JSON 配置方式（add-json）
+
+```bash
+# 快速配置
+claude mcp add-json "deepthinking" '{"command":"python","args":["-m","deep_thinking"]}' --scope user
+
+# 完整配置
+claude mcp add-json "deepthinking" '{
+  "command": "python",
+  "args": ["-m", "deep_thinking"],
+  "env": {
+    "DEEP_THINKING_LOG_LEVEL": "INFO",
+    "DEEP_THINKING_MAX_THOUGHTS": "50"
+  }
+}' --scope user
+```
+
+### CLI 命令方式
 
 ```bash
 # 添加 MCP 服务器
