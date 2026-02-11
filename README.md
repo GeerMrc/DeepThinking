@@ -235,6 +235,7 @@ claude mcp add-json "deep-thinking" '{
 }' --scope user
 
 # JSON 配置方式（SSE 远程模式 - 完整参数）
+# 认证方式二选一：DEEP_THINKING_AUTH_TOKEN 或 DEEP_THINKING_API_KEY
 claude mcp add-json "deep-thinking-remote" '{
   "command": "python",
   "args": ["-m", "deep_thinking", "--transport", "sse"],
