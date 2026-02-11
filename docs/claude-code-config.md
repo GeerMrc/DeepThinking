@@ -90,63 +90,29 @@ claude mcp add-json "deepthinking" '{
 
 ## CLI 命令参考
 
-### 基础命令
+### 基础命令语法
 
 ```bash
-# 添加 MCP 服务器
+# 添加 MCP 服务器（STDIO）
 claude mcp add <name> stdio <command> [args...]
 
-# 示例
-claude mcp add deepthinking stdio python -m deep_thinking
+# 添加 MCP 服务器（SSE）
+claude mcp add <name> sse <command> [args...] --transport sse
+
+# JSON 配置方式添加
+claude mcp add-json <name> <json-config> [--scope {local|project|user}]
+
+# 从文件导入 JSON 配置
+claude mcp add-json <name> -f <config-file> [-s {local|project|user}]
 
 # 列出所有服务器
 claude mcp list
 
 # 删除服务器
-claude mcp remove deepthinking
+claude mcp remove <name>
 
 # 查看帮助
 claude mcp --help
-```
-
-### STDIO 模式配置
-
-```bash
-# 基础配置
-claude mcp add deepthinking stdio python -m deep_thinking
-
-# 带日志级别
-claude mcp add deepthinking stdio python -m deep_thinking \
-  --env DEEP_THINKING_LOG_LEVEL=DEBUG
-
-# 带数据目录
-claude mcp add deepthinking stdio python -m deep_thinking \
-  --env DEEP_THINKING_DATA_DIR=~/.deepthinking
-
-# 带思考限制
-claude mcp add deepthinking stdio python -m deep_thinking \
-  --env DEEP_THINKING_MAX_THOUGHTS=100 \
-  --env DEEP_THINKING_MIN_THOUGHTS=5
-```
-
-### SSE 模式配置
-
-```bash
-# 基础 SSE 配置
-claude mcp add deepthinking-remote sse python -m deep_thinking --transport sse
-
-# 带主机和端口
-claude mcp add deepthinking-remote sse python -m deep_thinking --transport sse \
-  --env DEEP_THINKING_HOST=localhost \
-  --env DEEP_THINKING_PORT=8000
-
-# 带 Token 认证
-claude mcp add deepthinking-remote sse python -m deep_thinking --transport sse \
-  --env DEEP_THINKING_AUTH_TOKEN=your-token-here
-
-# 带 API Key 认证
-claude mcp add deepthinking-remote sse python -m deep_thinking --transport sse \
-  --env DEEP_THINKING_API_KEY=your-api-key-here
 ```
 
 ### 使用虚拟环境
