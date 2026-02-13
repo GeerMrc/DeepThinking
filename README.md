@@ -6,6 +6,28 @@
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
+## 核心特性
+
+- **六种思考模式**：
+  - 💭 **常规思考**：正常顺序思考步骤
+  - 🔄 **修订思考**：修订之前的思考内容
+  - 🌿 **分支思考**：从某点分出新思考分支
+  - ⚖️ **对比思考**：比较多个选项或方案的优劣
+  - 🔙 **逆向思考**：从结论反推前提条件
+  - 🤔 **假设思考**：探索假设条件下的影响
+- **Interleaved Thinking** (v0.2.4+)：
+  - 🧠 **三阶段模型**：thinking（思考）→ tool_call（工具调用）→ analysis（分析）
+  - 🔧 **自动阶段推断**：根据参数自动判断执行阶段
+  - 📊 **工具调用追踪**：支持 1:N 映射（每步骤多次工具调用）
+  - ⚡ **资源控制**：可配置的工具调用次数限制
+  - 💾 **结果缓存**：支持缓存命中标记和统计
+- **双传输模式**：支持STDIO（本地）和SSE（远程）两种传输协议
+- **会话管理**：创建/查询/删除思考会话
+- **状态持久化**：JSON文件存储，支持恢复
+- **多格式导出**：JSON/Markdown/HTML/Text
+- **可视化**：Mermaid/ASCII/Tree 三种可视化格式
+- **模板系统**：预设思考框架
+
 ## 📖 文档
 
 ### 快速导航
@@ -29,26 +51,7 @@
 
 - **[架构设计](ARCHITECTURE.md)** - 系统架构和技术设计
 - **[数据迁移指南](docs/MIGRATION.md)** - 数据迁移和备份说明
-
-## 项目概述
-
-DeepThinking MCP是一个功能完整的MCP（Model Context Protocol）服务器，提供顺序思考工具，支持六种思考模式：常规思考、修订思考、分支思考、对比思考、逆向思考和假设思考。
-
-### 核心特性
-
-- **双传输模式**：支持STDIO（本地）和SSE（远程）两种传输协议
-- **六种思考模式**：
-  - 💭 **常规思考**：正常顺序思考步骤
-  - 🔄 **修订思考**：修订之前的思考内容
-  - 🌿 **分支思考**：从某点分出新思考分支
-  - ⚖️ **对比思考**：比较多个选项或方案的优劣
-  - 🔙 **逆向思考**：从结论反推前提条件
-  - 🤔 **假设思考**：探索假设条件下的影响
-- **会话管理**：创建/查询/删除思考会话
-- **状态持久化**：JSON文件存储，支持恢复
-- **多格式导出**：JSON/Markdown/HTML/Text
-- **可视化**：Mermaid流程图生成
-- **模板系统**：预设思考框架
+- **[使用示例](docs/examples.md)** - Interleaved Thinking 完整示例
 
 ## 安装
 
@@ -167,6 +170,10 @@ DEEP_THINKING_DATA_DIR=~/.deepthinking
 DEEP_THINKING_MAX_THOUGHTS=50           # 最大思考步骤数（推荐 50，支持 1-10000）
 DEEP_THINKING_MIN_THOUGHTS=3            # 最小思考步骤数（推荐 3，支持 1-10000）
 DEEP_THINKING_THOUGHTS_INCREMENT=10     # 思考步骤增量（默认 10，支持 1-100）
+
+# Interleaved Thinking 配置 (v0.2.4+)
+DEEP_THINKING_MAX_TOOL_CALLS=100        # 会话总工具调用次数上限
+DEEP_THINKING_MAX_TOOL_CALLS_PER_THOUGHT=10  # 每步骤工具调用次数上限
 
 # 日志配置
 DEEP_THINKING_LOG_LEVEL=INFO
@@ -341,6 +348,13 @@ mypy src/deep_thinking/
 | `max_thoughts` | 50 | 1-10000 | 最大思考步骤数 |
 | `min_thoughts` | 3 | 1-10000 | 最小思考步骤数 |
 | `thoughts_increment` | 10 | 1-100 | 每次增加的步骤数 |
+
+### Interleaved Thinking 配置 (v0.2.4+)
+
+| 配置项 | 默认值 | 说明 |
+|--------|--------|------|
+| `max_tool_calls` | 100 | 会话总工具调用次数上限 |
+| `max_tool_calls_per_thought` | 10 | 每步骤工具调用次数上限 |
 
 > 💡 **设计说明**: 限制值基于实际使用场景设定，平衡了灵活性和系统性能。如需调整限制，请确保充分测试。
 

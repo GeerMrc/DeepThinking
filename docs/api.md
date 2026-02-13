@@ -1,9 +1,16 @@
 # DeepThinking MCP API 文档
 
-> 版本: 0.2.3
-> 更新日期: 2026-01-08
+> 版本: 0.2.4
+> 更新日期: 2026-02-14
 >
-> **重要更新** (v0.2.2):
+> **重要更新** (v0.2.4):
+> - **Interleaved Thinking**: 三阶段执行模型 (thinking/tool_call/analysis)
+> - **自动阶段推断**: 根据参数自动判断当前执行阶段
+> - **工具调用追踪**: 支持 1:N 映射（每步骤多次工具调用）
+> - **资源控制**: 可配置的工具调用次数限制
+> - **结果缓存**: 支持缓存命中标记和统计
+>
+> **历史更新** (v0.2.2):
 > - 支持6种思考类型：常规💭、修订🔄、分支🌿、对比⚖️、逆向🔙、假设🤔
 > - 同步/异步设计统一：所有MCP工具函数均为同步函数，调用时无需使用 `await`
 > - 代码已改为全同步设计
@@ -14,6 +21,16 @@
 ## 概述
 
 DeepThinking MCP 是一个基于 Model Context Protocol (MCP) 的深度思考服务器，提供顺序思考、会话管理、模板应用、导出和可视化等功能。
+
+### 核心特性
+
+- **六种思考类型**: 常规💭、修订🔄、分支🌿、对比⚖️、逆向🔙、假设🤔
+- **Interleaved Thinking**: 三阶段执行模型，支持思考与工具调用交错
+- **自动阶段推断**: 根据参数自动判断当前执行阶段
+- **工具调用追踪**: 完整的工具调用记录和 1:N 映射支持
+- **资源控制**: 可配置的工具调用次数限制
+- **多格式导出**: JSON、Markdown、HTML、Text
+- **可视化支持**: Mermaid、ASCII、Tree 三种可视化格式
 
 ### MCP工具列表
 
@@ -120,12 +137,17 @@ DeepThinking MCP 将思考会话数据存储在本地文件系统中。
 | `hypotheticalImpact` | string\|null | ❌ | null | 假设思考的影响分析（1-10000字符） |
 | `hypotheticalProbability` | string\|null | ❌ | null | 假设思考的可能性评估（1-50字符） |
 | `needsMoreThoughts` | boolean | ❌ | false | 是否需要增加总思考步骤数（每次增加DEEP_THINKING_THOUGHTS_INCREMENT步，默认10步，上限DEEP_THINKING_MAX_THOUGHTS，默认50步） |
+| `phase` | string\|null | ❌ | null | **[Interleaved]** 执行阶段（thinking/tool_call/analysis），为空时自动推断 |
+| `toolCalls` | list[dict]\|null | ❌ | null | **[Interleaved]** 工具调用参数列表，支持每步骤多次调用（1:N 映射） |
+| `toolResults` | list[dict]\|null | ❌ | null | **[Interleaved]** 工具结果参数列表，与 toolCalls 通过 call_id 匹配 |
 
 #### 返回值
 
 返回思考结果描述，包含：
 - 当前思考信息和类型
-- 会话状态（会话ID、总思考数、预计总数）
+- 执行阶段（thinking/tool_call/analysis）
+- 工具调用信息（如有）
+- 会话状态（会话ID、总思考数、预计总数、工具调用统计）
 - 下一步提示或完成标记
 
 #### 思考类型
@@ -136,6 +158,74 @@ DeepThinking MCP 将思考会话数据存储在本地文件系统中。
 4. **对比思考 (comparison)** ⚖️: 比较多个选项或方案的优劣
 5. **逆向思考 (reverse)** 🔙: 从结论反推前提条件验证
 6. **假设思考 (hypothetical)** 🤔: 探索假设条件下的影响
+
+#### Interleaved Thinking (交错思考)
+
+Interleaved Thinking 是一种三阶段执行模型，允许在思考过程中交错进行工具调用。
+
+**执行阶段**:
+
+| 阶段 | 符号 | 说明 |
+|------|------|------|
+| `thinking` | 🧠 | 纯思考阶段，进行思维推理 |
+| `tool_call` | 🔧 | 工具调用阶段，准备调用外部工具 |
+| `analysis` | 📊 | 分析阶段，分析工具调用结果 |
+
+**自动阶段推断规则**:
+
+当 `phase` 参数为空时，系统自动根据其他参数推断执行阶段：
+
+| 条件 | 推断阶段 |
+|------|---------|
+| 有 `toolResults` 且非空 | `analysis` |
+| 有 `toolCalls` 且非空 | `tool_call` |
+| 其他情况 | `thinking` |
+
+**工具调用追踪 (1:N 映射)**:
+
+每个思考步骤可以关联多个工具调用，实现 1:N 映射：
+
+```python
+# 单步骤多次工具调用
+sequential_thinking(
+    thought="并行获取多个数据源",
+    nextThoughtNeeded=True,
+    thoughtNumber=1,
+    totalThoughts=3,
+    session_id="interleaved-session",
+    toolCalls=[
+        {"name": "search_api", "arguments": {"q": "query1"}},
+        {"name": "read_file", "arguments": {"path": "/data"}},
+    ],
+    toolResults=[
+        {"call_id": "...", "result": "result1", "success": True},
+        {"call_id": "...", "result": "result2", "success": True},
+    ],
+)
+```
+
+**资源控制配置**:
+
+通过环境变量配置工具调用限制：
+
+| 环境变量 | 默认值 | 说明 |
+|---------|--------|------|
+| `DEEP_THINKING_MAX_TOOL_CALLS` | 100 | 会话总工具调用次数上限 |
+| `DEEP_THINKING_MAX_TOOL_CALLS_PER_THOUGHT` | 10 | 每步骤工具调用次数上限 |
+
+**统计信息**:
+
+会话统计信息包含以下字段：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `total_thoughts` | int | 总思考步骤数 |
+| `total_tool_calls` | int | 总工具调用次数 |
+| `successful_tool_calls` | int | 成功的工具调用次数 |
+| `failed_tool_calls` | int | 失败的工具调用次数 |
+| `cached_tool_calls` | int | 缓存命中的工具调用次数 |
+| `total_execution_time_ms` | float | 总执行时间（毫秒） |
+| `avg_thought_length` | float | 平均思考内容长度 |
 
 #### 使用示例
 
@@ -204,6 +294,74 @@ sequential_thinking(
     hypotheticalCondition="如果用户数量从10万增长到100万",
     hypotheticalImpact="服务器负载增加10倍，需要：1.数据库分库分表 2.引入缓存层 3.增加CDN节点",
     hypotheticalProbability="可能性：高"
+)
+
+# ===== Interleaved Thinking 示例 =====
+
+# 三阶段工作流：thinking -> tool_call -> analysis
+# Step 1: thinking 阶段 - 初始思考
+sequential_thinking(
+    thought="需要查询数据库获取用户信息",
+    nextThoughtNeeded=True,
+    thoughtNumber=1,
+    totalThoughts=3,
+    session_id="interleaved-demo",
+    # phase 参数为空时自动推断为 "thinking"
+)
+
+# Step 2: tool_call 阶段 - 调用工具
+sequential_thinking(
+    thought="执行数据库查询",
+    nextThoughtNeeded=True,
+    thoughtNumber=2,
+    totalThoughts=3,
+    session_id="interleaved-demo",
+    toolCalls=[
+        {"name": "query_database", "arguments": {"sql": "SELECT * FROM users LIMIT 10"}},
+    ],
+    # phase 自动推断为 "tool_call"
+)
+
+# Step 3: analysis 阶段 - 分析结果
+sequential_thinking(
+    thought="分析查询结果，找到目标用户",
+    nextThoughtNeeded=False,
+    thoughtNumber=3,
+    totalThoughts=3,
+    session_id="interleaved-demo",
+    toolResults=[
+        {"call_id": "...", "result": [{"id": 1, "name": "Alice"}], "success": True},
+    ],
+    # phase 自动推断为 "analysis"
+)
+
+# 显式指定阶段
+sequential_thinking(
+    thought="显式指定为分析阶段",
+    nextThoughtNeeded=True,
+    thoughtNumber=1,
+    totalThoughts=3,
+    session_id="explicit-phase",
+    phase="analysis",  # 显式指定
+)
+
+# 1:N 映射 - 单步骤多次工具调用
+sequential_thinking(
+    thought="并行调用多个工具获取数据",
+    nextThoughtNeeded=True,
+    thoughtNumber=1,
+    totalThoughts=3,
+    session_id="multi-tool",
+    toolCalls=[
+        {"name": "api_a", "arguments": {"endpoint": "/users"}, "call_id": "call-1"},
+        {"name": "api_b", "arguments": {"endpoint": "/orders"}, "call_id": "call-2"},
+        {"name": "db_query", "arguments": {"sql": "SELECT * FROM products"}, "call_id": "call-3"},
+    ],
+    toolResults=[
+        {"call_id": "call-1", "result": "users_data", "success": True},
+        {"call_id": "call-2", "result": "orders_data", "success": True},
+        {"call_id": "call-3", "result": "products_data", "success": True},
+    ],
 )
 ```
 
@@ -843,6 +1001,9 @@ tree_structure = visualize_session_simple("abc-123", "tree")
   hypothetical_condition?: string;  // 假设条件
   hypothetical_impact?: string;     // 影响分析
   hypothetical_probability?: string;  // 可能性评估
+  // Interleaved Thinking 字段 (v0.2.4+)
+  phase?: "thinking" | "tool_call" | "analysis";  // 执行阶段
+  tool_calls?: string[];       // 关联的工具调用记录ID列表
   timestamp: string;           // 时间戳（ISO 8601）
 }
 ```
@@ -859,6 +1020,59 @@ tree_structure = visualize_session_simple("abc-123", "tree")
   updated_at: string;          // 更新时间
   thoughts: Thought[];         // 思考步骤列表
   metadata: Record<string, any>;  // 元数据
+  // Interleaved Thinking 字段 (v0.2.4+)
+  statistics: SessionStatistics;  // 会话统计信息
+  tool_call_history: ToolCallRecord[];  // 工具调用记录列表
+}
+```
+
+### SessionStatistics（会话统计信息）(v0.2.4+)
+
+```typescript
+{
+  total_thoughts: number;      // 总思考步骤数
+  total_tool_calls: number;    // 总工具调用次数
+  successful_tool_calls: number;  // 成功的工具调用次数
+  failed_tool_calls: number;   // 失败的工具调用次数
+  cached_tool_calls: number;   // 缓存命中的工具调用次数
+  total_execution_time_ms: number;  // 总执行时间（毫秒）
+  avg_thought_length: number;  // 平均思考内容长度
+  phase_distribution: {        // 各阶段分布
+    thinking: number;
+    tool_call: number;
+    analysis: number;
+  };
+}
+```
+
+### ToolCallRecord（工具调用记录）(v0.2.4+)
+
+```typescript
+{
+  record_id: string;           // 记录唯一标识符
+  thought_number: number;      // 关联的思考步骤编号
+  call_data: {                 // 调用数据
+    call_id: string;           // 调用唯一标识符
+    tool_name: string;         // 工具名称
+    arguments: object;         // 工具调用参数
+    timestamp: string;         // 调用时间戳
+  };
+  result_data: {               // 结果数据（可选）
+    call_id: string;           // 对应的调用ID
+    success: boolean;          // 是否成功
+    result: any;               // 返回结果
+    error?: {                  // 错误信息（失败时）
+      error_type: string;
+      error_message: string;
+    };
+    execution_time_ms?: number;  // 执行时间（毫秒）
+    from_cache: boolean;       // 是否来自缓存
+    timestamp: string;         // 结果时间戳
+  } | null;
+  status: "pending" | "running" | "completed" | "failed" | "timeout" | "cancelled";
+  created_at: string;          // 创建时间
+  updated_at: string;          // 更新时间
+}
 }
 ```
 
@@ -896,6 +1110,8 @@ DeepThinking MCP 支持两种传输模式：
 
 | 版本 | 日期 | 变更 |
 |------|------|------|
+| 0.2.4 | 2026-02-14 | **Interleaved Thinking**: 三阶段模型、自动阶段推断、工具调用追踪(1:N)、资源控制、结果缓存 |
+| 0.2.3 | 2026-01-08 | 代码质量优化与测试覆盖率提升 |
 | 0.2.2 | 2026-01-03 | 代码质量优化与文档完善，支持6种思考类型 |
 | 0.2.0 | 2026-01-02 | 新增对比、逆向、假设三种思考类型 |
 | 0.1.0 | 2025-12-31 | 初始版本 |
