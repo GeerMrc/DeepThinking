@@ -297,3 +297,192 @@ class TestStorageManager:
         manager.delete_session(session.session_id)
         index = manager._read_index()
         assert session.session_id not in index
+
+    # =============================================================================
+    # Interleaved Thinking 新字段持久化测试 (Phase 4.1/4.2/4.3/4.4)
+    # =============================================================================
+
+    def test_thought_phase_persistence(self, manager):
+        """测试 Thought 的 phase 字段持久化 (Phase 4.1)"""
+        from deep_thinking.models.thought import Thought
+
+        session = manager.create_session(name="测试会话")
+
+        # 添加带有 phase 字段的思考步骤
+        thought = Thought(
+            thought_number=1,
+            content="工具调用阶段",
+            phase="tool_call",
+        )
+        manager.add_thought(session.session_id, thought)
+
+        # 重新加载
+        reloaded = manager.get_session(session.session_id)
+        assert reloaded is not None
+        assert reloaded.thoughts[0].phase == "tool_call"
+
+    def test_thought_tool_calls_persistence(self, manager):
+        """测试 Thought 的 tool_calls 字段持久化 (Phase 4.1)"""
+        from deep_thinking.models.thought import Thought
+
+        session = manager.create_session(name="测试会话")
+
+        # 添加带有 tool_calls 字段的思考步骤
+        thought = Thought(
+            thought_number=1,
+            content="带有工具调用的思考",
+            tool_calls=["record-id-1", "record-id-2"],
+        )
+        manager.add_thought(session.session_id, thought)
+
+        # 重新加载
+        reloaded = manager.get_session(session.session_id)
+        assert reloaded is not None
+        assert reloaded.thoughts[0].tool_calls == ["record-id-1", "record-id-2"]
+
+    def test_thought_backward_compatibility(self, manager):
+        """测试 Thought 向后兼容性 - 旧格式数据 (Phase 4.1)"""
+        from deep_thinking.models.thought import Thought
+
+        session = manager.create_session(name="测试会话")
+
+        # 添加旧格式的思考步骤（没有 phase 和 tool_calls）
+        thought = Thought(
+            thought_number=1,
+            content="旧格式思考",
+        )
+        manager.add_thought(session.session_id, thought)
+
+        # 重新加载
+        reloaded = manager.get_session(session.session_id)
+        assert reloaded is not None
+        # 验证默认值
+        assert reloaded.thoughts[0].phase == "thinking"
+        assert reloaded.thoughts[0].tool_calls == []
+
+    def test_session_statistics_persistence(self, manager):
+        """测试 ThinkingSession 的 statistics 字段持久化 (Phase 4.2/4.4)"""
+        session = manager.create_session(name="测试会话")
+
+        # 更新统计信息
+        session.statistics.total_thoughts = 5
+        session.statistics.total_tool_calls = 3
+        session.statistics.successful_tool_calls = 2
+        session.statistics.failed_tool_calls = 1
+        manager.update_session(session)
+
+        # 重新加载
+        reloaded = manager.get_session(session.session_id)
+        assert reloaded is not None
+        assert reloaded.statistics.total_thoughts == 5
+        assert reloaded.statistics.total_tool_calls == 3
+        assert reloaded.statistics.successful_tool_calls == 2
+        assert reloaded.statistics.failed_tool_calls == 1
+
+    def test_session_tool_call_history_persistence(self, manager):
+        """测试 ThinkingSession 的 tool_call_history 字段持久化 (Phase 4.3)"""
+        from deep_thinking.models.tool_call import ToolCallData, ToolCallRecord
+
+        session = manager.create_session(name="测试会话")
+
+        # 添加工具调用记录
+        record = ToolCallRecord(
+            thought_number=1,
+            call_data=ToolCallData(
+                tool_name="search",
+                arguments={"query": "test"},
+            ),
+            status="completed",
+        )
+        session.tool_call_history.append(record)
+        manager.update_session(session)
+
+        # 重新加载
+        reloaded = manager.get_session(session.session_id)
+        assert reloaded is not None
+        assert len(reloaded.tool_call_history) == 1
+
+        # 验证嵌套模型正确反序列化
+        reloaded_record = reloaded.tool_call_history[0]
+        assert reloaded_record.call_data.tool_name == "search"
+        assert reloaded_record.call_data.arguments == {"query": "test"}
+        assert reloaded_record.status == "completed"
+
+    def test_session_backward_compatibility(self, manager):
+        """测试 ThinkingSession 向后兼容性 - 旧格式数据 (Phase 4.2)"""
+        session = manager.create_session(name="测试会话")
+
+        # 旧格式会话不包含 statistics 和 tool_call_history
+        reloaded = manager.get_session(session.session_id)
+        assert reloaded is not None
+        # 验证默认值
+        assert reloaded.statistics.total_thoughts == 0
+        assert reloaded.statistics.total_tool_calls == 0
+        assert reloaded.tool_call_history == []
+
+    def test_complex_nested_persistence(self, manager):
+        """测试复杂嵌套结构持久化 (Phase 4.3/4.4)"""
+        from deep_thinking.models.thought import Thought
+        from deep_thinking.models.tool_call import (
+            ToolCallData,
+            ToolCallError,
+            ToolCallRecord,
+            ToolResultData,
+        )
+
+        session = manager.create_session(name="复杂测试会话")
+
+        # 添加带有新字段的思考步骤
+        thought = Thought(
+            thought_number=1,
+            content="分析阶段",
+            phase="analysis",
+            tool_calls=["rec-1"],
+        )
+        manager.add_thought(session.session_id, thought)
+
+        # 重新获取会话并添加复杂的工具调用记录
+        session = manager.get_session(session.session_id)
+        assert session is not None
+
+        # 添加带有错误信息的工具调用记录
+        record = ToolCallRecord(
+            thought_number=1,
+            call_data=ToolCallData(tool_name="failing_tool", arguments={"x": 1}),
+            result_data=ToolResultData(
+                call_id="call-1",
+                success=False,
+                error=ToolCallError(
+                    error_type="ValueError",
+                    error_message="Invalid input",
+                    error_code="E001",
+                ),
+                execution_time_ms=150.5,
+            ),
+            status="failed",
+        )
+        session.tool_call_history.append(record)
+        session.statistics.update_from_tool_calls(session.tool_call_history)
+        manager.update_session(session)
+
+        # 重新加载并验证
+        reloaded = manager.get_session(session.session_id)
+        assert reloaded is not None
+
+        # 验证 Thought
+        assert reloaded.thoughts[0].phase == "analysis"
+        assert reloaded.thoughts[0].tool_calls == ["rec-1"]
+
+        # 验证 ToolCallRecord
+        assert len(reloaded.tool_call_history) == 1
+        rec = reloaded.tool_call_history[0]
+        assert rec.call_data.tool_name == "failing_tool"
+        assert rec.result_data is not None
+        assert rec.result_data.success is False
+        assert rec.result_data.error is not None
+        assert rec.result_data.error.error_type == "ValueError"
+        assert rec.result_data.execution_time_ms == 150.5
+
+        # 验证 Statistics
+        assert reloaded.statistics.total_tool_calls == 1
+        assert reloaded.statistics.failed_tool_calls == 1
