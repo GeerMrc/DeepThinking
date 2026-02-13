@@ -553,6 +553,62 @@ class TestSequentialThinkingIntegration:
             assert record.result_data is not None
             assert record.result_data.success is True
 
+    def test_tool_calls_per_thought_limit_exceeded(self, storage_manager, monkeypatch):
+        """测试超过每步骤工具调用数量限制"""
+        # 设置较低的每步骤工具调用限制
+        monkeypatch.setenv("DEEP_THINKING_MAX_TOOL_CALLS_PER_THOUGHT", "5")
+
+        # 重新加载配置
+        from deep_thinking.models.config import set_global_config, ThinkingConfig
+        set_global_config(ThinkingConfig.from_env())
+
+        # 尝试调用 6 个工具（超过限制 5）
+        result = sequential_thinking.sequential_thinking(
+            thought="尝试调用过多工具",
+            nextThoughtNeeded=True,
+            thoughtNumber=1,
+            totalThoughts=3,
+            session_id="test-per-thought-limit",
+            toolCalls=[
+                {"name": f"tool_{i}", "arguments": {}} for i in range(6)
+            ],
+        )
+        assert "单步骤工具调用数超限" in result
+        assert "6" in result
+        assert "5" in result
+
+        # 验证没有工具调用被记录
+        session = storage_manager.get_session("test-per-thought-limit")
+        assert session is not None
+        assert len(session.tool_call_history) == 0
+
+    def test_tool_calls_per_thought_within_limit(self, storage_manager, monkeypatch):
+        """测试在每步骤工具调用数量限制内"""
+        # 设置较低的每步骤工具调用限制
+        monkeypatch.setenv("DEEP_THINKING_MAX_TOOL_CALLS_PER_THOUGHT", "5")
+
+        # 重新加载配置
+        from deep_thinking.models.config import set_global_config, ThinkingConfig
+        set_global_config(ThinkingConfig.from_env())
+
+        # 调用 5 个工具（刚好等于限制）
+        result = sequential_thinking.sequential_thinking(
+            thought="调用刚好等于限制的工具数",
+            nextThoughtNeeded=True,
+            thoughtNumber=1,
+            totalThoughts=3,
+            session_id="test-per-thought-ok",
+            toolCalls=[
+                {"name": f"tool_{i}", "arguments": {}} for i in range(5)
+            ],
+        )
+        assert "工具调用 (5个)" in result
+
+        # 验证 5 个工具调用被记录
+        session = storage_manager.get_session("test-per-thought-ok")
+        assert session is not None
+        assert len(session.tool_call_history) == 5
+
 
 class TestSequentialThinkingBoundary:
     """顺序思考工具边界测试"""

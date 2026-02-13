@@ -242,6 +242,30 @@ def sequential_thinking(
 
     # 如果有工具调用参数，创建并存储工具调用记录
     if toolCalls is not None and len(toolCalls) > 0:
+        # ===== 每步骤调用数量检查 (Phase 3.6.3) =====
+        max_tool_calls_per_thought = config.max_tool_calls_per_thought
+        if len(toolCalls) > max_tool_calls_per_thought:
+            logger.warning(
+                f"会话 {session_id} 单步骤工具调用数超限: "
+                f"请求 {len(toolCalls)} > 每步骤上限 {max_tool_calls_per_thought}"
+            )
+            result = [
+                f"## 思考步骤 {thoughtNumber}/{totalThoughts}",
+                "",
+                f"**类型**: {get_type_name(thought_type)}",
+                f"**阶段**: {get_phase_display(inferred_phase)}",
+                "",
+                f"{thought}",
+                "",
+                "---",
+                "**会话信息**:",
+                f"- 会话ID: {session_id}",
+                "",
+                f"⚠️ 警告：单步骤工具调用数超限，请求 {len(toolCalls)} > "
+                f"每步骤上限 {max_tool_calls_per_thought}。",
+            ]
+            return "\n".join(result)
+
         # ===== 资源控制检查 (Phase 3.5.7: 批量检查配额) =====
         current_session = manager.get_session(session_id)
         if current_session is not None:
