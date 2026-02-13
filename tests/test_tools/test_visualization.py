@@ -10,6 +10,7 @@ import pytest
 
 from deep_thinking.models.thinking_session import ThinkingSession
 from deep_thinking.models.thought import Thought
+from deep_thinking.models.tool_call import ToolCallData, ToolCallRecord, ToolResultData
 from deep_thinking.tools import visualization
 from deep_thinking.utils.formatters import Visualizer
 
@@ -468,3 +469,282 @@ class TestHelperFunctions:
 
         with pytest.raises(ValueError, match="不支持的格式"):
             _normalize_format("invalid")
+
+
+# =============================================================================
+# Interleaved Thinking 可视化测试
+# =============================================================================
+
+
+class TestInterleavedThinkingMermaid:
+    """测试 Mermaid 格式的 Interleaved Thinking 支持"""
+
+    def test_mermaid_with_tool_calls(self, sample_session_data):
+        """测试 Mermaid 显示工具调用节点"""
+        # 创建带工具调用的思考步骤
+        thought = Thought(
+            thought_number=1,
+            content="需要查询数据",
+            type="regular",
+            phase="tool_call",
+            tool_calls=["record-001"],
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+
+        # 添加工具调用记录
+        record = ToolCallRecord(
+            record_id="record-001",
+            thought_number=1,
+            call_data=ToolCallData(tool_name="search_api", arguments={"query": "test"}),
+            result_data=ToolResultData(call_id="call-001", success=True, result="found"),
+            status="completed",
+        )
+        session.tool_call_history.append(record)
+
+        result = Visualizer.to_mermaid(session)
+
+        # 验证工具调用节点存在
+        assert "T1_TOOL1" in result
+        assert "search_api" in result
+        assert ":::tool_call" in result
+        # 验证工具调用连接线
+        assert "-.->|调用|" in result or "-.->" in result
+
+    def test_mermaid_with_phase_info(self, sample_session_data):
+        """测试 Mermaid 显示阶段信息"""
+        thought = Thought(
+            thought_number=1,
+            content="分析数据",
+            type="regular",
+            phase="analysis",
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+
+        result = Visualizer.to_mermaid(session)
+
+        # 验证阶段信息存在
+        assert "分析阶段" in result or "📊" in result
+
+    def test_mermaid_multiple_tool_calls(self, sample_session_data):
+        """测试 Mermaid 显示多个工具调用"""
+        thought = Thought(
+            thought_number=1,
+            content="多工具调用",
+            type="regular",
+            phase="tool_call",
+            tool_calls=["record-001", "record-002"],
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+
+        # 添加多个工具调用记录
+        session.tool_call_history.append(
+            ToolCallRecord(
+                record_id="record-001",
+                thought_number=1,
+                call_data=ToolCallData(tool_name="read_file", arguments={}),
+                status="completed",
+            )
+        )
+        session.tool_call_history.append(
+            ToolCallRecord(
+                record_id="record-002",
+                thought_number=1,
+                call_data=ToolCallData(tool_name="write_file", arguments={}),
+                status="failed",
+            )
+        )
+
+        result = Visualizer.to_mermaid(session)
+
+        # 验证两个工具调用节点
+        assert "T1_TOOL1" in result
+        assert "T1_TOOL2" in result
+        assert "read_file" in result
+        assert "write_file" in result
+
+    def test_mermaid_tool_call_style(self, sample_session_data):
+        """测试 Mermaid 工具调用样式定义"""
+        session = ThinkingSession(**sample_session_data)
+        result = Visualizer.to_mermaid(session)
+
+        # 验证工具调用样式定义存在
+        assert "classDef tool_call" in result
+
+
+class TestInterleavedThinkingAscii:
+    """测试 ASCII 格式的 Interleaved Thinking 支持"""
+
+    def test_ascii_with_tool_calls(self, sample_session_data):
+        """测试 ASCII 显示工具调用"""
+        thought = Thought(
+            thought_number=1,
+            content="需要查询数据",
+            type="regular",
+            phase="tool_call",
+            tool_calls=["record-001"],
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+
+        # 添加工具调用记录
+        session.tool_call_history.append(
+            ToolCallRecord(
+                record_id="record-001",
+                thought_number=1,
+                call_data=ToolCallData(tool_name="search_api", arguments={}),
+                status="completed",
+            )
+        )
+
+        result = Visualizer.to_ascii(session)
+
+        # 验证工具调用信息
+        assert "🔧" in result
+        assert "search_api" in result
+        assert "✅" in result  # completed status emoji
+
+    def test_ascii_with_phase_info(self, sample_session_data):
+        """测试 ASCII 显示阶段信息"""
+        thought = Thought(
+            thought_number=1,
+            content="思考中",
+            type="regular",
+            phase="thinking",
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+
+        result = Visualizer.to_ascii(session)
+
+        # 验证阶段信息
+        assert "思考阶段" in result or "💭" in result
+
+    def test_ascii_analysis_phase(self, sample_session_data):
+        """测试 ASCII 显示分析阶段"""
+        thought = Thought(
+            thought_number=1,
+            content="分析结果",
+            type="regular",
+            phase="analysis",
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+
+        result = Visualizer.to_ascii(session)
+
+        # 验证分析阶段
+        assert "分析阶段" in result or "📊" in result
+
+
+class TestInterleavedThinkingTree:
+    """测试 Tree 格式的 Interleaved Thinking 支持"""
+
+    def test_tree_with_tool_calls(self, sample_session_data):
+        """测试 Tree 显示工具调用"""
+        thought = Thought(
+            thought_number=1,
+            content="执行工具",
+            type="regular",
+            phase="tool_call",
+            tool_calls=["record-001"],
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+
+        # 添加工具调用记录
+        session.tool_call_history.append(
+            ToolCallRecord(
+                record_id="record-001",
+                thought_number=1,
+                call_data=ToolCallData(tool_name="execute_cmd", arguments={}),
+                status="completed",
+            )
+        )
+
+        result = Visualizer.to_tree(session)
+
+        # 验证工具调用信息
+        assert "🔧" in result
+        assert "execute_cmd" in result
+
+    def test_tree_with_phase_info(self, sample_session_data):
+        """测试 Tree 显示阶段信息"""
+        thought = Thought(
+            thought_number=1,
+            content="分析数据",
+            type="regular",
+            phase="analysis",
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+
+        result = Visualizer.to_tree(session)
+
+        # 验证阶段信息
+        assert "分析阶段" in result or "📊" in result
+
+    def test_tree_multiple_tool_calls(self, sample_session_data):
+        """测试 Tree 显示多个工具调用"""
+        thought = Thought(
+            thought_number=1,
+            content="多工具",
+            type="regular",
+            phase="tool_call",
+            tool_calls=["record-001", "record-002", "record-003"],
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+
+        # 添加多个工具调用记录
+        for i, tool_name in enumerate(["tool_a", "tool_b", "tool_c"]):
+            session.tool_call_history.append(
+                ToolCallRecord(
+                    record_id=f"record-00{i + 1}",
+                    thought_number=1,
+                    call_data=ToolCallData(tool_name=tool_name, arguments={}),
+                    status="completed",
+                )
+            )
+
+        result = Visualizer.to_tree(session)
+
+        # 验证所有工具调用都显示
+        assert "tool_a" in result
+        assert "tool_b" in result
+        assert "tool_c" in result
+
+    def test_tree_different_phases(self, sample_session_data):
+        """测试 Tree 显示不同阶段"""
+        phases = [
+            ("thinking", "思考阶段", "💭"),
+            ("tool_call", "工具调用阶段", "🔧"),
+            ("analysis", "分析阶段", "📊"),
+        ]
+
+        for phase, phase_name, emoji in phases:
+            thought = Thought(
+                thought_number=1,
+                content=f"测试{phase}",
+                type="regular",
+                phase=phase,  # type: ignore
+            )
+
+            session = ThinkingSession(**sample_session_data)
+            session.add_thought(thought)
+
+            result = Visualizer.to_tree(session)
+
+            # 验证阶段信息显示
+            assert phase_name in result or emoji in result, f"Phase {phase} not found in result"

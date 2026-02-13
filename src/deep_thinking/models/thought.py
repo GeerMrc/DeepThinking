@@ -13,6 +13,9 @@ from pydantic import BaseModel, Field, model_validator
 # 定义思考类型的联合类型
 ThoughtType = Literal["regular", "revision", "branch", "comparison", "reverse", "hypothetical"]
 
+# 定义执行阶段的联合类型 (Interleaved Thinking)
+ExecutionPhase = Literal["thinking", "tool_call", "analysis"]
+
 
 class Thought(BaseModel):
     """
@@ -29,6 +32,8 @@ class Thought(BaseModel):
         branch_from_thought: 分支起始思考步骤编号
         branch_id: 分支标识符
         timestamp: 思考时间戳
+        phase: 执行阶段（thinking/tool_call/analysis，Interleaved Thinking）
+        tool_calls: 关联的工具调用记录列表（Interleaved Thinking）
     """
 
     thought_number: int = Field(..., ge=1, description="思考步骤编号，从1开始")
@@ -111,6 +116,17 @@ class Thought(BaseModel):
 
     timestamp: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc), description="思考时间戳"
+    )
+
+    # Interleaved Thinking 扩展字段
+    phase: ExecutionPhase = Field(
+        default="thinking",
+        description="执行阶段（thinking/tool_call/analysis）",
+    )
+
+    tool_calls: list[Any] = Field(
+        default_factory=list,
+        description="关联的工具调用记录ID列表",
     )
 
     @model_validator(mode="after")
@@ -349,6 +365,12 @@ class ThoughtCreate(BaseModel):
         description="假设思考的可能性评估",
     )
 
+    # Interleaved Thinking 扩展字段
+    phase: ExecutionPhase = Field(
+        default="thinking",
+        description="执行阶段",
+    )
+
     def to_thought(self) -> Thought:
         """
         转换为Thought模型
@@ -373,6 +395,7 @@ class ThoughtCreate(BaseModel):
             hypothetical_condition=self.hypothetical_condition,
             hypothetical_impact=self.hypothetical_impact,
             hypothetical_probability=self.hypothetical_probability,
+            phase=self.phase,
         )
 
 
@@ -432,3 +455,6 @@ class ThoughtUpdate(BaseModel):
     hypothetical_probability: str | None = Field(
         None, min_length=1, max_length=50, description="假设思考的可能性评估"
     )
+
+    # Interleaved Thinking 扩展字段
+    phase: ExecutionPhase | None = Field(None, description="执行阶段")

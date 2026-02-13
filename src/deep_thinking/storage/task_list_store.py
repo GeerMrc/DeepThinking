@@ -267,7 +267,7 @@ class TaskListStore:
         Returns:
             状态到数量的映射字典
         """
-        counts = {status: 0 for status in TaskStatus}
+        counts = dict.fromkeys(TaskStatus, 0)
         index = self._read_index()
 
         for task_info in index.values():

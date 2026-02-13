@@ -7,7 +7,96 @@ from datetime import datetime, timezone
 import pytest
 from pydantic import ValidationError
 
-from deep_thinking.models.thought import Thought, ThoughtCreate, ThoughtUpdate
+from deep_thinking.models.thought import (
+    ExecutionPhase,
+    Thought,
+    ThoughtCreate,
+    ThoughtUpdate,
+)
+
+
+class TestExecutionPhase:
+    """ExecutionPhase类型测试 (Interleaved Thinking)"""
+
+    def test_execution_phase_type_definition(self):
+        """测试ExecutionPhase类型定义存在"""
+        # 验证类型已定义
+        assert ExecutionPhase is not None
+
+    def test_execution_phase_valid_values(self):
+        """测试ExecutionPhase有效值"""
+        # 验证三种执行阶段都是有效值
+        thinking_phase: ExecutionPhase = "thinking"
+        tool_call_phase: ExecutionPhase = "tool_call"
+        analysis_phase: ExecutionPhase = "analysis"
+
+        assert thinking_phase == "thinking"
+        assert tool_call_phase == "tool_call"
+        assert analysis_phase == "analysis"
+
+
+class TestThoughtInterleaved:
+    """Thought Interleaved Thinking 功能测试"""
+
+    def test_thought_has_phase_field(self):
+        """测试Thought包含phase字段"""
+        thought = Thought(thought_number=1, content="测试")
+        assert hasattr(thought, "phase")
+        assert thought.phase == "thinking"  # 默认值
+
+    def test_thought_has_tool_calls_field(self):
+        """测试Thought包含tool_calls字段"""
+        thought = Thought(thought_number=1, content="测试")
+        assert hasattr(thought, "tool_calls")
+        assert thought.tool_calls == []
+
+    def test_thought_phase_validation(self):
+        """测试phase字段验证"""
+        # 有效phase值
+        for phase in ["thinking", "tool_call", "analysis"]:
+            thought = Thought(thought_number=1, content="测试", phase=phase)
+            assert thought.phase == phase
+
+    def test_thought_tool_calls_with_records(self):
+        """测试tool_calls字段存储记录ID"""
+        thought = Thought(
+            thought_number=1,
+            content="需要调用工具的思考",
+            phase="tool_call",
+            tool_calls=["record-id-1", "record-id-2"],
+        )
+        assert thought.phase == "tool_call"
+        assert len(thought.tool_calls) == 2
+
+    def test_thought_to_dict_includes_new_fields(self):
+        """测试to_dict包含新字段"""
+        thought = Thought(
+            thought_number=1,
+            content="测试",
+            phase="analysis",
+            tool_calls=["record-1"],
+        )
+        data = thought.to_dict()
+
+        assert "phase" in data
+        assert data["phase"] == "analysis"
+        assert "tool_calls" in data
+        assert data["tool_calls"] == ["record-1"]
+
+    def test_thoughtcreate_with_phase(self):
+        """测试ThoughtCreate支持phase字段"""
+        create_data = ThoughtCreate(
+            thought_number=1,
+            content="测试",
+            phase="tool_call",
+        )
+        thought = create_data.to_thought()
+        assert thought.phase == "tool_call"
+
+    def test_thoughtupdate_with_phase(self):
+        """测试ThoughtUpdate支持phase字段"""
+        update_data = ThoughtUpdate(phase="analysis")
+        assert update_data.phase == "analysis"
 
 
 class TestThought:
