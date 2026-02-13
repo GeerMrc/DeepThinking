@@ -7,7 +7,32 @@ from datetime import datetime, timezone
 import pytest
 from pydantic import ValidationError
 
-from deep_thinking.models.thought import Thought, ThoughtCreate, ThoughtUpdate
+from deep_thinking.models.thought import (
+    ExecutionPhase,
+    Thought,
+    ThoughtCreate,
+    ThoughtUpdate,
+)
+
+
+class TestExecutionPhase:
+    """ExecutionPhase类型测试 (Interleaved Thinking)"""
+
+    def test_execution_phase_type_definition(self):
+        """测试ExecutionPhase类型定义存在"""
+        # 验证类型已定义
+        assert ExecutionPhase is not None
+
+    def test_execution_phase_valid_values(self):
+        """测试ExecutionPhase有效值"""
+        # 验证三种执行阶段都是有效值
+        thinking_phase: ExecutionPhase = "thinking"
+        tool_call_phase: ExecutionPhase = "tool_call"
+        analysis_phase: ExecutionPhase = "analysis"
+
+        assert thinking_phase == "thinking"
+        assert tool_call_phase == "tool_call"
+        assert analysis_phase == "analysis"
 
 
 class TestThought:

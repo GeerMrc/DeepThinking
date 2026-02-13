@@ -13,6 +13,9 @@ from pydantic import BaseModel, Field, model_validator
 # 定义思考类型的联合类型
 ThoughtType = Literal["regular", "revision", "branch", "comparison", "reverse", "hypothetical"]
 
+# 定义执行阶段的联合类型 (Interleaved Thinking)
+ExecutionPhase = Literal["thinking", "tool_call", "analysis"]
+
 
 class Thought(BaseModel):
     """
