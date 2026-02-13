@@ -203,9 +203,7 @@ def sequential_thinking(
     if phase is not None:
         inferred_phase = phase
     else:
-        inferred_phase = infer_phase_from_lists(
-            tool_calls=toolCalls, tool_results=toolResults
-        )
+        inferred_phase = infer_phase_from_lists(tool_calls=toolCalls, tool_results=toolResults)
 
     # 创建思考步骤对象
     thought_obj = Thought(

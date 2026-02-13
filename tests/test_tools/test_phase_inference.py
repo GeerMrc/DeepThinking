@@ -2,8 +2,6 @@
 阶段推断模块单元测试 (Interleaved Thinking)
 """
 
-import pytest
-
 from deep_thinking.tools.phase_inference import (
     get_phase_description,
     infer_phase,
@@ -73,10 +71,13 @@ class TestInferPhase:
         assert infer_phase(tool_result={"result": "data"}) == "analysis"
 
         # 两者都有，tool_result 优先
-        assert infer_phase(
-            tool_call={"name": "test"},
-            tool_result={"result": "data"},
-        ) == "analysis"
+        assert (
+            infer_phase(
+                tool_call={"name": "test"},
+                tool_result={"result": "data"},
+            )
+            == "analysis"
+        )
 
 
 class TestInferPhaseFromLists:
@@ -89,9 +90,7 @@ class TestInferPhaseFromLists:
 
     def test_with_tool_calls(self):
         """测试有 tool_calls 参数时返回 tool_call"""
-        result = infer_phase_from_lists(
-            tool_calls=[{"name": "search", "arguments": {"q": "test"}}]
-        )
+        result = infer_phase_from_lists(tool_calls=[{"name": "search", "arguments": {"q": "test"}}])
         assert result == "tool_call"
 
     def test_with_multiple_tool_calls(self):
@@ -117,9 +116,7 @@ class TestInferPhaseFromLists:
 
     def test_with_tool_results(self):
         """测试有 tool_results 参数时返回 analysis"""
-        result = infer_phase_from_lists(
-            tool_results=[{"call_id": "123", "result": "data"}]
-        )
+        result = infer_phase_from_lists(tool_results=[{"call_id": "123", "result": "data"}])
         assert result == "analysis"
 
     def test_with_multiple_tool_results(self):
@@ -159,10 +156,13 @@ class TestInferPhaseFromLists:
         assert infer_phase_from_lists(tool_results=[{"result": "data"}]) == "analysis"
 
         # 两者都有，tool_results 优先
-        assert infer_phase_from_lists(
-            tool_calls=[{"name": "test"}],
-            tool_results=[{"result": "data"}],
-        ) == "analysis"
+        assert (
+            infer_phase_from_lists(
+                tool_calls=[{"name": "test"}],
+                tool_results=[{"result": "data"}],
+            )
+            == "analysis"
+        )
 
 
 class TestInferPhaseFromContent:

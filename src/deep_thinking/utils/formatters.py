@@ -688,7 +688,9 @@ class SessionFormatter:
         # 添加执行阶段标签 (Interleaved Thinking)
         phase_emoji = SessionFormatter.PHASE_EMOJI.get(thought.phase, "")
         phase_name = SessionFormatter.PHASE_NAME.get(thought.phase, "思考阶段")
-        phase_span = f'<span class="thought-phase {thought.phase}">{phase_emoji} {phase_name}</span>'
+        phase_span = (
+            f'<span class="thought-phase {thought.phase}">{phase_emoji} {phase_name}</span>'
+        )
         lines.append(f"                {phase_span}")
 
         lines.append("            </div>")
@@ -709,15 +711,21 @@ class SessionFormatter:
         # 显示关联的工具调用 (Interleaved Thinking)
         if thought.tool_calls and session:
             lines.append('            <div class="tool-calls">')
-            lines.append('                <strong>关联工具调用:</strong>')
+            lines.append("                <strong>关联工具调用:</strong>")
             for record_id in thought.tool_calls:
                 record = SessionFormatter._find_tool_call_record(session, record_id)
                 if record:
                     status_emoji = SessionFormatter.TOOL_STATUS_EMOJI.get(record.status, "❓")
                     tool_name = SessionFormatter._escape_html(record.call_data.tool_name)
-                    status_class = record.status if record.status in ("completed", "failed", "pending") else ""
-                    status_span = f'<span class="tool-call-status {status_class}">{status_emoji}</span>'
-                    lines.append(f'                <div class="tool-call-item">{status_span} <code>{tool_name}</code></div>')
+                    status_class = (
+                        record.status if record.status in ("completed", "failed", "pending") else ""
+                    )
+                    status_span = (
+                        f'<span class="tool-call-status {status_class}">{status_emoji}</span>'
+                    )
+                    lines.append(
+                        f'                <div class="tool-call-item">{status_span} <code>{tool_name}</code></div>'
+                    )
             lines.append("            </div>")
 
         # 时间戳
@@ -741,16 +749,16 @@ class SessionFormatter:
         """
         lines: list[str] = []
         lines.append('        <div class="tool-call-history">')
-        lines.append('            <table>')
-        lines.append('                <thead>')
-        lines.append('                    <tr>')
-        lines.append('                        <th>步骤</th>')
-        lines.append('                        <th>工具名称</th>')
-        lines.append('                        <th>状态</th>')
-        lines.append('                        <th>执行时间</th>')
-        lines.append('                    </tr>')
-        lines.append('                </thead>')
-        lines.append('                <tbody>')
+        lines.append("            <table>")
+        lines.append("                <thead>")
+        lines.append("                    <tr>")
+        lines.append("                        <th>步骤</th>")
+        lines.append("                        <th>工具名称</th>")
+        lines.append("                        <th>状态</th>")
+        lines.append("                        <th>执行时间</th>")
+        lines.append("                    </tr>")
+        lines.append("                </thead>")
+        lines.append("                <tbody>")
 
         for record in tool_call_history:
             status_emoji = SessionFormatter.TOOL_STATUS_EMOJI.get(record.status, "❓")
@@ -763,19 +771,21 @@ class SessionFormatter:
                 exec_time = f"{record.result_data.execution_time_ms:.1f}ms"
 
             # 状态
-            status_class = record.status if record.status in ("completed", "failed", "pending") else ""
+            status_class = (
+                record.status if record.status in ("completed", "failed", "pending") else ""
+            )
             status_html = f'<span class="tool-call-status {status_class}">{status_emoji} {record.status}</span>'
 
-            lines.append(f'                    <tr>')
-            lines.append(f'                        <td>{thought_num}</td>')
-            lines.append(f'                        <td><code>{tool_name}</code></td>')
-            lines.append(f'                        <td>{status_html}</td>')
-            lines.append(f'                        <td>{exec_time}</td>')
-            lines.append(f'                    </tr>')
+            lines.append("                    <tr>")
+            lines.append(f"                        <td>{thought_num}</td>")
+            lines.append(f"                        <td><code>{tool_name}</code></td>")
+            lines.append(f"                        <td>{status_html}</td>")
+            lines.append(f"                        <td>{exec_time}</td>")
+            lines.append("                    </tr>")
 
-        lines.append('                </tbody>')
-        lines.append('            </table>')
-        lines.append('        </div>')
+        lines.append("                </tbody>")
+        lines.append("            </table>")
+        lines.append("        </div>")
 
         return "\n".join(lines)
 
@@ -795,51 +805,61 @@ class SessionFormatter:
         lines.append('            <div class="statistics-grid">')
 
         # 基本统计卡片
-        lines.append(f'                <div class="stat-card">')
-        lines.append(f'                    <div class="stat-value">{statistics.total_thoughts}</div>')
-        lines.append(f'                    <div class="stat-label">总思考步骤数</div>')
-        lines.append(f'                </div>')
+        lines.append('                <div class="stat-card">')
+        lines.append(
+            f'                    <div class="stat-value">{statistics.total_thoughts}</div>'
+        )
+        lines.append('                    <div class="stat-label">总思考步骤数</div>')
+        lines.append("                </div>")
 
-        lines.append(f'                <div class="stat-card">')
-        lines.append(f'                    <div class="stat-value">{statistics.avg_thought_length:.0f}</div>')
-        lines.append(f'                    <div class="stat-label">平均思考长度</div>')
-        lines.append(f'                </div>')
+        lines.append('                <div class="stat-card">')
+        lines.append(
+            f'                    <div class="stat-value">{statistics.avg_thought_length:.0f}</div>'
+        )
+        lines.append('                    <div class="stat-label">平均思考长度</div>')
+        lines.append("                </div>")
 
         if statistics.total_tool_calls > 0:
-            lines.append(f'                <div class="stat-card">')
-            lines.append(f'                    <div class="stat-value">{statistics.total_tool_calls}</div>')
-            lines.append(f'                    <div class="stat-label">工具调用次数</div>')
-            lines.append(f'                </div>')
+            lines.append('                <div class="stat-card">')
+            lines.append(
+                f'                    <div class="stat-value">{statistics.total_tool_calls}</div>'
+            )
+            lines.append('                    <div class="stat-label">工具调用次数</div>')
+            lines.append("                </div>")
 
             # 成功率
             success_rate = statistics.successful_tool_calls / statistics.total_tool_calls * 100
-            lines.append(f'                <div class="stat-card">')
+            lines.append('                <div class="stat-card">')
             lines.append(f'                    <div class="stat-value">{success_rate:.0f}%</div>')
-            lines.append(f'                    <div class="stat-label">调用成功率</div>')
-            lines.append(f'                </div>')
+            lines.append('                    <div class="stat-label">调用成功率</div>')
+            lines.append("                </div>")
 
             if statistics.total_execution_time_ms > 0:
-                lines.append(f'                <div class="stat-card">')
-                lines.append(f'                    <div class="stat-value">{statistics.total_execution_time_ms:.0f}ms</div>')
-                lines.append(f'                    <div class="stat-label">总执行时间</div>')
-                lines.append(f'                </div>')
+                lines.append('                <div class="stat-card">')
+                lines.append(
+                    f'                    <div class="stat-value">{statistics.total_execution_time_ms:.0f}ms</div>'
+                )
+                lines.append('                    <div class="stat-label">总执行时间</div>')
+                lines.append("                </div>")
 
-        lines.append('            </div>')
+        lines.append("            </div>")
 
         # 阶段分布
         if statistics.phase_distribution:
-            lines.append('            <h3>阶段分布</h3>')
+            lines.append("            <h3>阶段分布</h3>")
             lines.append('            <div class="statistics-grid">')
             for phase, count in statistics.phase_distribution.items():
                 phase_name = SessionFormatter.PHASE_NAME.get(phase, phase)
                 phase_emoji = SessionFormatter.PHASE_EMOJI.get(phase, "")
-                lines.append(f'                <div class="stat-card">')
+                lines.append('                <div class="stat-card">')
                 lines.append(f'                    <div class="stat-value">{count}</div>')
-                lines.append(f'                    <div class="stat-label">{phase_emoji} {phase_name}</div>')
-                lines.append(f'                </div>')
-            lines.append('            </div>')
+                lines.append(
+                    f'                    <div class="stat-label">{phase_emoji} {phase_name}</div>'
+                )
+                lines.append("                </div>")
+            lines.append("            </div>")
 
-        lines.append('        </div>')
+        lines.append("        </div>")
 
         return "\n".join(lines)
 
@@ -1019,7 +1039,9 @@ class SessionFormatter:
             if record.result_data and record.result_data.execution_time_ms:
                 exec_time = f"{record.result_data.execution_time_ms:.1f}ms"
 
-            lines.append(f"  [{thought_num}] {status_emoji} {tool_name} - {record.status} ({exec_time})")
+            lines.append(
+                f"  [{thought_num}] {status_emoji} {tool_name} - {record.status} ({exec_time})"
+            )
 
         if not tool_call_history:
             lines.append("  (无工具调用)")

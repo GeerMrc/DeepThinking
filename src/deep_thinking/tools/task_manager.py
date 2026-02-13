@@ -59,12 +59,7 @@ def create_task(
     )
 
     logger.info(f"创建任务成功: {task.task_id}")
-    return (
-        f"✅ 任务已创建\n"
-        f"ID: {task.task_id}\n"
-        f"标题: {task.title}\n"
-        f"状态: {task.status.value}"
-    )
+    return f"✅ 任务已创建\nID: {task.task_id}\n标题: {task.title}\n状态: {task.status.value}"
 
 
 @app.tool(

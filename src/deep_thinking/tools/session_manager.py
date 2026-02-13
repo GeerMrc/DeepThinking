@@ -421,11 +421,7 @@ def get_tool_call_history(
 
     # 过滤工具调用记录
     if thought_number is not None:
-        records = [
-            r
-            for r in session.tool_call_history
-            if r.thought_number == thought_number
-        ]
+        records = [r for r in session.tool_call_history if r.thought_number == thought_number]
     else:
         records = session.tool_call_history
 

@@ -389,9 +389,7 @@ class TestStatisticsCorrectness:
             thoughtNumber=1,
             totalThoughts=3,
             session_id=session_id,
-            toolCalls=[
-                {"name": f"tool_{i}", "arguments": {}} for i in range(3)
-            ],
+            toolCalls=[{"name": f"tool_{i}", "arguments": {}} for i in range(3)],
         )
 
         session = storage_manager.get_session(session_id)
@@ -527,7 +525,7 @@ class TestResourceControl:
         # 调用 5 次（达到限制）
         for i in range(5):
             result = sequential_thinking.sequential_thinking(
-                thought=f"思考{i+1}",
+                thought=f"思考{i + 1}",
                 nextThoughtNeeded=True,
                 thoughtNumber=i + 1,
                 totalThoughts=10,
@@ -560,9 +558,7 @@ class TestResourceControl:
             thoughtNumber=1,
             totalThoughts=3,
             session_id=session_id,
-            toolCalls=[
-                {"name": f"tool_{i}", "arguments": {}} for i in range(4)
-            ],
+            toolCalls=[{"name": f"tool_{i}", "arguments": {}} for i in range(4)],
         )
 
         assert "单步骤工具调用数超限" in result
@@ -582,9 +578,7 @@ class TestResourceControl:
             thoughtNumber=1,
             totalThoughts=3,
             session_id=session_id,
-            toolCalls=[
-                {"name": f"tool_{i}", "arguments": {}} for i in range(3)
-            ],
+            toolCalls=[{"name": f"tool_{i}", "arguments": {}} for i in range(3)],
         )
 
         # 应该成功
@@ -1016,7 +1010,7 @@ class TestEdgeCases:
         """测试工具调用没有结果的情况"""
         session_id = "test-edge-1"
 
-        result = sequential_thinking.sequential_thinking(
+        sequential_thinking.sequential_thinking(
             thought="无结果调用",
             nextThoughtNeeded=True,
             thoughtNumber=1,
@@ -1100,14 +1094,16 @@ class TestEdgeCases:
             thoughtNumber=1,
             totalThoughts=1,
             session_id=session_id,
-            toolCalls=[{
-                "name": "special_tool",
-                "arguments": {
-                    "unicode": "你好世界",
-                    "emoji": "🔧",
-                    "newline": "line1\nline2",
+            toolCalls=[
+                {
+                    "name": "special_tool",
+                    "arguments": {
+                        "unicode": "你好世界",
+                        "emoji": "🔧",
+                        "newline": "line1\nline2",
+                    },
                 }
-            }],
+            ],
         )
 
         session = storage_manager.get_session(session_id)

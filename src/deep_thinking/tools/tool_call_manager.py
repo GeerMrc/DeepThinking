@@ -55,9 +55,7 @@ class ToolCallStatistics:
             "cache_misses": self.cache_misses,
             "total_execution_time_ms": self.total_execution_time_ms,
             "avg_execution_time_ms": (
-                self.total_execution_time_ms / self.total_calls
-                if self.total_calls > 0
-                else 0.0
+                self.total_execution_time_ms / self.total_calls if self.total_calls > 0 else 0.0
             ),
         }
 

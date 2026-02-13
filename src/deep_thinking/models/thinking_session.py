@@ -106,9 +106,7 @@ class SessionStatistics(BaseModel):
             1 for r in tool_call_history if r.status in ("failed", "timeout")
         )
         self.cached_tool_calls = sum(
-            1
-            for r in tool_call_history
-            if r.result_data and r.result_data.from_cache
+            1 for r in tool_call_history if r.result_data and r.result_data.from_cache
         )
 
         total_time = 0.0

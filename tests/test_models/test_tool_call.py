@@ -2,8 +2,6 @@
 工具调用数据模型单元测试 (Interleaved Thinking)
 """
 
-from datetime import datetime, timezone
-
 import pytest
 from pydantic import ValidationError
 

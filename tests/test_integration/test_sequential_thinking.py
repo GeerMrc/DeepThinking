@@ -377,11 +377,11 @@ class TestSequentialThinkingIntegration:
         """测试超过工具调用限制"""
         # 设置较低的工具调用限制以便测试
         # 注意：由于 max_thoughts=50，所以 max_tool_calls 需要小于 50
-        import os
         monkeypatch.setenv("DEEP_THINKING_MAX_TOOL_CALLS", "10")
 
         # 重新加载配置
-        from deep_thinking.models.config import set_global_config, ThinkingConfig
+        from deep_thinking.models.config import ThinkingConfig, set_global_config
+
         set_global_config(ThinkingConfig.from_env())
 
         # 添加 10 次工具调用（达到限制）
@@ -559,7 +559,8 @@ class TestSequentialThinkingIntegration:
         monkeypatch.setenv("DEEP_THINKING_MAX_TOOL_CALLS_PER_THOUGHT", "5")
 
         # 重新加载配置
-        from deep_thinking.models.config import set_global_config, ThinkingConfig
+        from deep_thinking.models.config import ThinkingConfig, set_global_config
+
         set_global_config(ThinkingConfig.from_env())
 
         # 尝试调用 6 个工具（超过限制 5）
@@ -569,9 +570,7 @@ class TestSequentialThinkingIntegration:
             thoughtNumber=1,
             totalThoughts=3,
             session_id="test-per-thought-limit",
-            toolCalls=[
-                {"name": f"tool_{i}", "arguments": {}} for i in range(6)
-            ],
+            toolCalls=[{"name": f"tool_{i}", "arguments": {}} for i in range(6)],
         )
         assert "单步骤工具调用数超限" in result
         assert "6" in result
@@ -588,7 +587,8 @@ class TestSequentialThinkingIntegration:
         monkeypatch.setenv("DEEP_THINKING_MAX_TOOL_CALLS_PER_THOUGHT", "5")
 
         # 重新加载配置
-        from deep_thinking.models.config import set_global_config, ThinkingConfig
+        from deep_thinking.models.config import ThinkingConfig, set_global_config
+
         set_global_config(ThinkingConfig.from_env())
 
         # 调用 5 个工具（刚好等于限制）
@@ -598,9 +598,7 @@ class TestSequentialThinkingIntegration:
             thoughtNumber=1,
             totalThoughts=3,
             session_id="test-per-thought-ok",
-            toolCalls=[
-                {"name": f"tool_{i}", "arguments": {}} for i in range(5)
-            ],
+            toolCalls=[{"name": f"tool_{i}", "arguments": {}} for i in range(5)],
         )
         assert "工具调用 (5个)" in result
 

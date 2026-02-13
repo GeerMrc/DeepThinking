@@ -2,8 +2,6 @@
 工具调用管理器单元测试 (Interleaved Thinking)
 """
 
-import pytest
-
 from deep_thinking.models.tool_call import (
     ToolCallData,
     ToolCallError,

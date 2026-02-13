@@ -457,6 +457,4 @@ class ThoughtUpdate(BaseModel):
     )
 
     # Interleaved Thinking 扩展字段
-    phase: ExecutionPhase | None = Field(
-        None, description="执行阶段"
-    )
+    phase: ExecutionPhase | None = Field(None, description="执行阶段")

@@ -152,7 +152,9 @@ class ThinkingConfig(BaseModel):
             min_thoughts=int(os.getenv("DEEP_THINKING_MIN_THOUGHTS", "3")),
             thoughts_increment=int(os.getenv("DEEP_THINKING_THOUGHTS_INCREMENT", "10")),
             max_tool_calls=int(os.getenv("DEEP_THINKING_MAX_TOOL_CALLS", "100")),
-            max_tool_calls_per_thought=int(os.getenv("DEEP_THINKING_MAX_TOOL_CALLS_PER_THOUGHT", "10")),
+            max_tool_calls_per_thought=int(
+                os.getenv("DEEP_THINKING_MAX_TOOL_CALLS_PER_THOUGHT", "10")
+            ),
         )
 
 

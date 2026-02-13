@@ -439,9 +439,7 @@ class TestSessionManagerIntegration:
         storage_manager.update_session(session)
 
         # 限制返回3条
-        limited_result = session_manager.get_tool_call_history(
-            session.session_id, limit=3
-        )
+        limited_result = session_manager.get_tool_call_history(session.session_id, limit=3)
         # 应该只显示3条记录
         assert "tool_0" in limited_result
         assert "tool_2" in limited_result
@@ -523,7 +521,13 @@ class TestSessionManagerIntegration:
         thoughts = [
             Thought(thought_number=1, content="常规思考", type="regular"),
             Thought(thought_number=2, content="另一个常规思考", type="regular"),
-            Thought(thought_number=3, content="修订思考", type="revision", is_revision=True, revises_thought=1),
+            Thought(
+                thought_number=3,
+                content="修订思考",
+                type="revision",
+                is_revision=True,
+                revises_thought=1,
+            ),
         ]
         for t in thoughts:
             session.add_thought(t)
