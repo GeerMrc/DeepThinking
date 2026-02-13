@@ -1154,9 +1154,10 @@ class Visualizer:
     思考会话可视化器
 
     提供将思考会话转换为可视化图表的功能。
+    支持 Interleaved Thinking 的工具调用和执行阶段显示。
     """
 
-    # Mermaid 样式定义
+    # Mermaid 样式定义 - 思考类型样式
     MERMAID_STYLES = """
 classDef regular fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
 classDef revision fill:#fff3e0,stroke:#f57c00,stroke-width:2px;
@@ -1164,12 +1165,20 @@ classDef branch fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;
 classDef comparison fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
 classDef reverse fill:#fff8e1,stroke:#ffa000,stroke-width:2px;
 classDef hypothetical fill:#fce4ec,stroke:#c2185b,stroke-width:2px;
+classDef tool_call fill:#fff3e0,stroke:#ff9800,stroke-width:2px,stroke-dasharray: 5 5;
+classDef thinking_phase fill:#e3f2fd,stroke:#2196f3,stroke-width:3px;
+classDef tool_call_phase fill:#fff8e1,stroke:#ff9800,stroke-width:3px;
+classDef analysis_phase fill:#e8f5e9,stroke:#4caf50,stroke-width:3px;
 """
 
     @staticmethod
     def to_mermaid(session: ThinkingSession) -> str:
         """
         导出为 Mermaid 流程图
+
+        支持 Interleaved Thinking 特性：
+        - 显示执行阶段（thinking/tool_call/analysis）
+        - 显示关联的工具调用节点
 
         Args:
             session: 思考会话对象
@@ -1193,17 +1202,37 @@ classDef hypothetical fill:#fce4ec,stroke:#c2185b,stroke-width:2px;
             node_label = Visualizer._escape_mermaid_label(thought.content)
             node_class = thought.type
 
-            # 添加节点
+            # 获取阶段信息 (Interleaved Thinking)
+            phase = getattr(thought, "phase", "thinking")
+            phase_emoji = SessionFormatter.PHASE_EMOJI.get(phase, "💭")
+            phase_name = SessionFormatter.PHASE_NAME.get(phase, "思考阶段")
+
+            # 构建节点标签，包含阶段信息
             if thought.type == "revision":
                 revises = thought.revises_thought or 0
-                label = f"{node_label}<br/><small>(修订步骤{revises})</small>"
+                label = f"{node_label}<br/><small>(修订步骤{revises})</small><br/><small>{phase_emoji}{phase_name}</small>"
                 lines.append(f'    {node_id}["{label}"]:::{node_class}')
             elif thought.type == "branch":
                 branch_from = thought.branch_from_thought or 0
-                label = f"{node_label}<br/><small>(分支自步骤{branch_from})</small>"
+                label = f"{node_label}<br/><small>(分支自步骤{branch_from})</small><br/><small>{phase_emoji}{phase_name}</small>"
                 lines.append(f'    {node_id}["{label}"]:::{node_class}')
             else:
-                lines.append(f'    {node_id}["{node_label}"]:::{node_class}')
+                label = f"{node_label}<br/><small>{phase_emoji}{phase_name}</small>"
+                lines.append(f'    {node_id}["{label}"]:::{node_class}')
+
+            # 添加工具调用节点 (Interleaved Thinking)
+            tool_calls = getattr(thought, "tool_calls", None)
+            if tool_calls and session:
+                for idx, record_id in enumerate(tool_calls):
+                    record = SessionFormatter._find_tool_call_record(session, record_id)
+                    if record:
+                        tool_node_id = f"{node_id}_TOOL{idx + 1}"
+                        tool_name = record.call_data.tool_name
+                        status_emoji = SessionFormatter.TOOL_STATUS_EMOJI.get(record.status, "❓")
+                        tool_label = f"🔧 {tool_name} {status_emoji}"
+                        lines.append(f'    {tool_node_id}["{tool_label}"]:::tool_call')
+                        # 连接思考节点到工具调用节点
+                        lines.append(f"    {node_id} -.->|调用| {tool_node_id}")
 
         # 添加连接线
         for i, thought in enumerate(session.thoughts):
@@ -1295,6 +1324,10 @@ classDef hypothetical fill:#fce4ec,stroke:#c2185b,stroke-width:2px;
         """
         导出为 ASCII 流程图
 
+        支持 Interleaved Thinking 特性：
+        - 显示执行阶段（thinking/tool_call/analysis）
+        - 显示关联的工具调用信息
+
         Args:
             session: 思考会话对象
 
@@ -1312,7 +1345,7 @@ classDef hypothetical fill:#fce4ec,stroke:#c2185b,stroke-width:2px;
 
         # 为每个思考步骤生成 ASCII 表示
         for thought in session.thoughts:
-            block = Visualizer._thought_to_ascii_block(thought)
+            block = Visualizer._thought_to_ascii_block(thought, session)
             lines.append(block)
 
             # 添加连接线
@@ -1323,12 +1356,17 @@ classDef hypothetical fill:#fce4ec,stroke:#c2185b,stroke-width:2px;
         return "\n".join(lines)
 
     @staticmethod
-    def _thought_to_ascii_block(thought: Any) -> str:
+    def _thought_to_ascii_block(thought: Any, session: ThinkingSession | None = None) -> str:
         """
         将思考步骤转换为 ASCII 块
 
+        支持 Interleaved Thinking 特性：
+        - 显示执行阶段信息
+        - 显示关联的工具调用
+
         Args:
             thought: 思考步骤对象
+            session: 会话对象（用于获取工具调用详情）
 
         Returns:
             ASCII 格式的块
@@ -1351,6 +1389,11 @@ classDef hypothetical fill:#fce4ec,stroke:#c2185b,stroke-width:2px;
         content = thought.content
         if len(content) > 28:
             content = content[:25] + "..."
+
+        # 获取阶段信息 (Interleaved Thinking)
+        phase = getattr(thought, "phase", "thinking")
+        phase_emoji = SessionFormatter.PHASE_EMOJI.get(phase, "💭")
+        phase_name = SessionFormatter.PHASE_NAME.get(phase, "思考阶段")
 
         lines: list[str] = []
 
@@ -1375,11 +1418,27 @@ classDef hypothetical fill:#fce4ec,stroke:#c2185b,stroke-width:2px;
         # 第二行：内容
         lines.append(f"        {prefix} {content}")
 
-        # 第三行：修订/分支信息
+        # 第三行：阶段信息 (Interleaved Thinking)
+        lines.append(f"        {prefix} {phase_emoji} {phase_name}")
+
+        # 第四行：修订/分支信息
         if thought.type == "revision" and thought.revises_thought:
             lines.append(f"        {prefix} → 修订步骤 {thought.revises_thought}")
         elif thought.type == "branch" and thought.branch_from_thought:
             lines.append(f"        {prefix} ← 分支自步骤 {thought.branch_from_thought}")
+
+        # 第五行：工具调用信息 (Interleaved Thinking)
+        tool_calls = getattr(thought, "tool_calls", None)
+        if tool_calls and session:
+            for record_id in tool_calls:
+                record = SessionFormatter._find_tool_call_record(session, record_id)
+                if record:
+                    status_emoji = SessionFormatter.TOOL_STATUS_EMOJI.get(record.status, "❓")
+                    tool_name = record.call_data.tool_name
+                    # 截断工具名称
+                    if len(tool_name) > 20:
+                        tool_name = tool_name[:17] + "..."
+                    lines.append(f"        {prefix} 🔧 {tool_name} {status_emoji}")
 
         # 下边框
         if thought.type == "branch":
@@ -1393,6 +1452,10 @@ classDef hypothetical fill:#fce4ec,stroke:#c2185b,stroke-width:2px;
     def to_tree(session: ThinkingSession) -> str:
         """
         导出为树状结构（适合显示分支关系）
+
+        支持 Interleaved Thinking 特性：
+        - 显示执行阶段（thinking/tool_call/analysis）
+        - 显示关联的工具调用信息
 
         Args:
             session: 思考会话对象
@@ -1410,10 +1473,17 @@ classDef hypothetical fill:#fce4ec,stroke:#c2185b,stroke-width:2px;
         # 构建思考步骤树
         for i, thought in enumerate(session.thoughts):
             # 确定前缀符号
-            prefix = "└──" if i == len(session.thoughts) - 1 else "├──"
+            is_last = i == len(session.thoughts) - 1
+            prefix = "└──" if is_last else "├──"
+            sub_prefix = "    " if is_last else "│   "
 
             # 根据类型选择 emoji
             emoji = SessionFormatter.TYPE_EMOJI.get(thought.type, "💭")
+
+            # 获取阶段信息 (Interleaved Thinking)
+            phase = getattr(thought, "phase", "thinking")
+            phase_emoji = SessionFormatter.PHASE_EMOJI.get(phase, "💭")
+            phase_name = SessionFormatter.PHASE_NAME.get(phase, "思考阶段")
 
             # 格式化行
             line = f"{prefix} {emoji} 步骤 {thought.thought_number}: {thought.content[:50]}"
@@ -1422,10 +1492,25 @@ classDef hypothetical fill:#fce4ec,stroke:#c2185b,stroke-width:2px;
 
             lines.append(line)
 
+            # 添加阶段信息 (Interleaved Thinking)
+            lines.append(f"{sub_prefix}├─ {phase_emoji} {phase_name}")
+
             # 添加修订/分支信息
             if thought.type == "revision" and thought.revises_thought:
-                lines.append(f"    │   └─ 📝 修订步骤 {thought.revises_thought}")
+                lines.append(f"{sub_prefix}├─ 📝 修订步骤 {thought.revises_thought}")
             elif thought.type == "branch" and thought.branch_from_thought:
-                lines.append(f"    │   └─ 🔀 分支自步骤 {thought.branch_from_thought}")
+                lines.append(f"{sub_prefix}├─ 🔀 分支自步骤 {thought.branch_from_thought}")
+
+            # 添加工具调用信息 (Interleaved Thinking)
+            tool_calls = getattr(thought, "tool_calls", None)
+            if tool_calls and session:
+                for idx, record_id in enumerate(tool_calls):
+                    record = SessionFormatter._find_tool_call_record(session, record_id)
+                    if record:
+                        status_emoji = SessionFormatter.TOOL_STATUS_EMOJI.get(record.status, "❓")
+                        tool_name = record.call_data.tool_name
+                        # 最后一个工具调用使用 └─，否则使用 ├─
+                        tool_prefix = "└─" if idx == len(tool_calls) - 1 else "├─"
+                        lines.append(f"{sub_prefix}{tool_prefix} 🔧 {tool_name} {status_emoji}")
 
         return "\n".join(lines)
