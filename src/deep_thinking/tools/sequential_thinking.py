@@ -324,6 +324,7 @@ def sequential_thinking(
                     success=result_item.get("success", True),
                     result=result_item.get("result"),
                     execution_time_ms=result_item.get("execution_time_ms"),
+                    from_cache=result_item.get("from_cache", False),
                 )
             # 其次使用索引匹配
             elif toolResults is not None and i < len(toolResults):
@@ -333,6 +334,7 @@ def sequential_thinking(
                     success=result_item.get("success", True),
                     result=result_item.get("result"),
                     execution_time_ms=result_item.get("execution_time_ms"),
+                    from_cache=result_item.get("from_cache", False),
                 )
 
             # 创建工具调用记录
