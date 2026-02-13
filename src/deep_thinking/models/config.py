@@ -19,6 +19,7 @@ class ThinkingConfig(BaseModel):
         max_thoughts: 最大思考步骤数（防止无限循环）
         min_thoughts: 最小思考步骤数（确保合理范围）
         thoughts_increment: 每次增加的思考步骤数（needsMoreThoughts 功能使用）
+        max_tool_calls: 最大工具调用次数（Interleaved Thinking）
     """
 
     max_thoughts: int = Field(
@@ -37,6 +38,12 @@ class ThinkingConfig(BaseModel):
         ge=1,
         le=100,
         description="每次增加的思考步骤数（needsMoreThoughts 功能使用）",
+    )
+    max_tool_calls: int = Field(
+        default=100,
+        ge=1,
+        le=10000,
+        description="最大工具调用次数（Interleaved Thinking）",
     )
 
     @field_validator("min_thoughts")
@@ -120,11 +127,13 @@ class ThinkingConfig(BaseModel):
         - DEEP_THINKING_MAX_THOUGHTS: 最大思考步骤数（默认：50）
         - DEEP_THINKING_MIN_THOUGHTS: 最小思考步骤数（默认：3）
         - DEEP_THINKING_THOUGHTS_INCREMENT: 思考步骤增量（默认：10）
+        - DEEP_THINKING_MAX_TOOL_CALLS: 最大工具调用次数（默认：100）
 
         配置范围说明：
         - 最大思考步骤：支持配置 1-10000 步（推荐 50 步）
         - 最小思考步骤：支持配置 1-10000 步（推荐 3 步）
         - 思考步骤增量：支持配置 1-100 步（默认 10 步）
+        - 最大工具调用：支持配置 1-10000 次（默认 100 次）
 
         Returns:
             思考配置实例
@@ -133,6 +142,7 @@ class ThinkingConfig(BaseModel):
             max_thoughts=int(os.getenv("DEEP_THINKING_MAX_THOUGHTS", "50")),
             min_thoughts=int(os.getenv("DEEP_THINKING_MIN_THOUGHTS", "3")),
             thoughts_increment=int(os.getenv("DEEP_THINKING_THOUGHTS_INCREMENT", "10")),
+            max_tool_calls=int(os.getenv("DEEP_THINKING_MAX_TOOL_CALLS", "100")),
         )
 
 

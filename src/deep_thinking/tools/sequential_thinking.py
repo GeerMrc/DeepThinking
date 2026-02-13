@@ -8,15 +8,26 @@
 - 对比思考(Comparison): 比较多个选项或方案的优劣 ⚖️
 - 逆向思考(Reverse): 从结论反推前提条件 🔙
 - 假设思考(Hypothetical): 探索假设条件下的影响 🤔
+
+Interleaved Thinking 扩展：
+- 执行阶段(thinking/tool_call/analysis)
+- 工具调用追踪和记录
+- 资源控制和统计
 """
 
 import logging
 from datetime import datetime, timezone
-from typing import Literal
+from typing import Any, Literal
 
 from deep_thinking.models.config import get_global_config
-from deep_thinking.models.thought import Thought
+from deep_thinking.models.thought import ExecutionPhase, Thought
+from deep_thinking.models.tool_call import (
+    ToolCallData,
+    ToolCallRecord,
+    ToolResultData,
+)
 from deep_thinking.server import app, get_storage_manager
+from deep_thinking.tools.phase_inference import infer_phase
 
 logger = logging.getLogger(__name__)
 
@@ -45,11 +56,16 @@ def sequential_thinking(
     hypotheticalCondition: str | None = None,
     hypotheticalImpact: str | None = None,
     hypotheticalProbability: str | None = None,
+    # Interleaved Thinking 参数 (Phase 3)
+    phase: ExecutionPhase | None = None,
+    toolCall: dict[str, Any] | None = None,
+    toolResult: dict[str, Any] | None = None,
 ) -> str:
     """
     执行顺序思考步骤
 
     支持六种思考类型：常规思考、修订思考、分支思考、对比思考、逆向思考、假设思考。
+    支持 Interleaved Thinking 三阶段模型：thinking、tool_call、analysis。
 
     Args:
         thought: 当前思考内容
@@ -62,18 +78,18 @@ def sequential_thinking(
         branchFromThought: 分支来源思考步骤编号（仅分支思考使用）
         branchId: 分支ID（仅分支思考使用，格式如"branch-0-1"）
         needsMoreThoughts: 是否需要增加总思考步骤数
-        # Comparison类型参数
         comparisonItems: 对比思考的比较项列表（至少2个，每个1-500字符）
         comparisonDimensions: 对比思考的比较维度列表（最多10个，每个1-50字符）
         comparisonResult: 对比思考的比较结论（1-2000字符）
-        # Reverse类型参数
         reverseFrom: 逆向思考的反推起点思考编号
         reverseTarget: 逆向思考的反推目标描述（1-500字符）
         reverseSteps: 逆向思考的反推步骤列表（最多20个，每个1-500字符）
-        # Hypothetical类型参数
         hypotheticalCondition: 假设思考的假设条件描述（1-500字符）
         hypotheticalImpact: 假设思考的影响分析（1-2000字符）
         hypotheticalProbability: 假设思考的可能性评估（1-50字符）
+        phase: 执行阶段（thinking/tool_call/analysis），None时自动推断
+        toolCall: 工具调用参数（Interleaved Thinking）
+        toolResult: 工具结果参数（Interleaved Thinking）
 
     Returns:
         思考结果描述，包含当前思考信息和会话状态
@@ -181,6 +197,14 @@ def sequential_thinking(
     elif hypotheticalCondition is not None:
         thought_type = "hypothetical"
 
+    # ===== Interleaved Thinking: 阶段推断 =====
+    # 如果 phase 参数为 None，则自动推断执行阶段
+    inferred_phase: ExecutionPhase
+    if phase is not None:
+        inferred_phase = phase
+    else:
+        inferred_phase = infer_phase(tool_call=toolCall, tool_result=toolResult)
+
     # 创建思考步骤对象
     thought_obj = Thought(
         thought_number=thoughtNumber,
@@ -202,11 +226,79 @@ def sequential_thinking(
         hypothetical_condition=hypotheticalCondition,
         hypothetical_impact=hypotheticalImpact,
         hypothetical_probability=hypotheticalProbability,
+        # Interleaved Thinking 字段
+        phase=inferred_phase,
         timestamp=datetime.now(timezone.utc),
     )
 
     # 添加思考步骤到会话
     manager.add_thought(session_id, thought_obj)
+
+    # ===== Interleaved Thinking: 工具调用记录存储 =====
+    tool_call_record: ToolCallRecord | None = None
+
+    # 如果有工具调用参数，创建并存储工具调用记录
+    if toolCall is not None and toolCall:
+        # ===== 资源控制检查 (Phase 3.8) =====
+        # 获取当前会话检查是否超过工具调用限制
+        current_session = manager.get_session(session_id)
+        if current_session is not None:
+            current_tool_calls = current_session.statistics.total_tool_calls
+            max_tool_calls_limit = config.max_tool_calls
+
+            if current_tool_calls >= max_tool_calls_limit:
+                logger.warning(
+                    f"会话 {session_id} 工具调用次数已达上限 {max_tool_calls_limit}"
+                )
+                result = [
+                    f"## 思考步骤 {thoughtNumber}/{totalThoughts}",
+                    "",
+                    f"**类型**: {get_type_name(thought_type)}",
+                    f"**阶段**: {get_phase_display(inferred_phase)}",
+                    "",
+                    f"{thought}",
+                    "",
+                    "---",
+                    "**会话信息**:",
+                    f"- 会话ID: {session_id}",
+                    f"- 总思考数: {current_session.thought_count()}",
+                    f"- 工具调用数: {current_tool_calls}",
+                    "",
+                    f"⚠️ 警告：工具调用次数已达上限 {max_tool_calls_limit}，无法执行新的工具调用。",
+                ]
+                return "\n".join(result)
+
+        # 从 toolCall 字典创建 ToolCallData
+        call_data = ToolCallData(
+            tool_name=toolCall.get("name", toolCall.get("tool_name", "unknown")),
+            arguments=toolCall.get("arguments", toolCall.get("args", {})),
+        )
+
+        # 如果有工具结果，创建 ToolResultData
+        result_data: ToolResultData | None = None
+        if toolResult is not None and toolResult:
+            result_data = ToolResultData(
+                call_id=toolResult.get("call_id", call_data.call_id),
+                success=toolResult.get("success", True),
+                result=toolResult.get("result"),
+                execution_time_ms=toolResult.get("execution_time_ms"),
+            )
+
+        # 创建工具调用记录
+        tool_call_record = ToolCallRecord(
+            thought_number=thoughtNumber,
+            call_data=call_data,
+            result_data=result_data,
+            status="completed" if result_data else "pending",
+        )
+
+        # 重新获取会话并添加记录
+        session = manager.get_session(session_id)
+        if session is not None:
+            session.add_tool_call_record(tool_call_record)
+            # 更新统计信息
+            session.update_statistics()
+            manager.update_session(session)
 
     # 获取会话状态
     session = manager.get_session(session_id)
@@ -218,6 +310,7 @@ def sequential_thinking(
         f"## 思考步骤 {thoughtNumber}/{totalThoughts}",
         "",
         f"**类型**: {get_type_name(thought_type)}",
+        f"**阶段**: {get_phase_display(inferred_phase)}",
         "",
         f"{thought}",
         "",
@@ -272,6 +365,17 @@ def sequential_thinking(
             result_parts.append(f"**可能性**: {hypotheticalProbability}")
         result_parts.append("")
 
+    # ===== Interleaved Thinking: 添加工具调用信息 =====
+    if tool_call_record is not None:
+        result_parts.append("🔧 工具调用")
+        result_parts.append(f"**工具名称**: {tool_call_record.call_data.tool_name}")
+        result_parts.append(f"**调用状态**: {tool_call_record.status}")
+        if tool_call_record.result_data:
+            result_parts.append(f"**执行成功**: {'是' if tool_call_record.result_data.success else '否'}")
+            if tool_call_record.result_data.execution_time_ms:
+                result_parts.append(f"**执行时间**: {tool_call_record.result_data.execution_time_ms:.2f}ms")
+        result_parts.append("")
+
     # 添加思考步骤调整信息
     if needsMoreThoughts and totalThoughts > original_total:
         result_parts.append(f"📈 思考步骤总数已调整: {original_total} → {totalThoughts}")
@@ -285,9 +389,20 @@ def sequential_thinking(
             f"- 会话ID: {session_id}",
             f"- 总思考数: {session.thought_count()}",
             f"- 预计总数: {totalThoughts}",
-            "",
         ]
     )
+
+    # 添加工具调用统计信息（Interleaved Thinking）
+    if session.statistics.total_tool_calls > 0:
+        stats = session.statistics
+        result_parts.extend(
+            [
+                f"- 工具调用数: {stats.total_tool_calls}",
+                f"  - 成功: {stats.successful_tool_calls}, 失败: {stats.failed_tool_calls}, 缓存命中: {stats.cached_tool_calls}",
+            ]
+        )
+
+    result_parts.append("")
 
     # 下一步提示
     if nextThoughtNeeded:
@@ -320,6 +435,24 @@ def get_type_name(thought_type: str) -> str:
         "hypothetical": "假设思考 🤔",
     }
     return type_names.get(thought_type, "常规思考 💭")
+
+
+def get_phase_display(phase: ExecutionPhase) -> str:
+    """
+    获取执行阶段的显示名称
+
+    Args:
+        phase: 执行阶段
+
+    Returns:
+        阶段显示名称
+    """
+    phase_names: dict[ExecutionPhase, str] = {
+        "thinking": "思考 🧠",
+        "tool_call": "工具调用 🔧",
+        "analysis": "分析 📊",
+    }
+    return phase_names.get(phase, "思考 🧠")
 
 
 # 注册工具
