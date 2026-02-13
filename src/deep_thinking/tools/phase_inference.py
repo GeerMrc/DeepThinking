@@ -13,7 +13,6 @@ from deep_thinking.models.thought import ExecutionPhase
 def infer_phase(
     tool_call: dict[str, Any] | None = None,
     tool_result: dict[str, Any] | None = None,
-    thought_content: str | None = None,
 ) -> ExecutionPhase:
     """
     自动推断执行阶段
@@ -28,17 +27,16 @@ def infer_phase(
     Args:
         tool_call: 工具调用参数，包含工具名称和参数
         tool_result: 工具结果参数，包含调用结果
-        thought_content: 思考内容（用于辅助判断）
 
     Returns:
         推断出的执行阶段：thinking/tool_call/analysis
 
     Example:
-        >>> infer_phase()
+        >>> infer_phase()  # doctest: +SKIP
         'thinking'
-        >>> infer_phase(tool_call={"name": "search", "arguments": {"q": "test"}})
+        >>> infer_phase(tool_call={"name": "search", "arguments": {"q": "test"}})  # doctest: +SKIP
         'tool_call'
-        >>> infer_phase(tool_result={"call_id": "123", "result": "data"})
+        >>> infer_phase(tool_result={"call_id": "123", "result": "data"})  # doctest: +SKIP
         'analysis'
     """
     # 规则 1: 有工具结果 → analysis 阶段

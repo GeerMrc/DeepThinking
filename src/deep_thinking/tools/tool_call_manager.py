@@ -5,16 +5,14 @@
 提供调用次数限制、结果缓存（LRU策略）和统计信息收集功能。
 """
 
-from collections import OrderedDict
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Any
-from hashlib import md5
 import json
+from collections import OrderedDict
+from dataclasses import dataclass
+from hashlib import md5
+from typing import Any
 
 from deep_thinking.models.tool_call import (
     ToolCallData,
-    ToolCallRecord,
     ToolResultData,
 )
 

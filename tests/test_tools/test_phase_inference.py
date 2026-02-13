@@ -58,9 +58,9 @@ class TestInferPhase:
         )
         assert result == "analysis"
 
-    def test_infer_phase_with_thought_content(self):
-        """测试 thought_content 参数（不影响基本推断）"""
-        result = infer_phase(thought_content="这是一个纯思考")
+    def test_infer_phase_with_no_args(self):
+        """测试无参数时返回 thinking（默认行为）"""
+        result = infer_phase()
         assert result == "thinking"
 
     def test_infer_phase_priority(self):
