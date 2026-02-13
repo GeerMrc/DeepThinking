@@ -351,3 +351,193 @@ class TestSessionManagerIntegration:
         assert "思考步骤调整历史" in result
         assert "**当前总数**: 10" in result
         assert "**调整次数**: 1" in result
+
+    # =========================================================================
+    # Interleaved Thinking 工具测试 (Phase 4.5/4.6)
+    # =========================================================================
+
+    async def test_get_tool_call_history_empty(self, storage_manager):
+        """测试获取空工具调用历史"""
+        result = session_manager.create_session(name="测试会话")
+        import re
+
+        session_id = re.search(r"\*\*会话ID\*\*: ([a-f0-9-]+)", result).group(1)
+
+        # 获取工具调用历史（应该为空）
+        history_result = session_manager.get_tool_call_history(session_id)
+        assert "工具调用历史" in history_result
+        assert "暂无工具调用记录" in history_result
+
+    async def test_get_tool_call_history_with_records(self, storage_manager):
+        """测试获取有记录的工具调用历史"""
+        from deep_thinking.models.tool_call import ToolCallData, ToolCallRecord
+
+        # 创建会话
+        session = storage_manager.create_session(name="工具调用测试会话")
+
+        # 添加工具调用记录
+        record1 = ToolCallRecord(
+            thought_number=1,
+            call_data=ToolCallData(tool_name="search", arguments={"query": "test"}),
+            status="completed",
+        )
+        record2 = ToolCallRecord(
+            thought_number=2,
+            call_data=ToolCallData(tool_name="read", arguments={"file": "test.py"}),
+            status="failed",
+        )
+        session.tool_call_history.append(record1)
+        session.tool_call_history.append(record2)
+        storage_manager.update_session(session)
+
+        # 获取工具调用历史
+        history_result = session_manager.get_tool_call_history(session.session_id)
+        assert "工具调用历史" in history_result
+        assert "search" in history_result
+        assert "read" in history_result
+        assert "**总记录数**: 2" in history_result
+
+    async def test_get_tool_call_history_filter_by_thought(self, storage_manager):
+        """测试按思考步骤过滤工具调用历史"""
+        from deep_thinking.models.tool_call import ToolCallData, ToolCallRecord
+
+        # 创建会话
+        session = storage_manager.create_session(name="过滤测试会话")
+
+        # 添加多个思考步骤的工具调用
+        for thought_num in [1, 1, 2]:
+            record = ToolCallRecord(
+                thought_number=thought_num,
+                call_data=ToolCallData(tool_name=f"tool_{thought_num}", arguments={}),
+                status="completed",
+            )
+            session.tool_call_history.append(record)
+        storage_manager.update_session(session)
+
+        # 过滤思考步骤1的调用
+        filtered_result = session_manager.get_tool_call_history(
+            session.session_id, thought_number=1
+        )
+        assert "tool_1" in filtered_result
+        assert "tool_2" not in filtered_result
+
+    async def test_get_tool_call_history_with_limit(self, storage_manager):
+        """测试限制工具调用历史返回数量"""
+        from deep_thinking.models.tool_call import ToolCallData, ToolCallRecord
+
+        # 创建会话
+        session = storage_manager.create_session(name="限制测试会话")
+
+        # 添加5条记录
+        for i in range(5):
+            record = ToolCallRecord(
+                thought_number=1,
+                call_data=ToolCallData(tool_name=f"tool_{i}", arguments={}),
+                status="completed",
+            )
+            session.tool_call_history.append(record)
+        storage_manager.update_session(session)
+
+        # 限制返回3条
+        limited_result = session_manager.get_tool_call_history(
+            session.session_id, limit=3
+        )
+        # 应该只显示3条记录
+        assert "tool_0" in limited_result
+        assert "tool_2" in limited_result
+        assert "tool_3" not in limited_result  # 被限制了
+
+    async def test_get_tool_call_history_nonexistent_session(self, storage_manager):
+        """测试获取不存在会话的工具调用历史"""
+        with pytest.raises(ValueError, match="会话不存在"):
+            session_manager.get_tool_call_history("nonexistent-session-id")
+
+    async def test_get_session_statistics_basic(self, storage_manager):
+        """测试获取基本会话统计信息"""
+        result = session_manager.create_session(name="统计测试会话")
+        import re
+
+        session_id = re.search(r"\*\*会话ID\*\*: ([a-f0-9-]+)", result).group(1)
+
+        # 获取统计信息
+        stats_result = session_manager.get_session_statistics(session_id)
+        assert "会话统计信息" in stats_result
+        assert "统计测试会话" in stats_result
+        assert "思考步骤统计" in stats_result
+        assert "工具调用统计" in stats_result
+        assert "执行阶段分布" in stats_result
+
+    async def test_get_session_statistics_with_tool_calls(self, storage_manager):
+        """测试获取有工具调用的会话统计信息"""
+        from deep_thinking.models.tool_call import (
+            ToolCallData,
+            ToolCallRecord,
+            ToolResultData,
+        )
+
+        # 创建会话
+        session = storage_manager.create_session(name="完整统计测试会话")
+
+        # 添加工具调用记录
+        record1 = ToolCallRecord(
+            thought_number=1,
+            call_data=ToolCallData(tool_name="search", arguments={}),
+            result_data=ToolResultData(
+                call_id="call-1",
+                success=True,
+                execution_time_ms=100.5,
+            ),
+            status="completed",
+        )
+        record2 = ToolCallRecord(
+            thought_number=2,
+            call_data=ToolCallData(tool_name="read", arguments={}),
+            result_data=ToolResultData(
+                call_id="call-2",
+                success=False,
+                execution_time_ms=50.0,
+            ),
+            status="failed",
+        )
+        session.tool_call_history.append(record1)
+        session.tool_call_history.append(record2)
+        session.statistics.update_from_tool_calls(session.tool_call_history)
+        storage_manager.update_session(session)
+
+        # 获取统计信息
+        stats_result = session_manager.get_session_statistics(session.session_id)
+        assert "**总调用次数**: 2" in stats_result
+        assert "**成功次数**: 1" in stats_result
+        assert "**失败次数**: 1" in stats_result
+        assert "成功率" in stats_result
+        assert "150.50ms" in stats_result  # 总执行时间
+
+    async def test_get_session_statistics_with_thoughts(self, storage_manager):
+        """测试获取有思考步骤的会话统计信息"""
+        from deep_thinking.models.thought import Thought
+
+        # 创建会话
+        session = storage_manager.create_session(name="思考统计测试会话")
+
+        # 添加不同类型的思考（使用有效类型）
+        thoughts = [
+            Thought(thought_number=1, content="常规思考", type="regular"),
+            Thought(thought_number=2, content="另一个常规思考", type="regular"),
+            Thought(thought_number=3, content="修订思考", type="revision", is_revision=True, revises_thought=1),
+        ]
+        for t in thoughts:
+            session.add_thought(t)
+        session.statistics.update_from_thoughts(session.thoughts)
+        storage_manager.update_session(session)
+
+        # 获取统计信息
+        stats_result = session_manager.get_session_statistics(session.session_id)
+        assert "**总思考数**: 3" in stats_result
+        assert "思考类型分布" in stats_result
+        assert "常规思考" in stats_result
+        assert "修订思考" in stats_result
+
+    async def test_get_session_statistics_nonexistent_session(self, storage_manager):
+        """测试获取不存在会话的统计信息"""
+        with pytest.raises(ValueError, match="会话不存在"):
+            session_manager.get_session_statistics("nonexistent-session-id")

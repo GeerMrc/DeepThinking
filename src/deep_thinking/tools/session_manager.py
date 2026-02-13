@@ -390,6 +390,221 @@ def resume_session(
     return "\n".join(result_parts)
 
 
+@app.tool()
+def get_tool_call_history(
+    session_id: str,
+    thought_number: int | None = None,
+    limit: int = 50,
+) -> str:
+    """
+    获取会话的工具调用历史（Interleaved Thinking）
+
+    查询会话中的工具调用记录，支持按思考步骤过滤。
+
+    Args:
+        session_id: 会话ID
+        thought_number: 过滤特定思考步骤的工具调用（可选，为空则返回全部）
+        limit: 最大返回数量（默认50）
+
+    Returns:
+        工具调用历史记录
+
+    Raises:
+        ValueError: 会话不存在
+    """
+    manager = get_storage_manager()
+
+    # 获取会话
+    session = manager.get_session(session_id)
+    if session is None:
+        raise ValueError(f"会话不存在: {session_id}")
+
+    # 过滤工具调用记录
+    if thought_number is not None:
+        records = [
+            r
+            for r in session.tool_call_history
+            if r.thought_number == thought_number
+        ]
+    else:
+        records = session.tool_call_history
+
+    # 限制数量
+    records = records[:limit]
+
+    # 构建返回结果
+    parts = [
+        "## 工具调用历史",
+        "",
+        f"**会话ID**: {session_id}",
+        f"**总记录数**: {len(session.tool_call_history)}",
+    ]
+
+    if thought_number is not None:
+        parts.append(f"**过滤条件**: 思考步骤 {thought_number}")
+
+    parts.append("")
+
+    if not records:
+        parts.append("暂无工具调用记录")
+        return "\n".join(parts)
+
+    # 状态图标映射
+    status_icons = {
+        "pending": "⏳",
+        "running": "🔄",
+        "completed": "✅",
+        "failed": "❌",
+        "timeout": "⏱️",
+        "cancelled": "🚫",
+    }
+
+    # 工具调用记录列表
+    for record in records:
+        icon = status_icons.get(record.status, "❓")
+        parts.append(f"### {icon} {record.call_data.tool_name}")
+        parts.append(f"- **记录ID**: {record.record_id}")
+        parts.append(f"- **思考步骤**: {record.thought_number}")
+        parts.append(f"- **状态**: {record.status}")
+        parts.append(f"- **调用时间**: {record.call_data.timestamp.strftime('%Y-%m-%d %H:%M:%S')}")
+
+        # 参数（如果有）
+        if record.call_data.arguments:
+            args_str = json.dumps(record.call_data.arguments, ensure_ascii=False)
+            if len(args_str) > 100:
+                args_str = args_str[:100] + "..."
+            parts.append(f"- **参数**: `{args_str}`")
+
+        # 结果信息（如果有）
+        if record.result_data:
+            parts.append(f"- **成功**: {'是' if record.result_data.success else '否'}")
+            if record.result_data.execution_time_ms:
+                parts.append(f"- **执行时间**: {record.result_data.execution_time_ms:.2f}ms")
+            if record.result_data.from_cache:
+                parts.append("- **缓存命中**: 是")
+
+            # 错误信息（如果有）
+            if record.result_data.error:
+                parts.append(f"- **错误类型**: {record.result_data.error.error_type}")
+                error_msg = record.result_data.error.error_message
+                if len(error_msg) > 100:
+                    error_msg = error_msg[:100] + "..."
+                parts.append(f"- **错误信息**: {error_msg}")
+
+        parts.append("")
+
+    return "\n".join(parts)
+
+
+@app.tool()
+def get_session_statistics(session_id: str) -> str:
+    """
+    获取会话统计信息（Interleaved Thinking）
+
+    返回会话的详细统计数据，包括思考步骤、工具调用等指标。
+
+    Args:
+        session_id: 会话ID
+
+    Returns:
+        会话统计信息
+
+    Raises:
+        ValueError: 会话不存在
+    """
+    manager = get_storage_manager()
+
+    # 获取会话
+    session = manager.get_session(session_id)
+    if session is None:
+        raise ValueError(f"会话不存在: {session_id}")
+
+    stats = session.statistics
+
+    # 构建返回结果
+    parts = [
+        "## 会话统计信息",
+        "",
+        f"**会话ID**: {session_id}",
+        f"**会话名称**: {session.name}",
+        "",
+        "---",
+        "",
+        "### 思考步骤统计",
+        "",
+        f"- **总思考数**: {stats.total_thoughts}",
+        f"- **平均思考长度**: {stats.avg_thought_length:.1f} 字符",
+        "",
+        "### 工具调用统计",
+        "",
+        f"- **总调用次数**: {stats.total_tool_calls}",
+        f"- **成功次数**: {stats.successful_tool_calls}",
+        f"- **失败次数**: {stats.failed_tool_calls}",
+        f"- **缓存命中**: {stats.cached_tool_calls}",
+    ]
+
+    # 计算成功率
+    if stats.total_tool_calls > 0:
+        success_rate = (stats.successful_tool_calls / stats.total_tool_calls) * 100
+        parts.append(f"- **成功率**: {success_rate:.1f}%")
+    else:
+        parts.append("- **成功率**: N/A")
+
+    # 执行时间
+    if stats.total_execution_time_ms > 0:
+        parts.append(f"- **总执行时间**: {stats.total_execution_time_ms:.2f}ms")
+        if stats.total_tool_calls > 0:
+            avg_time = stats.total_execution_time_ms / stats.total_tool_calls
+            parts.append(f"- **平均执行时间**: {avg_time:.2f}ms")
+    else:
+        parts.append("- **总执行时间**: N/A")
+
+    parts.append("")
+    parts.append("### 执行阶段分布")
+    parts.append("")
+
+    phase_dist = stats.phase_distribution
+    total_phases = sum(phase_dist.values())
+
+    if total_phases > 0:
+        for phase, count in phase_dist.items():
+            percentage = (count / total_phases) * 100
+            phase_names = {
+                "thinking": "思考",
+                "tool_call": "工具调用",
+                "analysis": "分析",
+            }
+            phase_name = phase_names.get(phase, phase)
+            parts.append(f"- **{phase_name}**: {count} ({percentage:.1f}%)")
+    else:
+        parts.append("- 暂无阶段分布数据")
+
+    # 思考类型分布
+    if session.thoughts:
+        parts.append("")
+        parts.append("### 思考类型分布")
+        parts.append("")
+
+        type_counts: dict[str, int] = {}
+        for thought in session.thoughts:
+            type_counts[thought.type] = type_counts.get(thought.type, 0) + 1
+
+        type_names = {
+            "regular": "常规思考",
+            "revision": "修订思考",
+            "branch": "分支思考",
+            "comparison": "对比思考",
+            "reverse": "逆向思考",
+            "hypothetical": "假设思考",
+        }
+
+        for thought_type, count in type_counts.items():
+            type_name = type_names.get(thought_type, thought_type)
+            parts.append(f"- **{type_name}**: {count}")
+
+    return "\n".join(parts)
+
+
 # 注册工具
 __all__ = [
     "create_session",
@@ -398,4 +613,6 @@ __all__ = [
     "delete_session",
     "update_session_status",
     "resume_session",
+    "get_tool_call_history",
+    "get_session_statistics",
 ]
