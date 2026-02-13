@@ -7,10 +7,16 @@ from pydantic import ValidationError
 
 from deep_thinking.models.thinking_session import (
     SessionCreate,
+    SessionStatistics,
     SessionUpdate,
     ThinkingSession,
 )
 from deep_thinking.models.thought import Thought
+from deep_thinking.models.tool_call import (
+    ToolCallData,
+    ToolCallRecord,
+    ToolResultData,
+)
 
 
 class TestThinkingSession:
@@ -292,3 +298,181 @@ class TestSessionUpdate:
         assert update_data.name is None
         assert update_data.description is None
         assert update_data.status is None
+
+
+class TestSessionStatistics:
+    """SessionStatistics模型测试 (Interleaved Thinking)"""
+
+    def test_create_statistics_with_defaults(self):
+        """测试使用默认值创建统计信息"""
+        stats = SessionStatistics()
+        assert stats.total_thoughts == 0
+        assert stats.total_tool_calls == 0
+        assert stats.successful_tool_calls == 0
+        assert stats.failed_tool_calls == 0
+        assert stats.cached_tool_calls == 0
+        assert stats.total_execution_time_ms == 0.0
+        assert stats.avg_thought_length == 0.0
+        assert stats.phase_distribution == {"thinking": 0, "tool_call": 0, "analysis": 0}
+
+    def test_update_from_thoughts(self):
+        """测试从思考步骤更新统计"""
+        stats = SessionStatistics()
+        thoughts = [
+            Thought(thought_number=1, content="思考内容1"),
+            Thought(thought_number=2, content="思考内容22"),
+            Thought(thought_number=3, content="思考内容333"),
+        ]
+
+        stats.update_from_thoughts(thoughts)
+
+        assert stats.total_thoughts == 3
+        # 平均长度: (5 + 6 + 7) / 3 = 6
+        assert stats.avg_thought_length == 6.0
+
+    def test_update_from_thoughts_empty(self):
+        """测试空思考列表更新统计"""
+        stats = SessionStatistics()
+        stats.update_from_thoughts([])
+        assert stats.total_thoughts == 0
+        assert stats.avg_thought_length == 0.0
+
+    def test_update_from_tool_calls(self):
+        """测试从工具调用记录更新统计"""
+        stats = SessionStatistics()
+
+        # 创建工具调用记录
+        call_data1 = ToolCallData(tool_name="test", arguments={})
+        record1 = ToolCallRecord(
+            thought_number=1,
+            call_data=call_data1,
+            status="completed",
+        )
+        result1 = ToolResultData(
+            call_id=call_data1.call_id,
+            success=True,
+            execution_time_ms=100.0,
+        )
+        record1.set_result(result1)
+
+        call_data2 = ToolCallData(tool_name="test2", arguments={})
+        record2 = ToolCallRecord(
+            thought_number=2,
+            call_data=call_data2,
+            status="failed",
+        )
+
+        call_data3 = ToolCallData(tool_name="test3", arguments={})
+        record3 = ToolCallRecord(
+            thought_number=3,
+            call_data=call_data3,
+            status="completed",
+        )
+        result3 = ToolResultData(
+            call_id=call_data3.call_id,
+            success=True,
+            execution_time_ms=50.0,
+            from_cache=True,
+        )
+        record3.set_result(result3)
+
+        tool_calls = [record1, record2, record3]
+        stats.update_from_tool_calls(tool_calls)
+
+        assert stats.total_tool_calls == 3
+        assert stats.successful_tool_calls == 2
+        assert stats.failed_tool_calls == 1
+        assert stats.cached_tool_calls == 1
+        assert stats.total_execution_time_ms == 150.0
+
+    def test_statistics_to_dict(self):
+        """测试统计信息转换为字典"""
+        stats = SessionStatistics(
+            total_thoughts=5,
+            total_tool_calls=10,
+            successful_tool_calls=8,
+            failed_tool_calls=2,
+        )
+        data = stats.to_dict()
+
+        assert data["total_thoughts"] == 5
+        assert data["total_tool_calls"] == 10
+        assert data["successful_tool_calls"] == 8
+        assert data["failed_tool_calls"] == 2
+
+
+class TestThinkingSessionInterleaved:
+    """ThinkingSession Interleaved Thinking 功能测试"""
+
+    def test_session_has_statistics_field(self):
+        """测试会话包含统计字段"""
+        session = ThinkingSession(name="测试会话")
+        assert hasattr(session, "statistics")
+        assert isinstance(session.statistics, SessionStatistics)
+
+    def test_session_has_tool_call_history_field(self):
+        """测试会话包含工具调用历史字段"""
+        session = ThinkingSession(name="测试会话")
+        assert hasattr(session, "tool_call_history")
+        assert session.tool_call_history == []
+
+    def test_add_tool_call_record(self):
+        """测试添加工具调用记录"""
+        session = ThinkingSession(name="测试会话")
+        call_data = ToolCallData(tool_name="search", arguments={"query": "test"})
+        record = ToolCallRecord(thought_number=1, call_data=call_data)
+
+        session.add_tool_call_record(record)
+
+        assert len(session.tool_call_history) == 1
+        assert session.tool_call_history[0].call_data.tool_name == "search"
+
+    def test_update_statistics(self):
+        """测试更新统计信息"""
+        session = ThinkingSession(name="测试会话")
+
+        # 添加思考步骤
+        thought = Thought(thought_number=1, content="测试思考内容")
+        session.add_thought(thought)
+
+        # 添加工具调用记录
+        call_data = ToolCallData(tool_name="test", arguments={})
+        record = ToolCallRecord(thought_number=1, call_data=call_data, status="completed")
+        result = ToolResultData(call_id=call_data.call_id, success=True)
+        record.set_result(result)
+        session.add_tool_call_record(record)
+
+        # 更新统计
+        session.update_statistics()
+
+        assert session.statistics.total_thoughts == 1
+        assert session.statistics.total_tool_calls == 1
+        assert session.statistics.successful_tool_calls == 1
+
+    def test_to_dict_includes_statistics_and_tool_calls(self):
+        """测试to_dict包含统计和工具调用"""
+        session = ThinkingSession(name="测试会话")
+        thought = Thought(thought_number=1, content="测试")
+        session.add_thought(thought)
+
+        call_data = ToolCallData(tool_name="test", arguments={})
+        record = ToolCallRecord(thought_number=1, call_data=call_data)
+        session.add_tool_call_record(record)
+
+        data = session.to_dict()
+
+        assert "statistics" in data
+        assert "tool_call_history" in data
+        assert len(data["tool_call_history"]) == 1
+
+    def test_get_summary_includes_statistics(self):
+        """测试get_summary包含统计信息"""
+        session = ThinkingSession(name="测试会话")
+        thought = Thought(thought_number=1, content="测试")
+        session.add_thought(thought)
+
+        summary = session.get_summary()
+
+        assert "statistics" in summary
+        assert "tool_call_count" in summary
+        assert summary["tool_call_count"] == 0

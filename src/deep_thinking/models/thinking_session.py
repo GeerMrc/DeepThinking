@@ -12,6 +12,128 @@ from uuid import uuid4
 from pydantic import BaseModel, Field, field_validator
 
 from deep_thinking.models.thought import Thought
+from deep_thinking.models.tool_call import ToolCallRecord
+
+
+class SessionStatistics(BaseModel):
+    """
+    会话统计信息模型 (Interleaved Thinking)
+
+    记录会话的统计数据，包括思考步骤、工具调用等。
+
+    Attributes:
+        total_thoughts: 总思考步骤数
+        total_tool_calls: 总工具调用次数
+        successful_tool_calls: 成功的工具调用次数
+        failed_tool_calls: 失败的工具调用次数
+        cached_tool_calls: 缓存命中的工具调用次数
+        total_execution_time_ms: 总执行时间（毫秒）
+        avg_thought_length: 平均思考内容长度
+        phase_distribution: 各阶段分布（thinking/tool_call/analysis的数量）
+    """
+
+    total_thoughts: int = Field(
+        default=0,
+        ge=0,
+        description="总思考步骤数",
+    )
+
+    total_tool_calls: int = Field(
+        default=0,
+        ge=0,
+        description="总工具调用次数",
+    )
+
+    successful_tool_calls: int = Field(
+        default=0,
+        ge=0,
+        description="成功的工具调用次数",
+    )
+
+    failed_tool_calls: int = Field(
+        default=0,
+        ge=0,
+        description="失败的工具调用次数",
+    )
+
+    cached_tool_calls: int = Field(
+        default=0,
+        ge=0,
+        description="缓存命中的工具调用次数",
+    )
+
+    total_execution_time_ms: float = Field(
+        default=0.0,
+        ge=0,
+        description="总执行时间（毫秒）",
+    )
+
+    avg_thought_length: float = Field(
+        default=0.0,
+        ge=0,
+        description="平均思考内容长度",
+    )
+
+    phase_distribution: dict[str, int] = Field(
+        default_factory=lambda: {"thinking": 0, "tool_call": 0, "analysis": 0},
+        description="各阶段分布",
+    )
+
+    def update_from_thoughts(self, thoughts: list[Thought]) -> None:
+        """
+        根据思考步骤更新统计信息
+
+        Args:
+            thoughts: 思考步骤列表
+        """
+        self.total_thoughts = len(thoughts)
+        if thoughts:
+            total_length = sum(len(t.content) for t in thoughts)
+            self.avg_thought_length = total_length / len(thoughts)
+        else:
+            self.avg_thought_length = 0.0
+
+    def update_from_tool_calls(self, tool_call_history: list[ToolCallRecord]) -> None:
+        """
+        根据工具调用记录更新统计信息
+
+        Args:
+            tool_call_history: 工具调用记录列表
+        """
+        self.total_tool_calls = len(tool_call_history)
+        self.successful_tool_calls = sum(1 for r in tool_call_history if r.is_successful())
+        self.failed_tool_calls = sum(
+            1 for r in tool_call_history if r.status in ("failed", "timeout")
+        )
+        self.cached_tool_calls = sum(
+            1
+            for r in tool_call_history
+            if r.result_data and r.result_data.from_cache
+        )
+
+        total_time = 0.0
+        for record in tool_call_history:
+            if record.result_data and record.result_data.execution_time_ms:
+                total_time += record.result_data.execution_time_ms
+        self.total_execution_time_ms = total_time
+
+    def to_dict(self) -> dict[str, Any]:
+        """
+        转换为字典格式
+
+        Returns:
+            包含所有字段的字典
+        """
+        return {
+            "total_thoughts": self.total_thoughts,
+            "total_tool_calls": self.total_tool_calls,
+            "successful_tool_calls": self.successful_tool_calls,
+            "failed_tool_calls": self.failed_tool_calls,
+            "cached_tool_calls": self.cached_tool_calls,
+            "total_execution_time_ms": self.total_execution_time_ms,
+            "avg_thought_length": self.avg_thought_length,
+            "phase_distribution": self.phase_distribution,
+        }
 
 
 class ThinkingSession(BaseModel):
@@ -29,6 +151,8 @@ class ThinkingSession(BaseModel):
         status: 会话状态（active/completed/archived）
         thoughts: 思考步骤列表
         metadata: 元数据字典（用于存储自定义信息）
+        statistics: 会话统计信息（Interleaved Thinking）
+        tool_call_history: 工具调用记录列表（Interleaved Thinking）
     """
 
     session_id: str = Field(
@@ -59,6 +183,17 @@ class ThinkingSession(BaseModel):
     thoughts: list[Thought] = Field(default_factory=list, description="思考步骤列表")
 
     metadata: dict[str, Any] = Field(default_factory=dict, description="元数据字典")
+
+    # Interleaved Thinking 扩展字段
+    statistics: SessionStatistics = Field(
+        default_factory=SessionStatistics,
+        description="会话统计信息",
+    )
+
+    tool_call_history: list[ToolCallRecord] = Field(
+        default_factory=list,
+        description="工具调用记录列表",
+    )
 
     @field_validator("name")
     @classmethod
@@ -207,6 +342,8 @@ class ThinkingSession(BaseModel):
             "thought_count": self.thought_count(),
             "thoughts": [thought.to_dict() for thought in self.thoughts],
             "metadata": self.metadata,
+            "statistics": self.statistics.to_dict(),
+            "tool_call_history": [record.to_dict() for record in self.tool_call_history],
         }
 
     def get_summary(self) -> dict[str, Any]:
@@ -227,7 +364,29 @@ class ThinkingSession(BaseModel):
             "thought_count": self.thought_count(),
             "latest_thought": latest_thought.to_dict() if latest_thought else None,
             "metadata": self.metadata,
+            "statistics": self.statistics.to_dict(),
+            "tool_call_count": len(self.tool_call_history),
         }
+
+    def add_tool_call_record(self, record: ToolCallRecord) -> None:
+        """
+        添加工具调用记录到会话
+
+        Args:
+            record: 要添加的工具调用记录
+        """
+        self.tool_call_history.append(record)
+        self.updated_at = datetime.now(timezone.utc)
+
+    def update_statistics(self) -> None:
+        """
+        更新会话统计信息
+
+        根据当前的思考步骤和工具调用记录重新计算统计信息。
+        """
+        self.statistics.update_from_thoughts(self.thoughts)
+        self.statistics.update_from_tool_calls(self.tool_call_history)
+        self.updated_at = datetime.now(timezone.utc)
 
 
 class SessionCreate(BaseModel):

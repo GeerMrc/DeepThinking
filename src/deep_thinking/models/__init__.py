@@ -7,7 +7,7 @@
 from deep_thinking.models.config import ThinkingConfig, get_global_config, set_global_config
 from deep_thinking.models.task import TaskStatus, ThinkingTask
 from deep_thinking.models.template import Template
-from deep_thinking.models.thinking_session import ThinkingSession
+from deep_thinking.models.thinking_session import SessionStatistics, ThinkingSession
 from deep_thinking.models.thought import ExecutionPhase, Thought
 from deep_thinking.models.tool_call import (
     ToolCallData,
@@ -21,6 +21,7 @@ __all__ = [
     "Thought",
     "ExecutionPhase",
     "ThinkingSession",
+    "SessionStatistics",
     # 模板相关
     "Template",
     # 任务相关
