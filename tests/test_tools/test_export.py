@@ -11,6 +11,7 @@ import pytest
 
 from deep_thinking.models.thinking_session import ThinkingSession
 from deep_thinking.models.thought import Thought
+from deep_thinking.models.tool_call import ToolCallData, ToolCallRecord, ToolResultData
 from deep_thinking.tools import export
 from deep_thinking.utils.formatters import SessionFormatter, export_session_to_file
 
@@ -437,3 +438,323 @@ class TestHelperFunctions:
 
         with pytest.raises(ValueError, match="不支持的格式"):
             _normalize_format("invalid")
+
+
+# =============================================================================
+# Interleaved Thinking 导出测试 (Phase 5)
+# =============================================================================
+
+
+class TestInterleavedThinkingExport:
+    """测试 Interleaved Thinking 导出功能"""
+
+    def test_json_export_contains_tool_calls(self, sample_session_data):
+        """测试 JSON 导出包含 tool_calls 字段"""
+        # 创建带有工具调用的思考步骤
+        thought = Thought(
+            thought_number=1,
+            content="需要查询数据",
+            type="regular",
+            phase="tool_call",
+            tool_calls=["rec-001", "rec-002"],
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+
+        result = SessionFormatter.to_json(session)
+        data = json.loads(result)
+
+        # 验证思考步骤包含 phase 和 tool_calls
+        assert data["thoughts"][0]["phase"] == "tool_call"
+        assert data["thoughts"][0]["tool_calls"] == ["rec-001", "rec-002"]
+
+    def test_json_export_contains_statistics(self, sample_session_data):
+        """测试 JSON 导出包含 statistics 字段"""
+        session = ThinkingSession(**sample_session_data)
+        # 手动更新统计信息
+        session.statistics.total_thoughts = 5
+        session.statistics.total_tool_calls = 10
+
+        result = SessionFormatter.to_json(session)
+        data = json.loads(result)
+
+        # 验证统计信息
+        assert "statistics" in data
+        assert data["statistics"]["total_thoughts"] == 5
+        assert data["statistics"]["total_tool_calls"] == 10
+
+    def test_json_export_contains_tool_call_history(self, sample_session_data):
+        """测试 JSON 导出包含 tool_call_history 字段"""
+        # 创建工具调用记录
+        call_data = ToolCallData(
+            call_id="call-001",
+            tool_name="test_tool",
+            arguments={"arg1": "value1"},
+        )
+        result_data = ToolResultData(
+            call_id="call-001",
+            success=True,
+            result="test result",
+        )
+        record = ToolCallRecord(
+            record_id="rec-001",
+            thought_number=1,
+            call_data=call_data,
+            result_data=result_data,
+            status="completed",
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_tool_call_record(record)
+
+        result = SessionFormatter.to_json(session)
+        data = json.loads(result)
+
+        # 验证工具调用历史
+        assert "tool_call_history" in data
+        assert len(data["tool_call_history"]) == 1
+        assert data["tool_call_history"][0]["record_id"] == "rec-001"
+
+    def test_markdown_export_shows_phase(self, sample_session_data):
+        """测试 Markdown 导出显示执行阶段"""
+        thought = Thought(
+            thought_number=1,
+            content="分析阶段的内容",
+            type="regular",
+            phase="analysis",
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+
+        result = SessionFormatter.to_markdown(session)
+
+        # 验证阶段信息显示
+        assert "分析阶段" in result or "analysis" in result
+
+    def test_markdown_export_shows_tool_calls(self, sample_session_data):
+        """测试 Markdown 导出显示工具调用"""
+        # 创建工具调用记录
+        call_data = ToolCallData(
+            call_id="call-001",
+            tool_name="search_api",
+            arguments={"query": "test"},
+        )
+        result_data = ToolResultData(
+            call_id="call-001",
+            success=True,
+            result="found",
+        )
+        record = ToolCallRecord(
+            record_id="rec-001",
+            thought_number=1,
+            call_data=call_data,
+            result_data=result_data,
+            status="completed",
+        )
+
+        # 创建带工具调用的思考步骤
+        thought = Thought(
+            thought_number=1,
+            content="需要搜索",
+            type="regular",
+            phase="tool_call",
+            tool_calls=["rec-001"],
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+        session.add_tool_call_record(record)
+
+        result = SessionFormatter.to_markdown(session)
+
+        # 验证工具调用显示
+        assert "search_api" in result
+
+    def test_markdown_export_shows_statistics(self, sample_session_data):
+        """测试 Markdown 导出显示统计信息"""
+        session = ThinkingSession(**sample_session_data)
+        # 添加思考步骤
+        thought = Thought(thought_number=1, content="测试", type="regular")
+        session.add_thought(thought)
+        # 更新统计
+        session.statistics.total_thoughts = 1
+        session.statistics.total_tool_calls = 3
+
+        result = SessionFormatter.to_markdown(session)
+
+        # 验证统计信息显示
+        assert "统计信息" in result
+        assert "总思考步骤数" in result
+
+    def test_markdown_export_shows_tool_call_history_table(self, sample_session_data):
+        """测试 Markdown 导出显示工具调用历史表格"""
+        # 创建工具调用记录
+        call_data = ToolCallData(
+            call_id="call-001",
+            tool_name="read_file",
+            arguments={"path": "/test"},
+        )
+        result_data = ToolResultData(
+            call_id="call-001",
+            success=True,
+            result="content",
+            execution_time_ms=15.5,
+        )
+        record = ToolCallRecord(
+            record_id="rec-001",
+            thought_number=1,
+            call_data=call_data,
+            result_data=result_data,
+            status="completed",
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_tool_call_record(record)
+
+        result = SessionFormatter.to_markdown(session)
+
+        # 验证工具调用历史表格
+        assert "工具调用历史" in result
+        assert "read_file" in result
+        assert "completed" in result
+
+    def test_html_export_shows_phase(self, sample_session_data):
+        """测试 HTML 导出显示执行阶段"""
+        thought = Thought(
+            thought_number=1,
+            content="工具调用阶段",
+            type="regular",
+            phase="tool_call",
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+
+        result = SessionFormatter.to_html(session)
+
+        # 验证阶段标签
+        assert "thought-phase" in result
+        assert "tool_call" in result
+
+    def test_html_export_shows_tool_calls(self, sample_session_data):
+        """测试 HTML 导出显示工具调用"""
+        # 创建工具调用记录
+        call_data = ToolCallData(
+            call_id="call-001",
+            tool_name="query_db",
+            arguments={"sql": "SELECT 1"},
+        )
+        result_data = ToolResultData(
+            call_id="call-001",
+            success=True,
+            result=[{"id": 1}],
+        )
+        record = ToolCallRecord(
+            record_id="rec-001",
+            thought_number=1,
+            call_data=call_data,
+            result_data=result_data,
+            status="completed",
+        )
+
+        thought = Thought(
+            thought_number=1,
+            content="查询数据库",
+            type="regular",
+            phase="tool_call",
+            tool_calls=["rec-001"],
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+        session.add_tool_call_record(record)
+
+        result = SessionFormatter.to_html(session)
+
+        # 验证工具调用显示
+        assert "query_db" in result
+        assert "tool-calls" in result
+
+    def test_html_export_shows_statistics(self, sample_session_data):
+        """测试 HTML 导出显示统计信息"""
+        session = ThinkingSession(**sample_session_data)
+        thought = Thought(thought_number=1, content="测试", type="regular")
+        session.add_thought(thought)
+        session.statistics.total_thoughts = 1
+        session.statistics.total_tool_calls = 5
+
+        result = SessionFormatter.to_html(session)
+
+        # 验证统计信息
+        assert "统计信息" in result
+        assert "stat-card" in result
+
+    def test_text_export_shows_phase(self, sample_session_data):
+        """测试 Text 导出显示执行阶段"""
+        thought = Thought(
+            thought_number=1,
+            content="分析数据",
+            type="regular",
+            phase="analysis",
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+
+        result = SessionFormatter.to_text(session)
+
+        # 验证阶段信息
+        assert "阶段:" in result or "analysis" in result
+
+    def test_text_export_shows_tool_calls(self, sample_session_data):
+        """测试 Text 导出显示工具调用"""
+        # 创建工具调用记录
+        call_data = ToolCallData(
+            call_id="call-001",
+            tool_name="http_request",
+            arguments={"url": "https://example.com"},
+        )
+        result_data = ToolResultData(
+            call_id="call-001",
+            success=True,
+            result="response",
+        )
+        record = ToolCallRecord(
+            record_id="rec-001",
+            thought_number=1,
+            call_data=call_data,
+            result_data=result_data,
+            status="completed",
+        )
+
+        thought = Thought(
+            thought_number=1,
+            content="发送请求",
+            type="regular",
+            phase="tool_call",
+            tool_calls=["rec-001"],
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+        session.add_tool_call_record(record)
+
+        result = SessionFormatter.to_text(session)
+
+        # 验证工具调用显示
+        assert "http_request" in result
+
+    def test_text_export_shows_statistics(self, sample_session_data):
+        """测试 Text 导出显示统计信息"""
+        session = ThinkingSession(**sample_session_data)
+        thought = Thought(thought_number=1, content="测试", type="regular")
+        session.add_thought(thought)
+        session.statistics.total_thoughts = 1
+
+        result = SessionFormatter.to_text(session)
+
+        # 验证统计信息
+        assert "统计信息" in result
+        assert "总思考步骤数" in result
