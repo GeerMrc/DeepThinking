@@ -273,6 +273,31 @@ class StorageManager:
         session.add_thought(thought)
         return self.update_session(session)
 
+    def update_thought(self, session_id: str, thought: Thought) -> bool:
+        """
+        更新会话中的思考步骤
+
+        Args:
+            session_id: 会话ID
+            thought: 思考步骤（根据 thought_number 匹配）
+
+        Returns:
+            是否成功更新
+        """
+        session = self.get_session(session_id)
+        if session is None:
+            return False
+
+        # 查找并更新思考步骤
+        for i, existing_thought in enumerate(session.thoughts):
+            if existing_thought.thought_number == thought.thought_number:
+                session.thoughts[i] = thought
+                return self.update_session(session)
+
+        # 如果没找到，添加新的思考步骤
+        session.add_thought(thought)
+        return self.update_session(session)
+
     def get_latest_thought(self, session_id: str) -> Thought | None:
         """
         获取会话中最后一个思考步骤

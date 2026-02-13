@@ -11,7 +11,7 @@
 
 Interleaved Thinking 扩展：
 - 执行阶段(thinking/tool_call/analysis)
-- 工具调用追踪和记录
+- 1:N 工具调用追踪和记录（每步骤支持多次工具调用）
 - 资源控制和统计
 """
 
@@ -27,7 +27,7 @@ from deep_thinking.models.tool_call import (
     ToolResultData,
 )
 from deep_thinking.server import app, get_storage_manager
-from deep_thinking.tools.phase_inference import infer_phase
+from deep_thinking.tools.phase_inference import infer_phase_from_lists
 
 logger = logging.getLogger(__name__)
 
@@ -56,10 +56,10 @@ def sequential_thinking(
     hypotheticalCondition: str | None = None,
     hypotheticalImpact: str | None = None,
     hypotheticalProbability: str | None = None,
-    # Interleaved Thinking 参数 (Phase 3)
+    # Interleaved Thinking 参数 (Phase 3.5: 1:N 映射)
     phase: ExecutionPhase | None = None,
-    toolCall: dict[str, Any] | None = None,
-    toolResult: dict[str, Any] | None = None,
+    toolCalls: list[dict[str, Any]] | None = None,
+    toolResults: list[dict[str, Any]] | None = None,
 ) -> str:
     """
     执行顺序思考步骤
@@ -88,8 +88,8 @@ def sequential_thinking(
         hypotheticalImpact: 假设思考的影响分析（1-2000字符）
         hypotheticalProbability: 假设思考的可能性评估（1-50字符）
         phase: 执行阶段（thinking/tool_call/analysis），None时自动推断
-        toolCall: 工具调用参数（Interleaved Thinking）
-        toolResult: 工具结果参数（Interleaved Thinking）
+        toolCalls: 多个工具调用参数列表（Interleaved Thinking 1:N 映射）
+        toolResults: 多个工具结果参数列表（Interleaved Thinking 1:N 映射）
 
     Returns:
         思考结果描述，包含当前思考信息和会话状态
@@ -203,7 +203,9 @@ def sequential_thinking(
     if phase is not None:
         inferred_phase = phase
     else:
-        inferred_phase = infer_phase(tool_call=toolCall, tool_result=toolResult)
+        inferred_phase = infer_phase_from_lists(
+            tool_calls=toolCalls, tool_results=toolResults
+        )
 
     # 创建思考步骤对象
     thought_obj = Thought(
@@ -228,27 +230,29 @@ def sequential_thinking(
         hypothetical_probability=hypotheticalProbability,
         # Interleaved Thinking 字段
         phase=inferred_phase,
+        tool_calls=[],  # 稍后填充 record_id
         timestamp=datetime.now(timezone.utc),
     )
 
     # 添加思考步骤到会话
     manager.add_thought(session_id, thought_obj)
 
-    # ===== Interleaved Thinking: 工具调用记录存储 =====
-    tool_call_record: ToolCallRecord | None = None
+    # ===== Interleaved Thinking: 工具调用记录存储 (1:N 映射) =====
+    tool_call_records: list[ToolCallRecord] = []
 
     # 如果有工具调用参数，创建并存储工具调用记录
-    if toolCall is not None and toolCall:
-        # ===== 资源控制检查 (Phase 3.8) =====
-        # 获取当前会话检查是否超过工具调用限制
+    if toolCalls is not None and len(toolCalls) > 0:
+        # ===== 资源控制检查 (Phase 3.5.7: 批量检查配额) =====
         current_session = manager.get_session(session_id)
         if current_session is not None:
             current_tool_calls = current_session.statistics.total_tool_calls
             max_tool_calls_limit = config.max_tool_calls
+            new_calls_count = len(toolCalls)
 
-            if current_tool_calls >= max_tool_calls_limit:
+            if current_tool_calls + new_calls_count > max_tool_calls_limit:
                 logger.warning(
-                    f"会话 {session_id} 工具调用次数已达上限 {max_tool_calls_limit}"
+                    f"会话 {session_id} 工具调用次数将超限: "
+                    f"当前 {current_tool_calls} + 新增 {new_calls_count} > 上限 {max_tool_calls_limit}"
                 )
                 result = [
                     f"## 思考步骤 {thoughtNumber}/{totalThoughts}",
@@ -264,41 +268,70 @@ def sequential_thinking(
                     f"- 总思考数: {current_session.thought_count()}",
                     f"- 工具调用数: {current_tool_calls}",
                     "",
-                    f"⚠️ 警告：工具调用次数已达上限 {max_tool_calls_limit}，无法执行新的工具调用。",
+                    f"⚠️ 警告：工具调用次数将超限，当前 {current_tool_calls} + "
+                    f"新增 {new_calls_count} > 上限 {max_tool_calls_limit}。",
                 ]
                 return "\n".join(result)
 
-        # 从 toolCall 字典创建 ToolCallData
-        call_data = ToolCallData(
-            tool_name=toolCall.get("name", toolCall.get("tool_name", "unknown")),
-            arguments=toolCall.get("arguments", toolCall.get("args", {})),
-        )
+        # 创建 tool_call_id 到 result 的映射
+        results_map: dict[str, dict[str, Any]] = {}
+        if toolResults is not None:
+            for result_item in toolResults:
+                call_id = result_item.get("call_id", "")
+                if call_id:
+                    results_map[call_id] = result_item
 
-        # 如果有工具结果，创建 ToolResultData
-        result_data: ToolResultData | None = None
-        if toolResult is not None and toolResult:
-            result_data = ToolResultData(
-                call_id=toolResult.get("call_id", call_data.call_id),
-                success=toolResult.get("success", True),
-                result=toolResult.get("result"),
-                execution_time_ms=toolResult.get("execution_time_ms"),
+        # 循环处理多个工具调用 (Phase 3.5.5)
+        for i, call_item in enumerate(toolCalls):
+            # 从 toolCall 字典创建 ToolCallData
+            call_data = ToolCallData(
+                tool_name=call_item.get("name", call_item.get("tool_name", "unknown")),
+                arguments=call_item.get("arguments", call_item.get("args", {})),
             )
 
-        # 创建工具调用记录
-        tool_call_record = ToolCallRecord(
-            thought_number=thoughtNumber,
-            call_data=call_data,
-            result_data=result_data,
-            status="completed" if result_data else "pending",
-        )
+            # 查找对应的工具结果
+            result_data: ToolResultData | None = None
+            # 优先使用 call_id 匹配
+            call_id = call_item.get("call_id", call_data.call_id)
+            if call_id in results_map:
+                result_item = results_map[call_id]
+                result_data = ToolResultData(
+                    call_id=call_id,
+                    success=result_item.get("success", True),
+                    result=result_item.get("result"),
+                    execution_time_ms=result_item.get("execution_time_ms"),
+                )
+            # 其次使用索引匹配
+            elif toolResults is not None and i < len(toolResults):
+                result_item = toolResults[i]
+                result_data = ToolResultData(
+                    call_id=result_item.get("call_id", call_data.call_id),
+                    success=result_item.get("success", True),
+                    result=result_item.get("result"),
+                    execution_time_ms=result_item.get("execution_time_ms"),
+                )
 
-        # 重新获取会话并添加记录
-        session = manager.get_session(session_id)
-        if session is not None:
-            session.add_tool_call_record(tool_call_record)
-            # 更新统计信息
-            session.update_statistics()
-            manager.update_session(session)
+            # 创建工具调用记录
+            record = ToolCallRecord(
+                thought_number=thoughtNumber,
+                call_data=call_data,
+                result_data=result_data,
+                status="completed" if result_data else "pending",
+            )
+            tool_call_records.append(record)
+
+            # 重新获取会话并添加记录
+            session = manager.get_session(session_id)
+            if session is not None:
+                session.add_tool_call_record(record)
+                # 更新统计信息
+                session.update_statistics()
+                manager.update_session(session)
+
+        # 填充 Thought.tool_calls 字段 (Phase 3.5.6)
+        record_ids = [record.record_id for record in tool_call_records]
+        thought_obj.tool_calls = record_ids
+        manager.update_thought(session_id, thought_obj)
 
     # 获取会话状态
     session = manager.get_session(session_id)
@@ -365,15 +398,15 @@ def sequential_thinking(
             result_parts.append(f"**可能性**: {hypotheticalProbability}")
         result_parts.append("")
 
-    # ===== Interleaved Thinking: 添加工具调用信息 =====
-    if tool_call_record is not None:
-        result_parts.append("🔧 工具调用")
-        result_parts.append(f"**工具名称**: {tool_call_record.call_data.tool_name}")
-        result_parts.append(f"**调用状态**: {tool_call_record.status}")
-        if tool_call_record.result_data:
-            result_parts.append(f"**执行成功**: {'是' if tool_call_record.result_data.success else '否'}")
-            if tool_call_record.result_data.execution_time_ms:
-                result_parts.append(f"**执行时间**: {tool_call_record.result_data.execution_time_ms:.2f}ms")
+    # ===== Interleaved Thinking: 添加多工具调用信息 (Phase 3.5.8) =====
+    if len(tool_call_records) > 0:
+        result_parts.append(f"🔧 工具调用 ({len(tool_call_records)}个)")
+        for i, record in enumerate(tool_call_records, 1):
+            result_parts.append(f"  {i}. **{record.call_data.tool_name}** - {record.status}")
+            if record.result_data:
+                result_parts.append(f"     成功: {'是' if record.result_data.success else '否'}")
+                if record.result_data.execution_time_ms:
+                    result_parts.append(f"     耗时: {record.result_data.execution_time_ms:.2f}ms")
         result_parts.append("")
 
     # 添加思考步骤调整信息

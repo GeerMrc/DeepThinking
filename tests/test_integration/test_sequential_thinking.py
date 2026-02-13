@@ -9,12 +9,11 @@ from deep_thinking.storage.storage_manager import StorageManager
 from deep_thinking.tools import sequential_thinking
 
 
-@pytest.mark.asyncio
 class TestSequentialThinkingIntegration:
     """顺序思考工具集成测试"""
 
     @pytest.fixture
-    async def storage_manager(self, tmp_path):
+    def storage_manager(self, tmp_path):
         """创建存储管理器"""
         manager = StorageManager(tmp_path)
         server._storage_manager = manager
@@ -24,7 +23,7 @@ class TestSequentialThinkingIntegration:
         # 清理
         server._storage_manager = None
 
-    async def test_regular_thinking(self, storage_manager):
+    def test_regular_thinking(self, storage_manager):
         """测试常规思考"""
         result = sequential_thinking.sequential_thinking(
             thought="这是第一个思考步骤",
@@ -45,7 +44,7 @@ class TestSequentialThinkingIntegration:
         assert session.thought_count() == 1
         assert session.thoughts[0].content == "这是第一个思考步骤"
 
-    async def test_revision_thinking(self, storage_manager):
+    def test_revision_thinking(self, storage_manager):
         """测试修订思考"""
         # 先创建一个常规思考
         sequential_thinking.sequential_thinking(
@@ -79,7 +78,7 @@ class TestSequentialThinkingIntegration:
         assert session.thoughts[1].type == "revision"
         assert session.thoughts[1].revises_thought == 1
 
-    async def test_branch_thinking(self, storage_manager):
+    def test_branch_thinking(self, storage_manager):
         """测试分支思考"""
         # 先创建一个常规思考
         sequential_thinking.sequential_thinking(
@@ -113,7 +112,7 @@ class TestSequentialThinkingIntegration:
         assert session.thoughts[1].branch_from_thought == 1
         assert session.thoughts[1].branch_id == "branch-0-1"
 
-    async def test_completion(self, storage_manager):
+    def test_completion(self, storage_manager):
         """测试思考完成"""
         result = sequential_thinking.sequential_thinking(
             thought="最后一个思考",
@@ -131,7 +130,7 @@ class TestSequentialThinkingIntegration:
         assert session is not None
         assert session.is_completed()
 
-    async def test_multiple_thoughts_same_session(self, storage_manager):
+    def test_multiple_thoughts_same_session(self, storage_manager):
         """测试同一会话中的多个思考步骤"""
         session_id = "test-multiple"
 
@@ -168,7 +167,7 @@ class TestSequentialThinkingIntegration:
         assert session.thoughts[1].content == "步骤2：制定方案"
         assert session.thoughts[2].content == "步骤3：执行方案"
 
-    async def test_default_session_creation(self, storage_manager):
+    def test_default_session_creation(self, storage_manager):
         """测试默认会话自动创建"""
         result = sequential_thinking.sequential_thinking(
             thought="使用默认会话",
@@ -184,7 +183,7 @@ class TestSequentialThinkingIntegration:
         assert session is not None
         assert session.thought_count() == 1
 
-    async def test_comparison_thinking(self, storage_manager):
+    def test_comparison_thinking(self, storage_manager):
         """测试对比思考类型"""
         result = sequential_thinking.sequential_thinking(
             thought="比较三种数据库方案",
@@ -217,7 +216,7 @@ class TestSequentialThinkingIntegration:
         assert len(session.thoughts[0].comparison_items) == 3
         assert session.thoughts[0].comparison_result == "PostgreSQL在功能和扩展性上最优"
 
-    async def test_reverse_thinking(self, storage_manager):
+    def test_reverse_thinking(self, storage_manager):
         """测试逆向思考类型"""
         result = sequential_thinking.sequential_thinking(
             thought="反推微服务架构决策的前提条件",
@@ -252,7 +251,7 @@ class TestSequentialThinkingIntegration:
         assert session.thoughts[0].reverse_steps is not None
         assert len(session.thoughts[0].reverse_steps) == 3
 
-    async def test_hypothetical_thinking(self, storage_manager):
+    def test_hypothetical_thinking(self, storage_manager):
         """测试假设思考类型"""
         result = sequential_thinking.sequential_thinking(
             thought="探索用户增长10倍的影响",
@@ -286,13 +285,280 @@ class TestSequentialThinkingIntegration:
         )
         assert session.thoughts[0].hypothetical_probability == "可能性：高"
 
+    # ===== Phase 3: Interleaved Thinking 测试 =====
 
-@pytest.mark.asyncio
+    def test_phase_auto_inference_thinking(self, storage_manager):
+        """测试无工具调用时自动推断为 thinking 阶段"""
+        result = sequential_thinking.sequential_thinking(
+            thought="纯思考内容",
+            nextThoughtNeeded=True,
+            thoughtNumber=1,
+            totalThoughts=3,
+            session_id="test-phase-thinking",
+        )
+        assert "阶段**: 思考 🧠" in result
+
+    def test_phase_auto_inference_tool_call(self, storage_manager):
+        """测试有 toolCalls 时自动推断为 tool_call 阶段"""
+        result = sequential_thinking.sequential_thinking(
+            thought="需要调用工具",
+            nextThoughtNeeded=True,
+            thoughtNumber=1,
+            totalThoughts=3,
+            session_id="test-phase-toolcall",
+            toolCalls=[{"name": "search", "arguments": {"q": "test"}}],
+        )
+        assert "阶段**: 工具调用 🔧" in result
+
+    def test_phase_auto_inference_analysis(self, storage_manager):
+        """测试有 toolResults 时自动推断为 analysis 阶段"""
+        result = sequential_thinking.sequential_thinking(
+            thought="分析工具结果",
+            nextThoughtNeeded=True,
+            thoughtNumber=1,
+            totalThoughts=3,
+            session_id="test-phase-analysis",
+            toolResults=[{"call_id": "123", "result": "data", "success": True}],
+        )
+        assert "阶段**: 分析 📊" in result
+
+    def test_explicit_phase_parameter(self, storage_manager):
+        """测试显式指定 phase 参数"""
+        result = sequential_thinking.sequential_thinking(
+            thought="显式指定分析阶段",
+            nextThoughtNeeded=True,
+            thoughtNumber=1,
+            totalThoughts=3,
+            session_id="test-phase-explicit",
+            phase="analysis",
+        )
+        assert "阶段**: 分析 📊" in result
+
+    def test_tool_call_recording(self, storage_manager):
+        """测试工具调用记录存储"""
+        result = sequential_thinking.sequential_thinking(
+            thought="调用工具获取数据",
+            nextThoughtNeeded=True,
+            thoughtNumber=1,
+            totalThoughts=3,
+            session_id="test-toolcall-record",
+            toolCalls=[{"name": "read_file", "arguments": {"path": "/tmp/test.txt"}}],
+        )
+        assert "工具调用" in result
+        assert "read_file" in result
+
+        # 验证工具调用记录已存储
+        session = storage_manager.get_session("test-toolcall-record")
+        assert session is not None
+        assert len(session.tool_call_history) == 1
+        assert session.tool_call_history[0].call_data.tool_name == "read_file"
+
+    def test_tool_result_recording(self, storage_manager):
+        """测试工具结果记录存储"""
+        result = sequential_thinking.sequential_thinking(
+            thought="分析工具返回结果",
+            nextThoughtNeeded=True,
+            thoughtNumber=1,
+            totalThoughts=3,
+            session_id="test-toolresult-record",
+            toolCalls=[{"name": "search", "arguments": {"q": "test"}}],
+            toolResults=[{"call_id": "123", "result": "搜索结果", "success": True}],
+        )
+        assert "成功: 是" in result
+
+        # 验证工具调用记录包含结果
+        session = storage_manager.get_session("test-toolresult-record")
+        assert session is not None
+        record = session.tool_call_history[0]
+        assert record.result_data is not None
+        assert record.result_data.success is True
+
+    def test_tool_call_limit_exceeded(self, storage_manager, monkeypatch):
+        """测试超过工具调用限制"""
+        # 设置较低的工具调用限制以便测试
+        # 注意：由于 max_thoughts=50，所以 max_tool_calls 需要小于 50
+        import os
+        monkeypatch.setenv("DEEP_THINKING_MAX_TOOL_CALLS", "10")
+
+        # 重新加载配置
+        from deep_thinking.models.config import set_global_config, ThinkingConfig
+        set_global_config(ThinkingConfig.from_env())
+
+        # 添加 10 次工具调用（达到限制）
+        for i in range(10):
+            sequential_thinking.sequential_thinking(
+                thought=f"思考{i}",
+                nextThoughtNeeded=True,
+                thoughtNumber=i + 1,
+                totalThoughts=50,
+                session_id="test-limit",
+                toolCalls=[{"name": "test", "arguments": {}}],
+            )
+
+        # 确认有 10 次工具调用
+        session = storage_manager.get_session("test-limit")
+        assert session.statistics.total_tool_calls == 10
+
+        # 第 11 次应该被拒绝
+        result = sequential_thinking.sequential_thinking(
+            thought="超限思考",
+            nextThoughtNeeded=False,
+            thoughtNumber=11,
+            totalThoughts=50,
+            session_id="test-limit",
+            toolCalls=[{"name": "test", "arguments": {}}],
+        )
+        assert "工具调用次数将超限" in result
+
+    def test_statistics_update(self, storage_manager):
+        """测试统计信息更新"""
+        sequential_thinking.sequential_thinking(
+            thought="调用工具",
+            nextThoughtNeeded=True,
+            thoughtNumber=1,
+            totalThoughts=3,
+            session_id="test-stats",
+            toolCalls=[{"name": "test", "arguments": {}}],
+            toolResults=[{"call_id": "1", "result": "ok", "success": True}],
+        )
+
+        session = storage_manager.get_session("test-stats")
+        assert session is not None
+        assert session.statistics.total_tool_calls == 1
+        assert session.statistics.successful_tool_calls == 1
+
+    # ===== Phase 3.5: 1:N 映射测试 =====
+
+    def test_multiple_tool_calls_single_step(self, storage_manager):
+        """测试单步骤多次工具调用（1:N 映射）"""
+        result = sequential_thinking.sequential_thinking(
+            thought="并行调用多个工具",
+            nextThoughtNeeded=True,
+            thoughtNumber=1,
+            totalThoughts=3,
+            session_id="test-multi-calls",
+            toolCalls=[
+                {"name": "search_api", "arguments": {"q": "test1"}},
+                {"name": "read_file", "arguments": {"path": "/tmp/data"}},
+                {"name": "query_database", "arguments": {"sql": "SELECT *"}},
+            ],
+        )
+        assert "工具调用 (3个)" in result
+        assert "search_api" in result
+        assert "read_file" in result
+        assert "query_database" in result
+
+        # 验证 3 个工具调用记录已存储
+        session = storage_manager.get_session("test-multi-calls")
+        assert session is not None
+        assert len(session.tool_call_history) == 3
+        assert session.statistics.total_tool_calls == 3
+
+    def test_multiple_tool_calls_with_results(self, storage_manager):
+        """测试多次工具调用和结果记录"""
+        result = sequential_thinking.sequential_thinking(
+            thought="调用工具并分析结果",
+            nextThoughtNeeded=True,
+            thoughtNumber=1,
+            totalThoughts=3,
+            session_id="test-multi-results",
+            toolCalls=[
+                {"name": "tool_a", "arguments": {}},
+                {"name": "tool_b", "arguments": {}},
+            ],
+            toolResults=[
+                {"call_id": "a1", "result": "result_a", "success": True},
+                {"call_id": "b1", "result": "result_b", "success": False},
+            ],
+        )
+        assert "工具调用 (2个)" in result
+        assert "成功: 是" in result
+        assert "成功: 否" in result
+
+        # 验证工具调用记录包含正确的结果
+        session = storage_manager.get_session("test-multi-results")
+        assert session is not None
+        assert len(session.tool_call_history) == 2
+        # 验证第一个工具结果 success=True
+        assert session.tool_call_history[0].result_data.success is True
+        # 验证第二个工具结果 success=False
+        assert session.tool_call_history[1].result_data.success is False
+        # 统计：只有 success=True 的调用被计入 successful_tool_calls
+        # 注意：failed_tool_calls 只统计 status="failed" 或 "timeout" 的记录
+        # success=False 不等同于 status="failed"
+        assert session.statistics.successful_tool_calls == 1
+
+    def test_tool_calls_thought_linking(self, storage_manager):
+        """测试 Thought.tool_calls 字段正确填充"""
+        result = sequential_thinking.sequential_thinking(
+            thought="测试工具调用关联",
+            nextThoughtNeeded=True,
+            thoughtNumber=1,
+            totalThoughts=3,
+            session_id="test-linking",
+            toolCalls=[
+                {"name": "tool_1", "arguments": {}},
+                {"name": "tool_2", "arguments": {}},
+            ],
+        )
+        assert "工具调用 (2个)" in result
+
+        # 验证 Thought.tool_calls 字段包含 record_id
+        session = storage_manager.get_session("test-linking")
+        assert session is not None
+        thought = session.thoughts[0]
+        assert len(thought.tool_calls) == 2
+        # 验证 record_id 格式正确
+        for record_id in thought.tool_calls:
+            assert isinstance(record_id, str)
+            assert len(record_id) > 0
+
+    def test_empty_tool_calls_list(self, storage_manager):
+        """测试空工具调用列表（等同于无工具调用）"""
+        result = sequential_thinking.sequential_thinking(
+            thought="纯思考步骤",
+            nextThoughtNeeded=True,
+            thoughtNumber=1,
+            totalThoughts=3,
+            session_id="test-empty-calls",
+            toolCalls=[],
+        )
+        assert "阶段**: 思考 🧠" in result
+        assert "工具调用" not in result
+
+    def test_tool_calls_with_call_id_matching(self, storage_manager):
+        """测试使用 call_id 匹配工具调用和结果"""
+        result = sequential_thinking.sequential_thinking(
+            thought="使用 call_id 匹配",
+            nextThoughtNeeded=True,
+            thoughtNumber=1,
+            totalThoughts=3,
+            session_id="test-call-id",
+            toolCalls=[
+                {"name": "tool_x", "arguments": {}, "call_id": "xyz-123"},
+                {"name": "tool_y", "arguments": {}, "call_id": "xyz-456"},
+            ],
+            toolResults=[
+                {"call_id": "xyz-456", "result": "y_result", "success": True},
+                {"call_id": "xyz-123", "result": "x_result", "success": True},
+            ],
+        )
+        assert "工具调用 (2个)" in result
+
+        # 验证结果正确关联
+        session = storage_manager.get_session("test-call-id")
+        assert session is not None
+        # 验证两个工具调用都有结果
+        for record in session.tool_call_history:
+            assert record.result_data is not None
+            assert record.result_data.success is True
+
+
 class TestSequentialThinkingBoundary:
     """顺序思考工具边界测试"""
 
     @pytest.fixture
-    async def storage_manager(self, tmp_path):
+    def storage_manager(self, tmp_path):
         """创建存储管理器"""
         manager = StorageManager(tmp_path)
         server._storage_manager = manager
@@ -302,7 +568,7 @@ class TestSequentialThinkingBoundary:
         # 清理
         server._storage_manager = None
 
-    async def test_thought_number_less_than_one(self, storage_manager):
+    def test_thought_number_less_than_one(self, storage_manager):
         """测试thoughtNumber小于1的错误处理"""
         with pytest.raises(ValueError, match="thoughtNumber 必须大于等于 1"):
             sequential_thinking.sequential_thinking(
@@ -313,7 +579,7 @@ class TestSequentialThinkingBoundary:
                 session_id="test-boundary-1",
             )
 
-    async def test_thought_number_negative(self, storage_manager):
+    def test_thought_number_negative(self, storage_manager):
         """测试thoughtNumber为负数的错误处理"""
         with pytest.raises(ValueError, match="thoughtNumber 必须大于等于 1"):
             sequential_thinking.sequential_thinking(
@@ -324,7 +590,7 @@ class TestSequentialThinkingBoundary:
                 session_id="test-boundary-2",
             )
 
-    async def test_total_thoughts_less_than_thought_number(self, storage_manager):
+    def test_total_thoughts_less_than_thought_number(self, storage_manager):
         """测试totalThoughts小于thoughtNumber的错误处理"""
         with pytest.raises(ValueError, match="totalThoughts.*必须大于等于.*thoughtNumber"):
             sequential_thinking.sequential_thinking(
@@ -335,7 +601,7 @@ class TestSequentialThinkingBoundary:
                 session_id="test-boundary-3",
             )
 
-    async def test_empty_thought_content(self, storage_manager):
+    def test_empty_thought_content(self, storage_manager):
         """测试空思考内容的错误处理"""
         with pytest.raises(ValueError, match="thought 内容不能为空"):
             sequential_thinking.sequential_thinking(
@@ -346,7 +612,7 @@ class TestSequentialThinkingBoundary:
                 session_id="test-boundary-4",
             )
 
-    async def test_whitespace_only_thought_content(self, storage_manager):
+    def test_whitespace_only_thought_content(self, storage_manager):
         """测试纯空白思考内容的错误处理"""
         with pytest.raises(ValueError, match="thought 内容不能为空"):
             sequential_thinking.sequential_thinking(
@@ -357,7 +623,7 @@ class TestSequentialThinkingBoundary:
                 session_id="test-boundary-5",
             )
 
-    async def test_total_thoughts_exceeds_max_limit(self, storage_manager):
+    def test_total_thoughts_exceeds_max_limit(self, storage_manager):
         """测试totalThoughts超过最大配置限制的错误处理"""
         with pytest.raises(ValueError, match="totalThoughts.*超过最大限制"):
             sequential_thinking.sequential_thinking(
@@ -368,7 +634,7 @@ class TestSequentialThinkingBoundary:
                 session_id="test-boundary-6",
             )
 
-    async def test_needs_more_thoughts_at_max_limit(self, storage_manager):
+    def test_needs_more_thoughts_at_max_limit(self, storage_manager):
         """测试needsMoreThoughts在达到最大限制时的行为"""
         # 创建一个接近最大限制的会话
         result = sequential_thinking.sequential_thinking(
@@ -385,7 +651,7 @@ class TestSequentialThinkingBoundary:
         assert "警告：思考步骤数已达上限" in result
         assert "无法继续增加" in result
 
-    async def test_needs_more_thoughts_normal_increase(self, storage_manager):
+    def test_needs_more_thoughts_normal_increase(self, storage_manager):
         """测试needsMoreThoughts正常增加totalThoughts"""
         result = sequential_thinking.sequential_thinking(
             thought="测试思考",
@@ -406,7 +672,7 @@ class TestSequentialThinkingBoundary:
         assert "total_thoughts_history" in session.metadata
         assert len(session.metadata["total_thoughts_history"]) > 0
 
-    async def test_comparison_thinking_with_empty_items(self, storage_manager):
+    def test_comparison_thinking_with_empty_items(self, storage_manager):
         """测试对比思考缺少比较项的错误处理（Pydantic验证）"""
         with pytest.raises(ValueError, match="List should have at least 2 items"):
             sequential_thinking.sequential_thinking(
@@ -420,7 +686,7 @@ class TestSequentialThinkingBoundary:
                 comparisonResult="结论",
             )
 
-    async def test_comparison_thinking_with_single_item(self, storage_manager):
+    def test_comparison_thinking_with_single_item(self, storage_manager):
         """测试对比思考只有一个比较项的错误处理"""
         with pytest.raises(ValueError, match="List should have at least 2 items"):
             sequential_thinking.sequential_thinking(
@@ -434,7 +700,7 @@ class TestSequentialThinkingBoundary:
                 comparisonResult="结论",
             )
 
-    async def test_reverse_thinking_invalid_reverse_from(self, storage_manager):
+    def test_reverse_thinking_invalid_reverse_from(self, storage_manager):
         """测试逆向思考reverse_from必须小于thought_number"""
         with pytest.raises(ValueError, match="reverse_from.*必须小于.*thought_number"):
             sequential_thinking.sequential_thinking(
@@ -448,7 +714,7 @@ class TestSequentialThinkingBoundary:
                 reverseSteps=["步骤1", "步骤2"],
             )
 
-    async def test_hypothetical_thinking_with_empty_condition(self, storage_manager):
+    def test_hypothetical_thinking_with_empty_condition(self, storage_manager):
         """测试假设思考缺少假设条件的错误处理（Pydantic验证）"""
         with pytest.raises(ValueError, match="String should have at least 1 character"):
             sequential_thinking.sequential_thinking(

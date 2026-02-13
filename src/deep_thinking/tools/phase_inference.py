@@ -3,6 +3,8 @@
 
 提供自动推断执行阶段的功能。
 根据工具调用参数自动判断当前处于 thinking/tool_call/analysis 阶段。
+
+Phase 3.5 更新: 支持 1:N 映射（列表参数）
 """
 
 from typing import Any
@@ -15,7 +17,7 @@ def infer_phase(
     tool_result: dict[str, Any] | None = None,
 ) -> ExecutionPhase:
     """
-    自动推断执行阶段
+    自动推断执行阶段（单次调用版本，保留向后兼容）
 
     根据传入的参数自动判断当前思考步骤所处的执行阶段。
 
@@ -45,6 +47,47 @@ def infer_phase(
 
     # 规则 2: 有工具调用 → tool_call 阶段
     if tool_call is not None and tool_call:
+        return "tool_call"
+
+    # 规则 3: 默认 → thinking 阶段
+    return "thinking"
+
+
+def infer_phase_from_lists(
+    tool_calls: list[dict[str, Any]] | None = None,
+    tool_results: list[dict[str, Any]] | None = None,
+) -> ExecutionPhase:
+    """
+    自动推断执行阶段（列表版本，支持 1:N 映射）
+
+    根据传入的列表参数自动判断当前思考步骤所处的执行阶段。
+
+    推断规则（按优先级）：
+    1. 如果有 tool_results 参数且非空 → analysis 阶段（分析工具结果）
+    2. 如果有 tool_calls 参数且非空 → tool_call 阶段（调用工具）
+    3. 其他情况 → thinking 阶段（纯思考）
+
+    Args:
+        tool_calls: 多个工具调用参数列表
+        tool_results: 多个工具结果参数列表
+
+    Returns:
+        推断出的执行阶段：thinking/tool_call/analysis
+
+    Example:
+        >>> infer_phase_from_lists()  # doctest: +SKIP
+        'thinking'
+        >>> infer_phase_from_lists(tool_calls=[{"name": "search", "arguments": {"q": "test"}}])  # doctest: +SKIP
+        'tool_call'
+        >>> infer_phase_from_lists(tool_results=[{"call_id": "123", "result": "data"}])  # doctest: +SKIP
+        'analysis'
+    """
+    # 规则 1: 有工具结果 → analysis 阶段
+    if tool_results is not None and len(tool_results) > 0:
+        return "analysis"
+
+    # 规则 2: 有工具调用 → tool_call 阶段
+    if tool_calls is not None and len(tool_calls) > 0:
         return "tool_call"
 
     # 规则 3: 默认 → thinking 阶段
@@ -168,6 +211,7 @@ def get_phase_description(phase: ExecutionPhase) -> str:
 
 __all__ = [
     "infer_phase",
+    "infer_phase_from_lists",
     "infer_phase_from_content",
     "validate_phase_transition",
     "get_phase_description",

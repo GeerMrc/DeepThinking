@@ -8,6 +8,7 @@ from deep_thinking.tools.phase_inference import (
     get_phase_description,
     infer_phase,
     infer_phase_from_content,
+    infer_phase_from_lists,
     validate_phase_transition,
 )
 
@@ -75,6 +76,92 @@ class TestInferPhase:
         assert infer_phase(
             tool_call={"name": "test"},
             tool_result={"result": "data"},
+        ) == "analysis"
+
+
+class TestInferPhaseFromLists:
+    """infer_phase_from_lists 函数测试（1:N 映射）"""
+
+    def test_no_args(self):
+        """测试无参数时返回 thinking"""
+        result = infer_phase_from_lists()
+        assert result == "thinking"
+
+    def test_with_tool_calls(self):
+        """测试有 tool_calls 参数时返回 tool_call"""
+        result = infer_phase_from_lists(
+            tool_calls=[{"name": "search", "arguments": {"q": "test"}}]
+        )
+        assert result == "tool_call"
+
+    def test_with_multiple_tool_calls(self):
+        """测试有多个 tool_calls 参数时返回 tool_call"""
+        result = infer_phase_from_lists(
+            tool_calls=[
+                {"name": "search", "arguments": {"q": "test1"}},
+                {"name": "read_file", "arguments": {"path": "/tmp/data"}},
+                {"name": "query_database", "arguments": {"sql": "SELECT *"}},
+            ]
+        )
+        assert result == "tool_call"
+
+    def test_with_empty_tool_calls(self):
+        """测试空 tool_calls 列表时返回 thinking"""
+        result = infer_phase_from_lists(tool_calls=[])
+        assert result == "thinking"
+
+    def test_with_none_tool_calls(self):
+        """测试 None tool_calls 参数时返回 thinking"""
+        result = infer_phase_from_lists(tool_calls=None)
+        assert result == "thinking"
+
+    def test_with_tool_results(self):
+        """测试有 tool_results 参数时返回 analysis"""
+        result = infer_phase_from_lists(
+            tool_results=[{"call_id": "123", "result": "data"}]
+        )
+        assert result == "analysis"
+
+    def test_with_multiple_tool_results(self):
+        """测试有多个 tool_results 参数时返回 analysis"""
+        result = infer_phase_from_lists(
+            tool_results=[
+                {"call_id": "1", "result": "data1"},
+                {"call_id": "2", "result": "data2"},
+            ]
+        )
+        assert result == "analysis"
+
+    def test_with_empty_tool_results(self):
+        """测试空 tool_results 列表时返回 thinking"""
+        result = infer_phase_from_lists(tool_results=[])
+        assert result == "thinking"
+
+    def test_with_none_tool_results(self):
+        """测试 None tool_results 参数时返回 thinking"""
+        result = infer_phase_from_lists(tool_results=None)
+        assert result == "thinking"
+
+    def test_both_args(self):
+        """测试同时有 tool_calls 和 tool_results 时返回 analysis（tool_results 优先）"""
+        result = infer_phase_from_lists(
+            tool_calls=[{"name": "search"}],
+            tool_results=[{"call_id": "123", "result": "data"}],
+        )
+        assert result == "analysis"
+
+    def test_priority(self):
+        """测试推断优先级：tool_results > tool_calls > thinking"""
+        # 只有 tool_calls
+        assert infer_phase_from_lists(tool_calls=[{"name": "test"}]) == "tool_call"
+
+        # 只有 tool_results
+        assert infer_phase_from_lists(tool_results=[{"result": "data"}]) == "analysis"
+
+        # 两者都有，tool_results 优先
+        assert infer_phase_from_lists(
+            tool_calls=[{"name": "test"}],
+            tool_results=[{"result": "data"}],
         ) == "analysis"
 
 
