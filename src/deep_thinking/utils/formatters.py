@@ -1238,6 +1238,23 @@ classDef analysis_phase fill:#e8f5e9,stroke:#4caf50,stroke-width:3px;
                 branch_from = thought.branch_from_thought or 0
                 label = f"{node_label}<br/><small>(分支自步骤{branch_from})</small><br/><small>{phase_emoji}{phase_name}</small>"
                 lines.append(f'    {node_id}["{label}"]:::{node_class}')
+            elif thought.type == "comparison":
+                # 对比思考显示比较项数量
+                items_count = len(thought.comparison_items) if thought.comparison_items else 0
+                label = f"{node_label}<br/><small>(对比{items_count}项)</small><br/><small>{phase_emoji}{phase_name}</small>"
+                lines.append(f'    {node_id}["{label}"]:::{node_class}')
+            elif thought.type == "reverse":
+                # 逆向思考显示反推目标
+                target = thought.reverse_target or "未知目标"
+                target_short = target[:15] + "..." if len(target) > 15 else target
+                label = f"{node_label}<br/><small>(目标:{target_short})</small><br/><small>{phase_emoji}{phase_name}</small>"
+                lines.append(f'    {node_id}["{label}"]:::{node_class}')
+            elif thought.type == "hypothetical":
+                # 假设思考显示假设条件
+                condition = thought.hypothetical_condition or "未知假设"
+                condition_short = condition[:15] + "..." if len(condition) > 15 else condition
+                label = f"{node_label}<br/><small>(假设:{condition_short})</small><br/><small>{phase_emoji}{phase_name}</small>"
+                lines.append(f'    {node_id}["{label}"]:::{node_class}')
             else:
                 label = f"{node_label}<br/><small>{phase_emoji}{phase_name}</small>"
                 lines.append(f'    {node_id}["{label}"]:::{node_class}')
@@ -1289,6 +1306,20 @@ classDef analysis_phase fill:#e8f5e9,stroke:#4caf50,stroke-width:3px;
                 )
                 if branch_from_id:
                     lines.append(f"    {branch_from_id} -.->|分支| {current_id}")
+
+                # 分支后的延续连接
+                if i + 1 < len(session.thoughts):
+                    next_thought = session.thoughts[i + 1]
+                    # 规则1：同分支内的下一个思考
+                    # 规则2：分支后的第一个常规思考（无 branch_id）
+                    should_connect = (
+                        (next_thought.branch_id == thought.branch_id)
+                        or (next_thought.type == "regular" and next_thought.branch_id is None)
+                        or (next_thought.type == "branch" and next_thought.branch_from_thought == thought.thought_number)
+                    )
+                    if should_connect:
+                        next_id = Visualizer._mermaid_node_id(next_thought)
+                        lines.append(f"    {current_id} --> {next_id}")
 
         # 添加样式
         lines.append(Visualizer.MERMAID_STYLES.strip())
@@ -1366,14 +1397,35 @@ classDef analysis_phase fill:#e8f5e9,stroke:#4caf50,stroke-width:3px;
         lines: list[str] = []
 
         # 为每个思考步骤生成 ASCII 表示
-        for thought in session.thoughts:
+        for i, thought in enumerate(session.thoughts):
             block = Visualizer._thought_to_ascii_block(thought, session)
             lines.append(block)
 
             # 添加连接线
-            if thought.type == "regular" and thought.thought_number < session.thought_count():
-                lines.append("           │")
-                lines.append("           ▼")
+            # 规则1：常规思考之间的连接
+            # 规则2：分支思考后的延续连接
+            should_add_connector = False
+            if thought.thought_number < session.thought_count():
+                if thought.type == "regular":
+                    should_add_connector = True
+                elif thought.type == "branch" and i + 1 < len(session.thoughts):
+                    # 分支后检查是否需要连接
+                    next_thought = session.thoughts[i + 1]
+                    # 同分支内的下一个思考或分支后的延续
+                    should_add_connector = (
+                        (next_thought.branch_id == thought.branch_id)
+                        or (next_thought.type == "regular" and next_thought.branch_id is None)
+                        or (next_thought.type == "branch" and next_thought.branch_from_thought == thought.thought_number)
+                    )
+
+            if should_add_connector:
+                if thought.type == "branch":
+                    # 分支思考使用特殊连接线样式
+                    lines.append("           ║")
+                    lines.append("           ║")
+                else:
+                    lines.append("           │")
+                    lines.append("           ▼")
 
         return "\n".join(lines)
 
@@ -1443,11 +1495,32 @@ classDef analysis_phase fill:#e8f5e9,stroke:#4caf50,stroke-width:3px;
         # 第三行：阶段信息 (Interleaved Thinking)
         lines.append(f"        {prefix} {phase_emoji} {phase_name}")
 
-        # 第四行：修订/分支信息
+        # 第四行：修订/分支/对比/逆向/假设信息
         if thought.type == "revision" and thought.revises_thought:
             lines.append(f"        {prefix} → 修订步骤 {thought.revises_thought}")
         elif thought.type == "branch" and thought.branch_from_thought:
             lines.append(f"        {prefix} ← 分支自步骤 {thought.branch_from_thought}")
+        elif thought.type == "comparison":
+            # 对比思考显示比较项
+            if thought.comparison_items:
+                items_str = " vs ".join(thought.comparison_items[:3])
+                if len(thought.comparison_items) > 3:
+                    items_str += "..."
+                lines.append(f"        {prefix} ⚖️ 对比: {items_str[:25]}")
+        elif thought.type == "reverse":
+            # 逆向思考显示反推目标
+            if thought.reverse_target:
+                target = thought.reverse_target[:22] + "..." if len(thought.reverse_target) > 22 else thought.reverse_target
+                lines.append(f"        {prefix} 🔙 目标: {target}")
+            if thought.reverse_steps:
+                lines.append(f"        {prefix}    反推步骤: {len(thought.reverse_steps)} 步")
+        elif thought.type == "hypothetical":
+            # 假设思考显示假设条件
+            if thought.hypothetical_condition:
+                condition = thought.hypothetical_condition[:20] + "..." if len(thought.hypothetical_condition) > 20 else thought.hypothetical_condition
+                lines.append(f"        {prefix} 🤔 假设: {condition}")
+            if thought.hypothetical_probability:
+                lines.append(f"        {prefix}    可能性: {thought.hypothetical_probability}")
 
         # 第五行：工具调用信息 (Interleaved Thinking)
         tool_calls = getattr(thought, "tool_calls", None)
@@ -1479,6 +1552,10 @@ classDef analysis_phase fill:#e8f5e9,stroke:#4caf50,stroke-width:3px;
         - 显示执行阶段（thinking/tool_call/analysis）
         - 显示关联的工具调用信息
 
+        支持 Branch Thinking 特性：
+        - 根据分支层级正确缩进
+        - 显示分支延续关系
+
         Args:
             session: 思考会话对象
 
@@ -1492,12 +1569,42 @@ classDef analysis_phase fill:#e8f5e9,stroke:#4caf50,stroke-width:3px;
         lines.append("🧠 思考流程树")
         lines.append("")
 
+        # 跟踪分支层级（branch_id -> indent_level）
+        branch_levels: dict[str, int] = {}
+        current_level = 0
+
         # 构建思考步骤树
         for i, thought in enumerate(session.thoughts):
+            # 计算缩进层级
+            if thought.type == "branch" and thought.branch_id:
+                # 新分支，增加缩进
+                if thought.branch_from_thought:
+                    # 从某个步骤分支出来
+                    current_level = branch_levels.get(thought.branch_id.rsplit("-", 1)[0], 0) + 1
+                else:
+                    current_level = 1
+                branch_levels[thought.branch_id] = current_level
+            elif thought.branch_id and thought.branch_id in branch_levels:
+                # 延续在某个分支内
+                current_level = branch_levels[thought.branch_id]
+            else:
+                # 主流程
+                current_level = 0
+
+            # 生成缩进前缀
+            indent = "    " * current_level
             # 确定前缀符号
             is_last = i == len(session.thoughts) - 1
-            prefix = "└──" if is_last else "├──"
-            sub_prefix = "    " if is_last else "│   "
+            # 检查是否是当前层级的最后一个
+            is_last_in_level = is_last
+            if not is_last and current_level > 0:
+                # 检查下一个是否还是同一分支
+                next_thought = session.thoughts[i + 1]
+                if next_thought.branch_id != thought.branch_id:
+                    is_last_in_level = True
+
+            prefix = f"{indent}└──" if is_last or is_last_in_level else f"{indent}├──"
+            sub_prefix = f"{indent}    " if is_last or is_last_in_level else f"{indent}│   "
 
             # 根据类型选择 emoji
             emoji = SessionFormatter.TYPE_EMOJI.get(thought.type, "💭")
@@ -1517,11 +1624,38 @@ classDef analysis_phase fill:#e8f5e9,stroke:#4caf50,stroke-width:3px;
             # 添加阶段信息 (Interleaved Thinking)
             lines.append(f"{sub_prefix}├─ {phase_emoji} {phase_name}")
 
-            # 添加修订/分支信息
+            # 添加修订/分支/对比/逆向/假设信息
             if thought.type == "revision" and thought.revises_thought:
                 lines.append(f"{sub_prefix}├─ 📝 修订步骤 {thought.revises_thought}")
             elif thought.type == "branch" and thought.branch_from_thought:
                 lines.append(f"{sub_prefix}├─ 🔀 分支自步骤 {thought.branch_from_thought}")
+            elif thought.type == "comparison":
+                # 对比思考显示比较项
+                if thought.comparison_items:
+                    items_str = " vs ".join(thought.comparison_items[:3])
+                    if len(thought.comparison_items) > 3:
+                        items_str += "..."
+                    lines.append(f"{sub_prefix}├─ ⚖️ 对比: {items_str[:40]}")
+                if thought.comparison_result:
+                    result = thought.comparison_result[:35] + "..." if len(thought.comparison_result) > 35 else thought.comparison_result
+                    lines.append(f"{sub_prefix}├─ 📊 结论: {result}")
+            elif thought.type == "reverse":
+                # 逆向思考显示反推目标
+                if thought.reverse_target:
+                    target = thought.reverse_target[:40] + "..." if len(thought.reverse_target) > 40 else thought.reverse_target
+                    lines.append(f"{sub_prefix}├─ 🔙 目标: {target}")
+                if thought.reverse_steps:
+                    lines.append(f"{sub_prefix}├─ 📝 反推步骤: {len(thought.reverse_steps)} 步")
+            elif thought.type == "hypothetical":
+                # 假设思考显示假设条件
+                if thought.hypothetical_condition:
+                    condition = thought.hypothetical_condition[:35] + "..." if len(thought.hypothetical_condition) > 35 else thought.hypothetical_condition
+                    lines.append(f"{sub_prefix}├─ 🤔 假设: {condition}")
+                if thought.hypothetical_probability:
+                    lines.append(f"{sub_prefix}├─ 📈 可能性: {thought.hypothetical_probability}")
+                if thought.hypothetical_impact:
+                    impact = thought.hypothetical_impact[:35] + "..." if len(thought.hypothetical_impact) > 35 else thought.hypothetical_impact
+                    lines.append(f"{sub_prefix}├─ 💥 影响: {impact}")
 
             # 添加工具调用信息 (Interleaved Thinking)
             tool_calls = getattr(thought, "tool_calls", None)

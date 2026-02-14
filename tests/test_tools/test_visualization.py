@@ -748,3 +748,525 @@ class TestInterleavedThinkingTree:
 
             # 验证阶段信息显示
             assert phase_name in result or emoji in result, f"Phase {phase} not found in result"
+
+
+# =============================================================================
+# 分支思考可视化测试 (Branch Thinking Visualization)
+# =============================================================================
+
+
+class TestBranchThinkingMermaid:
+    """测试分支思考的 Mermaid 可视化连接"""
+
+    def test_branch_continuation_mermaid(self, sample_session_data):
+        """测试分支后的延续步骤有正确连接"""
+        # T1 -> T2(branch) -> T3(regular)
+        thought1 = Thought(thought_number=1, content="主思考", type="regular")
+        thought2 = Thought(
+            thought_number=2,
+            content="分支思考",
+            type="branch",
+            branch_from_thought=1,
+            branch_id="b1",
+        )
+        thought3 = Thought(thought_number=3, content="延续思考", type="regular")
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought1)
+        session.add_thought(thought2)
+        session.add_thought(thought3)
+
+        result = Visualizer.to_mermaid(session)
+
+        # 验证分支连接存在
+        assert "T1" in result
+        assert "T2_b1" in result
+        assert "T3" in result
+        # 验证分支连接线 T1 -.->|分支| T2
+        assert "-.->|分支|" in result
+        # 验证延续连接 T2 --> T3
+        assert "T2_b1 --> T3" in result
+
+    def test_multilevel_branch_mermaid(self, sample_session_data):
+        """测试多级分支的连接关系"""
+        # T1 -> T2(branch from 1) -> T3(branch from 2)
+        thought1 = Thought(thought_number=1, content="主思考", type="regular")
+        thought2 = Thought(
+            thought_number=2,
+            content="一级分支",
+            type="branch",
+            branch_from_thought=1,
+            branch_id="b1",
+        )
+        thought3 = Thought(
+            thought_number=3,
+            content="二级分支",
+            type="branch",
+            branch_from_thought=2,
+            branch_id="b1-1",
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought1)
+        session.add_thought(thought2)
+        session.add_thought(thought3)
+
+        result = Visualizer.to_mermaid(session)
+
+        # 验证多级分支连接
+        assert "T1" in result
+        assert "T2_b1" in result
+        assert "T3_b1_1" in result
+        # 验证 T1 -.-> T2 -.-> T3 连接链
+        assert "T1 -.->|分支| T2_b1" in result
+        assert "T2_b1 --> T3_b1_1" in result
+
+    def test_same_branch_multiple_thoughts_mermaid(self, sample_session_data):
+        """测试同分支内多个思考步骤的连接"""
+        # T1 -> T2(branch from 1, id=b1) -> T3(branch id=b1) -> T4(branch id=b1)
+        thought1 = Thought(thought_number=1, content="主思考", type="regular")
+        thought2 = Thought(
+            thought_number=2,
+            content="分支开始",
+            type="branch",
+            branch_from_thought=1,
+            branch_id="b1",
+        )
+        thought3 = Thought(
+            thought_number=3,
+            content="分支继续",
+            type="regular",
+            branch_id="b1",
+        )
+        thought4 = Thought(
+            thought_number=4,
+            content="分支结束",
+            type="regular",
+            branch_id="b1",
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought1)
+        session.add_thought(thought2)
+        session.add_thought(thought3)
+        session.add_thought(thought4)
+
+        result = Visualizer.to_mermaid(session)
+
+        # 验证节点存在
+        assert "T1" in result
+        assert "T2_b1" in result
+        assert "T3_b1" in result
+        assert "T4_b1" in result
+        # 验证连接链 T1 -.-> T2 --> T3 --> T4
+        assert "T1 -.->|分支| T2_b1" in result
+        # 验证 T2 -> T3 连接（分支思考到同分支常规思考）
+        assert "T2_b1 --> T3_b1" in result
+
+    def test_branch_to_main_flow_return(self, sample_session_data):
+        """测试分支返回主流程的连接"""
+        # T1 -> T2(branch) -> T3(返回主流程)
+        thought1 = Thought(thought_number=1, content="主流程1", type="regular")
+        thought2 = Thought(
+            thought_number=2,
+            content="分支",
+            type="branch",
+            branch_from_thought=1,
+            branch_id="b1",
+        )
+        thought3 = Thought(thought_number=3, content="主流程2", type="regular")
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought1)
+        session.add_thought(thought2)
+        session.add_thought(thought3)
+
+        result = Visualizer.to_mermaid(session)
+
+        # 验证分支到主流程的连接
+        assert "T2_b1 --> T3" in result
+
+
+class TestBranchThinkingAscii:
+    """测试分支思考的 ASCII 可视化连接"""
+
+    def test_branch_continuation_ascii(self, sample_session_data):
+        """测试 ASCII 显示分支延续"""
+        thought1 = Thought(thought_number=1, content="主思考", type="regular")
+        thought2 = Thought(
+            thought_number=2,
+            content="分支",
+            type="branch",
+            branch_from_thought=1,
+            branch_id="b1",
+        )
+        thought3 = Thought(thought_number=3, content="延续", type="regular")
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought1)
+        session.add_thought(thought2)
+        session.add_thought(thought3)
+
+        result = Visualizer.to_ascii(session)
+
+        # 验证分支思考存在
+        assert "🌿" in result
+        assert "分支" in result
+        # 验证连接线
+        assert "║" in result or "│" in result
+
+    def test_multilevel_branch_ascii(self, sample_session_data):
+        """测试 ASCII 多级分支显示"""
+        thought1 = Thought(thought_number=1, content="主思考", type="regular")
+        thought2 = Thought(
+            thought_number=2,
+            content="一级分支",
+            type="branch",
+            branch_from_thought=1,
+            branch_id="b1",
+        )
+        thought3 = Thought(
+            thought_number=3,
+            content="二级分支",
+            type="branch",
+            branch_from_thought=2,
+            branch_id="b1-1",
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought1)
+        session.add_thought(thought2)
+        session.add_thought(thought3)
+
+        result = Visualizer.to_ascii(session)
+
+        # 验证多级分支显示
+        assert "🌿" in result
+        assert "一级分支" in result or "一级" in result
+        assert "二级分支" in result or "二级" in result
+
+    def test_same_branch_multiple_thoughts_ascii(self, sample_session_data):
+        """测试 ASCII 同分支内多个思考步骤的连接线"""
+        # T1 -> T2(branch from 1, id=b1) -> T3(branch id=b1) -> T4(branch id=b1)
+        thought1 = Thought(thought_number=1, content="主思考", type="regular")
+        thought2 = Thought(
+            thought_number=2,
+            content="分支开始",
+            type="branch",
+            branch_from_thought=1,
+            branch_id="b1",
+        )
+        thought3 = Thought(
+            thought_number=3,
+            content="分支继续",
+            type="regular",
+            branch_id="b1",
+        )
+        thought4 = Thought(
+            thought_number=4,
+            content="分支结束",
+            type="regular",
+            branch_id="b1",
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought1)
+        session.add_thought(thought2)
+        session.add_thought(thought3)
+        session.add_thought(thought4)
+
+        result = Visualizer.to_ascii(session)
+
+        # 验证所有步骤显示
+        assert "步骤 1" in result
+        assert "步骤 2" in result
+        assert "步骤 3" in result
+        assert "步骤 4" in result
+        # 验证分支标识
+        assert "🌿" in result
+        # 验证连接线（分支延续使用 ║ 或 │）
+        assert "║" in result or "│" in result
+
+
+class TestBranchThinkingTree:
+    """测试分支思考的树状结构可视化"""
+
+    def test_branch_tree_indentation(self, sample_session_data):
+        """测试树状结构的分支缩进"""
+        thought1 = Thought(thought_number=1, content="主思考", type="regular")
+        thought2 = Thought(
+            thought_number=2,
+            content="分支",
+            type="branch",
+            branch_from_thought=1,
+            branch_id="b1",
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought1)
+        session.add_thought(thought2)
+
+        result = Visualizer.to_tree(session)
+
+        # 验证分支显示
+        assert "分支自步骤 1" in result
+        assert "🔀" in result
+
+    def test_multilevel_branch_tree(self, sample_session_data):
+        """测试多级分支的树状结构"""
+        thought1 = Thought(thought_number=1, content="主思考", type="regular")
+        thought2 = Thought(
+            thought_number=2,
+            content="一级分支",
+            type="branch",
+            branch_from_thought=1,
+            branch_id="b1",
+        )
+        thought3 = Thought(
+            thought_number=3,
+            content="二级分支",
+            type="branch",
+            branch_from_thought=2,
+            branch_id="b1-1",
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought1)
+        session.add_thought(thought2)
+        session.add_thought(thought3)
+
+        result = Visualizer.to_tree(session)
+
+        # 验证多级分支缩进
+        assert "🧠 思考流程树" in result
+        assert "步骤 1" in result
+        assert "步骤 2" in result
+        assert "步骤 3" in result
+        # 验证分支信息
+        assert "分支自步骤" in result
+
+    def test_same_branch_continuation_tree(self, sample_session_data):
+        """测试同分支内多个步骤的树状结构"""
+        thought1 = Thought(thought_number=1, content="主思考", type="regular")
+        thought2 = Thought(
+            thought_number=2,
+            content="分支开始",
+            type="branch",
+            branch_from_thought=1,
+            branch_id="b1",
+        )
+        thought3 = Thought(
+            thought_number=3,
+            content="分支继续",
+            type="regular",
+            branch_id="b1",
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought1)
+        session.add_thought(thought2)
+        session.add_thought(thought3)
+
+        result = Visualizer.to_tree(session)
+
+        # 验证所有步骤都显示
+        assert "步骤 1" in result
+        assert "步骤 2" in result
+        assert "步骤 3" in result
+
+
+# =============================================================================
+# 其他思考类型可视化测试 (Comparison/Reverse/Hypothetical)
+# =============================================================================
+
+
+class TestComparisonThinkingVisualization:
+    """测试对比思考的可视化"""
+
+    def test_comparison_mermaid(self, sample_session_data):
+        """测试 Mermaid 显示对比思考信息"""
+        thought = Thought(
+            thought_number=1,
+            content="对比方案",
+            type="comparison",
+            comparison_items=["方案A", "方案B", "方案C"],
+            comparison_dimensions=["成本", "效率"],
+            comparison_result="方案B最优",
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+
+        result = Visualizer.to_mermaid(session)
+
+        # 验证对比思考节点存在
+        assert "T1" in result
+        assert ":::comparison" in result
+        # 验证对比项数量显示
+        assert "对比3项" in result
+
+    def test_comparison_ascii(self, sample_session_data):
+        """测试 ASCII 显示对比思考信息"""
+        thought = Thought(
+            thought_number=1,
+            content="对比方案",
+            type="comparison",
+            comparison_items=["方案A", "方案B"],
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+
+        result = Visualizer.to_ascii(session)
+
+        # 验证对比思考显示
+        assert "⚖️" in result
+        assert "对比" in result
+
+    def test_comparison_tree(self, sample_session_data):
+        """测试 Tree 显示对比思考信息"""
+        thought = Thought(
+            thought_number=1,
+            content="对比方案",
+            type="comparison",
+            comparison_items=["A", "B"],
+            comparison_result="选B",
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+
+        result = Visualizer.to_tree(session)
+
+        # 验证对比思考显示
+        assert "⚖️" in result
+        assert "对比" in result
+
+
+class TestReverseThinkingVisualization:
+    """测试逆向思考的可视化"""
+
+    def test_reverse_mermaid(self, sample_session_data):
+        """测试 Mermaid 显示逆向思考信息"""
+        thought = Thought(
+            thought_number=3,
+            content="逆向分析",
+            type="reverse",
+            reverse_from=1,  # reverse_from 必须小于 thought_number
+            reverse_target="找出根本原因",
+            reverse_steps=["步骤1", "步骤2", "步骤3"],
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+
+        result = Visualizer.to_mermaid(session)
+
+        # 验证逆向思考节点存在 (thought_number=3 所以节点 ID 是 T3)
+        assert "T3" in result
+        assert ":::reverse" in result
+        # 验证目标显示
+        assert "目标" in result
+
+    def test_reverse_ascii(self, sample_session_data):
+        """测试 ASCII 显示逆向思考信息"""
+        thought = Thought(
+            thought_number=1,
+            content="逆向分析",
+            type="reverse",
+            reverse_target="找出问题根源",
+            reverse_steps=["step1", "step2"],
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+
+        result = Visualizer.to_ascii(session)
+
+        # 验证逆向思考显示
+        assert "🔙" in result
+        assert "目标" in result
+
+    def test_reverse_tree(self, sample_session_data):
+        """测试 Tree 显示逆向思考信息"""
+        thought = Thought(
+            thought_number=1,
+            content="逆向分析",
+            type="reverse",
+            reverse_target="找到根因",
+            reverse_steps=["回溯1", "回溯2"],
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+
+        result = Visualizer.to_tree(session)
+
+        # 验证逆向思考显示
+        assert "🔙" in result
+        assert "目标" in result or "反推" in result
+
+
+class TestHypotheticalThinkingVisualization:
+    """测试假设思考的可视化"""
+
+    def test_hypothetical_mermaid(self, sample_session_data):
+        """测试 Mermaid 显示假设思考信息"""
+        thought = Thought(
+            thought_number=1,
+            content="假设分析",
+            type="hypothetical",
+            hypothetical_condition="如果用户增长100%",
+            hypothetical_impact="需要扩容服务器",
+            hypothetical_probability="70%",
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+
+        result = Visualizer.to_mermaid(session)
+
+        # 验证假设思考节点存在
+        assert "T1" in result
+        assert ":::hypothetical" in result
+        # 验证假设条件显示
+        assert "假设" in result
+
+    def test_hypothetical_ascii(self, sample_session_data):
+        """测试 ASCII 显示假设思考信息"""
+        thought = Thought(
+            thought_number=1,
+            content="假设分析",
+            type="hypothetical",
+            hypothetical_condition="如果流量翻倍",
+            hypothetical_probability="高",
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+
+        result = Visualizer.to_ascii(session)
+
+        # 验证假设思考显示
+        assert "🤔" in result
+        assert "假设" in result
+
+    def test_hypothetical_tree(self, sample_session_data):
+        """测试 Tree 显示假设思考信息"""
+        thought = Thought(
+            thought_number=1,
+            content="假设分析",
+            type="hypothetical",
+            hypothetical_condition="假设需求变更",
+            hypothetical_impact="需要重新设计",
+            hypothetical_probability="中等",
+        )
+
+        session = ThinkingSession(**sample_session_data)
+        session.add_thought(thought)
+
+        result = Visualizer.to_tree(session)
+
+        # 验证假设思考显示
+        assert "🤔" in result
+        assert "假设" in result

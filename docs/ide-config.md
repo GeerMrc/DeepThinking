@@ -1,7 +1,7 @@
 # DeepThinking MCP IDE 配置指南
 
-> 版本: 0.2.3
-> 更新日期: 2026-01-08
+> 版本: 0.2.4
+> 更新日期: 2026-02-14
 > 适用对象: Claude Desktop、Cursor、Continue.dev 等 MCP 客户端用户
 
 ---
@@ -333,6 +333,9 @@ pip install --user deep-thinking-mcp
 | `DEEP_THINKING_MAX_THOUGHTS` | 50 | 最大思考步骤数（1-10000） |
 | `DEEP_THINKING_MIN_THOUGHTS` | 3 | 最小思考步骤数（1-10000） |
 | `DEEP_THINKING_THOUGHTS_INCREMENT` | 10 | 思考步骤增量（1-100） |
+| **Interleaved Thinking 配置** |
+| `DEEP_THINKING_MAX_TOOL_CALLS` | 100 | 最大工具调用总数 |
+| `DEEP_THINKING_MAX_TOOL_CALLS_PER_THOUGHT` | 10 | 每步骤最大工具调用数 |
 | **开发选项** |
 | `DEEP_THINKING_DEV` | false | 启用开发模式（暂未实现） |
 | `DEEP_THINKING_PROFILE` | false | 启用性能分析（暂未实现） |
