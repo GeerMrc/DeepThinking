@@ -336,6 +336,22 @@ class TestSessionStatistics:
         stats.update_from_thoughts([])
         assert stats.total_thoughts == 0
         assert stats.avg_thought_length == 0.0
+        assert stats.phase_distribution == {"thinking": 0, "tool_call": 0, "analysis": 0}
+
+    def test_update_from_thoughts_with_phases(self):
+        """测试从思考步骤更新统计（包含阶段分布）"""
+        stats = SessionStatistics()
+        thoughts = [
+            Thought(thought_number=1, content="思考1", phase="thinking"),
+            Thought(thought_number=2, content="思考22", phase="tool_call"),
+            Thought(thought_number=3, content="思考333", phase="analysis"),
+            Thought(thought_number=4, content="思考4444", phase="thinking"),
+        ]
+
+        stats.update_from_thoughts(thoughts)
+
+        assert stats.total_thoughts == 4
+        assert stats.phase_distribution == {"thinking": 2, "tool_call": 1, "analysis": 1}
 
     def test_update_from_tool_calls(self):
         """测试从工具调用记录更新统计"""

@@ -9,6 +9,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [0.2.4] - 2026-02-14
+
+### Added
+- **Interleaved Thinking**: 新增三阶段执行模型
+  - 支持 `phase` 参数（thinking/tool_call/analysis）
+  - 自动阶段推断 (`infer_phase_from_lists`)
+- **工具调用追踪**: 支持 1:N 思考-工具调用映射
+  - 每个思考步骤可关联多个工具调用
+  - 工具调用记录持久化存储
+- **资源控制配置**:
+  - `DEEP_THINKING_MAX_TOOL_CALLS`: 会话总工具调用次数上限 (默认100)
+  - `DEEP_THINKING_MAX_TOOL_CALLS_PER_THOUGHT`: 每步骤工具调用次数上限 (默认10)
+- **结果缓存支持**: 工具调用结果缓存标记 (`from_cache`)
+- **分支思考可视化增强**: 改进 Mermaid/ASCII/Tree 三种格式的可视化输出
+
+### Changed
+- **sequential_thinking 工具扩展**:
+  - 新增 `phase`, `toolCalls`, `toolResults` 参数
+  - 支持 `needsMoreThoughts` 动态调整思考步骤数
+- **SessionStatistics 扩展**:
+  - 新增 `phase_distribution` 字段
+  - 新增 `cached_tool_calls` 字段
+  - 新增 `update_from_tool_calls()` 方法
+
+### Fixed
+- 修复 `update_from_thoughts()` 未计算 `phase_distribution` 的问题
+- 修复 CLAUDE.md 环境变量表缺失 `DEEP_THINKING_THOUGHTS_INCREMENT` 参数
+
 ## [0.2.3] - 2026-01-10
 
 ### Added

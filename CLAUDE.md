@@ -184,6 +184,7 @@ def your_tool_function(param: str) -> str:
 | `DEEP_THINKING_AUTH_TOKEN` | - | SSE 认证 Token |
 | `DEEP_THINKING_MAX_TOOL_CALLS` | 100 | 最大工具调用总数 |
 | `DEEP_THINKING_MAX_TOOL_CALLS_PER_THOUGHT` | 10 | 每步骤最大工具调用数 |
+| `DEEP_THINKING_THOUGHTS_INCREMENT` | 10 | 思考步骤增量（needsMoreThoughts功能） |
 
 ## LSP 配置 (Pyright)
 

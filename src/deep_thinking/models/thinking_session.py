@@ -90,8 +90,17 @@ class SessionStatistics(BaseModel):
         if thoughts:
             total_length = sum(len(t.content) for t in thoughts)
             self.avg_thought_length = total_length / len(thoughts)
+
+            # 计算阶段分布 (Interleaved Thinking)
+            phase_counts: dict[str, int] = {"thinking": 0, "tool_call": 0, "analysis": 0}
+            for thought in thoughts:
+                phase = thought.phase
+                if phase in phase_counts:
+                    phase_counts[phase] += 1
+            self.phase_distribution = phase_counts
         else:
             self.avg_thought_length = 0.0
+            self.phase_distribution = {"thinking": 0, "tool_call": 0, "analysis": 0}
 
     def update_from_tool_calls(self, tool_call_history: list[ToolCallRecord]) -> None:
         """
