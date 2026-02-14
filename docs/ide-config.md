@@ -103,7 +103,7 @@ claude mcp add-json "deepthinking" '{
     "DEEP_THINKING_MIN_THOUGHTS": "3",
     "DEEP_THINKING_THOUGHTS_INCREMENT": "10",
     "DEEP_THINKING_BACKUP_COUNT": "10",
-    "DEEP_THINKING_DESCRIPTION": "深度思考MCP服务器",
+    "DEEP_THINKING_DESCRIPTION": "高级深度思考+动态工具调用的交错顺序思维MCP服务器",
     "DEEP_THINKING_DEV": "false",
     "DEEP_THINKING_PROFILE": "false"
   }
@@ -121,7 +121,7 @@ claude mcp add-json "deepthinking-remote" '{
     "DEEP_THINKING_MIN_THOUGHTS": "3",
     "DEEP_THINKING_THOUGHTS_INCREMENT": "10",
     "DEEP_THINKING_BACKUP_COUNT": "10",
-    "DEEP_THINKING_DESCRIPTION": "深度思考MCP服务器",
+    "DEEP_THINKING_DESCRIPTION": "高级深度思考+动态工具调用的交错顺序思维MCP服务器",
     "DEEP_THINKING_HOST": "localhost",
     "DEEP_THINKING_PORT": "8000",
     "DEEP_THINKING_AUTH_TOKEN": "your-secret-token"
