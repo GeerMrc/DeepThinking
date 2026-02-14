@@ -1315,7 +1315,10 @@ classDef analysis_phase fill:#e8f5e9,stroke:#4caf50,stroke-width:3px;
                     should_connect = (
                         (next_thought.branch_id == thought.branch_id)
                         or (next_thought.type == "regular" and next_thought.branch_id is None)
-                        or (next_thought.type == "branch" and next_thought.branch_from_thought == thought.thought_number)
+                        or (
+                            next_thought.type == "branch"
+                            and next_thought.branch_from_thought == thought.thought_number
+                        )
                     )
                     if should_connect:
                         next_id = Visualizer._mermaid_node_id(next_thought)
@@ -1415,7 +1418,10 @@ classDef analysis_phase fill:#e8f5e9,stroke:#4caf50,stroke-width:3px;
                     should_add_connector = (
                         (next_thought.branch_id == thought.branch_id)
                         or (next_thought.type == "regular" and next_thought.branch_id is None)
-                        or (next_thought.type == "branch" and next_thought.branch_from_thought == thought.thought_number)
+                        or (
+                            next_thought.type == "branch"
+                            and next_thought.branch_from_thought == thought.thought_number
+                        )
                     )
 
             if should_add_connector:
@@ -1510,14 +1516,22 @@ classDef analysis_phase fill:#e8f5e9,stroke:#4caf50,stroke-width:3px;
         elif thought.type == "reverse":
             # 逆向思考显示反推目标
             if thought.reverse_target:
-                target = thought.reverse_target[:22] + "..." if len(thought.reverse_target) > 22 else thought.reverse_target
+                target = (
+                    thought.reverse_target[:22] + "..."
+                    if len(thought.reverse_target) > 22
+                    else thought.reverse_target
+                )
                 lines.append(f"        {prefix} 🔙 目标: {target}")
             if thought.reverse_steps:
                 lines.append(f"        {prefix}    反推步骤: {len(thought.reverse_steps)} 步")
         elif thought.type == "hypothetical":
             # 假设思考显示假设条件
             if thought.hypothetical_condition:
-                condition = thought.hypothetical_condition[:20] + "..." if len(thought.hypothetical_condition) > 20 else thought.hypothetical_condition
+                condition = (
+                    thought.hypothetical_condition[:20] + "..."
+                    if len(thought.hypothetical_condition) > 20
+                    else thought.hypothetical_condition
+                )
                 lines.append(f"        {prefix} 🤔 假设: {condition}")
             if thought.hypothetical_probability:
                 lines.append(f"        {prefix}    可能性: {thought.hypothetical_probability}")
@@ -1637,24 +1651,40 @@ classDef analysis_phase fill:#e8f5e9,stroke:#4caf50,stroke-width:3px;
                         items_str += "..."
                     lines.append(f"{sub_prefix}├─ ⚖️ 对比: {items_str[:40]}")
                 if thought.comparison_result:
-                    result = thought.comparison_result[:35] + "..." if len(thought.comparison_result) > 35 else thought.comparison_result
+                    result = (
+                        thought.comparison_result[:35] + "..."
+                        if len(thought.comparison_result) > 35
+                        else thought.comparison_result
+                    )
                     lines.append(f"{sub_prefix}├─ 📊 结论: {result}")
             elif thought.type == "reverse":
                 # 逆向思考显示反推目标
                 if thought.reverse_target:
-                    target = thought.reverse_target[:40] + "..." if len(thought.reverse_target) > 40 else thought.reverse_target
+                    target = (
+                        thought.reverse_target[:40] + "..."
+                        if len(thought.reverse_target) > 40
+                        else thought.reverse_target
+                    )
                     lines.append(f"{sub_prefix}├─ 🔙 目标: {target}")
                 if thought.reverse_steps:
                     lines.append(f"{sub_prefix}├─ 📝 反推步骤: {len(thought.reverse_steps)} 步")
             elif thought.type == "hypothetical":
                 # 假设思考显示假设条件
                 if thought.hypothetical_condition:
-                    condition = thought.hypothetical_condition[:35] + "..." if len(thought.hypothetical_condition) > 35 else thought.hypothetical_condition
+                    condition = (
+                        thought.hypothetical_condition[:35] + "..."
+                        if len(thought.hypothetical_condition) > 35
+                        else thought.hypothetical_condition
+                    )
                     lines.append(f"{sub_prefix}├─ 🤔 假设: {condition}")
                 if thought.hypothetical_probability:
                     lines.append(f"{sub_prefix}├─ 📈 可能性: {thought.hypothetical_probability}")
                 if thought.hypothetical_impact:
-                    impact = thought.hypothetical_impact[:35] + "..." if len(thought.hypothetical_impact) > 35 else thought.hypothetical_impact
+                    impact = (
+                        thought.hypothetical_impact[:35] + "..."
+                        if len(thought.hypothetical_impact) > 35
+                        else thought.hypothetical_impact
+                    )
                     lines.append(f"{sub_prefix}├─ 💥 影响: {impact}")
 
             # 添加工具调用信息 (Interleaved Thinking)
