@@ -45,6 +45,8 @@
 | `DEEP_THINKING_MAX_THOUGHTS` | 50 | 从代码自动提取 |
 | `DEEP_THINKING_MIN_THOUGHTS` | 3 | 从代码自动提取 |
 | `DEEP_THINKING_THOUGHTS_INCREMENT` | 10 | 从代码自动提取 |
+| `DEEP_THINKING_MAX_TOOL_CALLS` | 100 | 从代码自动提取 |
+| `DEEP_THINKING_MAX_TOOL_CALLS_PER_THOUGHT` | 10 | 从代码自动提取 |
 
 ### 服务器配置
 

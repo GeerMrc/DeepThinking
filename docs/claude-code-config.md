@@ -1,7 +1,7 @@
 # Claude Code 配置完整指南
 
 > 版本: 1.0.0
-> 更新日期: 2026-01-08
+> 更新日期: 2026-02-14
 > 适用对象: Claude Code (VSCode) 用户
 
 ---
@@ -50,6 +50,8 @@ claude mcp add-json "deepthinking" '{
     "DEEP_THINKING_MAX_THOUGHTS": "50",
     "DEEP_THINKING_MIN_THOUGHTS": "3",
     "DEEP_THINKING_THOUGHTS_INCREMENT": "10",
+    "DEEP_THINKING_MAX_TOOL_CALLS": "100",
+    "DEEP_THINKING_MAX_TOOL_CALLS_PER_THOUGHT": "10",
     "DEEP_THINKING_BACKUP_COUNT": "10",
     "DEEP_THINKING_DESCRIPTION": "深度思考MCP服务器",
     "DEEP_THINKING_DEV": "false",
@@ -70,6 +72,8 @@ claude mcp add-json "deepthinking-remote" '{
     "DEEP_THINKING_MAX_THOUGHTS": "50",
     "DEEP_THINKING_MIN_THOUGHTS": "3",
     "DEEP_THINKING_THOUGHTS_INCREMENT": "10",
+    "DEEP_THINKING_MAX_TOOL_CALLS": "100",
+    "DEEP_THINKING_MAX_TOOL_CALLS_PER_THOUGHT": "10",
     "DEEP_THINKING_BACKUP_COUNT": "10",
     "DEEP_THINKING_DESCRIPTION": "深度思考MCP服务器",
     "DEEP_THINKING_HOST": "localhost",
@@ -93,6 +97,8 @@ claude mcp add-json "deepthinking-remote" '{
 | `DEEP_THINKING_MAX_THOUGHTS` | ✓ | ✓ | 最大思考步骤数 |
 | `DEEP_THINKING_MIN_THOUGHTS` | ✓ | ✓ | 最小思考步骤数 |
 | `DEEP_THINKING_THOUGHTS_INCREMENT` | ✓ | ✓ | 思考步骤增量 |
+| `DEEP_THINKING_MAX_TOOL_CALLS` | ✓ | ✓ | 会话总工具调用上限 (v0.2.4+) |
+| `DEEP_THINKING_MAX_TOOL_CALLS_PER_THOUGHT` | ✓ | ✓ | 每步骤工具调用上限 (v0.2.4+) |
 | `DEEP_THINKING_BACKUP_COUNT` | ✓ | ✓ | 自动备份保留数量 |
 | `DEEP_THINKING_DESCRIPTION` | ✓ | ✓ | 自定义服务器描述 |
 | `DEEP_THINKING_DEV` | ✓ | ✓ | 开发模式 |
@@ -361,6 +367,8 @@ claude mcp add deepthinking stdio python -m deep_thinking \
 | `DEEP_THINKING_MAX_THOUGHTS` | 50 | 最大思考步骤数（1-10000） |
 | `DEEP_THINKING_MIN_THOUGHTS` | 3 | 最小思考步骤数（1-10000） |
 | `DEEP_THINKING_THOUGHTS_INCREMENT` | 10 | 思考步骤增量（1-100） |
+| `DEEP_THINKING_MAX_TOOL_CALLS` | 100 | 会话总工具调用上限（1-10000） |
+| `DEEP_THINKING_MAX_TOOL_CALLS_PER_THOUGHT` | 10 | 每步骤工具调用上限（1-100） |
 | **开发选项** |
 | `DEEP_THINKING_DEV` | false | 启用开发模式（暂未实现） |
 | `DEEP_THINKING_PROFILE` | false | 启用性能分析（暂未实现） |

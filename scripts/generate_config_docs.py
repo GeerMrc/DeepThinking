@@ -217,7 +217,7 @@ class EnvVarExtractor:
                 categories["日志配置"].append(var)
             elif "DATA_DIR" in name or "BACKUP" in name:
                 categories["存储配置"].append(var)
-            elif "THOUGHT" in name or "THINKING" in name:
+            elif "THOUGHT" in name or "THINKING" in name or "TOOL_CALLS" in name:
                 if "MAX" in name or "MIN" in name or "INCREMENT" in name:
                     categories["思考配置"].append(var)
                 else:
@@ -560,6 +560,7 @@ def main():
     source_files = [
         project_root / "src" / "deep_thinking" / "__main__.py",
         project_root / "src" / "deep_thinking" / "server.py",
+        project_root / "src" / "deep_thinking" / "models" / "config.py",
     ]
 
     for source_file in source_files:
