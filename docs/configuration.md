@@ -214,7 +214,7 @@ DEEP_THINKING_DATA_DIR=$HOME/data
 自定义 MCP 服务器的描述（在 MCP 工具列表中显示）：
 
 ```bash
-DEEP_THINKING_DESCRIPTION="我的 AI 助手服务器"
+DEEP_THINKING_DESCRIPTION="高级深度思考+动态工具调用的交错顺序思维MCP服务器"
 ```
 
 **说明**：
