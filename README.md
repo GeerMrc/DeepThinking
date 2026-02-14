@@ -81,7 +81,7 @@ uv pip install --force-reinstall DeepThinking
 uv pip install --upgrade DeepThinking
 
 # 从 wheel 文件升级
-uv pip install --force-reinstall dist/deepthinking-0.2.3-py3-none-any.whl
+uv pip install --force-reinstall dist/deepthinking-0.2.4-py3-none-any.whl
 ```
 
 ### 使用 pip 安装
@@ -117,7 +117,7 @@ cd DeepThinking
 uv build  # 或 python -m build
 
 # 安装 Wheel 文件（不显示源代码路径）
-uv pip install deepthinking-0.2.3-py3-none-any.whl
+uv pip install deepthinking-0.2.4-py3-none-any.whl
 ```
 
 > 📘 **详细安装指南**: 请参阅 [安装与配置文档](docs/installation.md) 获取完整的安装说明，包括开发模式和生产模式Wheel安装的详细对比。

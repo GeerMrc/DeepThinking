@@ -178,7 +178,7 @@ python -m deep_thinking --help
 
 | 指标 | 数值 |
 |------|------|
-| 当前版本 | v0.2.3 |
+| 当前版本 | v0.2.4 |
 | MCP工具数量 | 17个 |
 | 环境变量数量 | 11个 |
 | 代码覆盖率 | 89.36% |
@@ -207,6 +207,11 @@ python -m deep_thinking --help
 
 ## 📝 文档更新记录
 
+- **2026-02-14**: v0.2.4 版本文档更新
+  - 新增 Interleaved Thinking 功能完整文档
+  - 添加工具调用追踪、阶段推断、资源控制相关说明
+  - 更新配置参数文档（新增 MAX_TOOL_CALLS 系列参数）
+  - 完善六种思考模式文档和示例
 - **2026-01-11**: 文档结构优化
   - 删除冗余文档 `PUBLISHING.md`，整合到 `RELEASE.md`
   - 更新 `RELEASE.md` 添加 GitHub Actions 自动发布详细说明
